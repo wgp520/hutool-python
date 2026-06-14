@@ -72,7 +72,7 @@ pip install hutool-python
 ### 🍐 From Source
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/wgp520/hutool-python.git
 cd hutool-python
 pip install -e .
 ```
