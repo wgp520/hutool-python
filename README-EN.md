@@ -10,6 +10,7 @@
     <img src="https://img.shields.io/badge/version-1.0.0-green.svg" />
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
     <img src="https://img.shields.io/badge/tests-613 passed-brightgreen.svg" />
+    <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
 -------------------------------------------------------------------------------
@@ -380,6 +381,7 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 📖 Related Links
 
+- [Hutool-Python Documentation](https://wgp520.github.io/hutool-python/)
 - [Java Hutool Repository](https://github.com/dromara/hutool)
 - [Java Hutool Documentation (Chinese)](https://doc.hutool.cn/pages/index/)
 - [Hutool API Documentation](https://plus.hutool.cn/apidocs/)
