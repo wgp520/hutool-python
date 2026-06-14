@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="hutool-python",
-    version="1.0.0",
+    version="1.0.1",
     description="Python port of Java Hutool utility library",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
