@@ -131,48 +131,42 @@ git push origin v1.0.0
 
 ## GitHub Actions 自动发布
 
-在 GitHub 仓库页面创建 Release 后，可手动触发以下 workflow 自动发布到 PyPI。
+项目已内置 `.github/workflows/release.yml`，当推送 `v*` 格式的 tag 时自动执行完整发布流程：
 
-在 `.github/workflows/` 下添加 `publish.yml`：
-
-```yaml
-name: Publish to PyPI
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write          # 用于 Trusted Publishing（可选）
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.8"
-
-      - name: Install build tools
-        run: pip install build twine
-
-      - name: Build
-        run: python -m build
-
-      - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
+```bash
+# 推送 tag 即触发
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
-在仓库 Settings → Secrets and variables → Actions 中添加 `PYPI_API_TOKEN`。
+### 流水线流程
+
+```
+test  →  build  →  GitHub Release  →  PyPI
+│          │            │                │
+│          │            │                └─ twine upload（需 PYPI_API_TOKEN）
+│          │            └─ 自动创建 Release，附带 .whl 和 .tar.gz
+│          └─ python -m build，产物上传为 artifact
+└─ pytest tests/ -q，确保测试通过
+```
+
+### 前置配置
+
+在仓库 **Settings → Secrets and variables → Actions** 中添加：
+
+| Secret 名称 | 说明 |
+|---|---|
+| `PYPI_API_TOKEN` | PyPI API Token，从 <https://pypi.org/manage/account/token/> 创建 |
+
+在仓库 **Settings → Environments** 中创建名为 `pypi` 的环境（可配置审批保护）。
 
 ```{note}
 也可以使用 PyPI 的 [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) 功能，无需配置 token，直接通过 OpenID Connect 认证。
 ```
+
+### 手动触发
+
+除 tag 推送外，也可在 Actions 页面手动运行，需填入 tag 名称。
 
 ---
 
