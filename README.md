@@ -7,7 +7,7 @@
 
 <p align="center">
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
-    <img src="https://img.shields.io/badge/version-1.0.0-green.svg" />
+    <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
     <img src="https://img.shields.io/badge/tests-613 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
@@ -383,6 +383,7 @@ md5 = DigestUtil.md5_hex("hello")
 
 ## 📖 相关链接
 
+- [PyPI](https://pypi.org/project/hutool-python/)
 - [Hutool-Python 在线文档](https://wgp520.github.io/hutool-python/)
 - [Java Hutool 官方仓库](https://github.com/dromara/hutool)
 - [Java Hutool 中文文档](https://doc.hutool.cn/pages/index/)

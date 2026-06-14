@@ -7,7 +7,7 @@
 
 <p align="center">
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
-    <img src="https://img.shields.io/badge/version-1.0.0-green.svg" />
+    <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
     <img src="https://img.shields.io/badge/tests-613 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
@@ -381,6 +381,7 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 📖 Related Links
 
+- [PyPI](https://pypi.org/project/hutool-python/)
 - [Hutool-Python Documentation](https://wgp520.github.io/hutool-python/)
 - [Java Hutool Repository](https://github.com/dromara/hutool)
 - [Java Hutool Documentation (Chinese)](https://doc.hutool.cn/pages/index/)
