@@ -1,0 +1,21 @@
+/* Custom styles for Hutool-Python documentation */
+
+/* Improve code block readability */
+.highlight pre {
+    padding: 1em;
+    line-height: 1.5;
+}
+
+/* Module cards spacing */
+.sd-card {
+    margin-bottom: 0.5em;
+}
+
+.sd-card .sd-card-body {
+    padding: 0.8em;
+}
+
+/* Better table styling */
+table.docutils td, table.docutils th {
+    padding: 0.5em 0.8em;
+}

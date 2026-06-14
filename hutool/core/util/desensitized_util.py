@@ -1,0 +1,194 @@
+class DesensitizedUtil:
+    """数据脱敏工具类"""
+
+    @staticmethod
+    def chinese_name(name: str) -> str:
+        """中文姓名脱敏：保留姓，名替换为*
+
+        示例：张三 -> 张*，欧阳娜娜 -> 欧***
+
+        :param name: 中文姓名
+        :return: 脱敏后的姓名
+        """
+        if not name:
+            return ""
+        name = name.strip()
+        if len(name) <= 1:
+            return name
+        elif len(name) == 2:
+            return name[0] + "*"
+        else:
+            return name[0] + "*" * (len(name) - 1)
+
+    @staticmethod
+    def id_card(idcard: str, before: int = 3, after: int = 4) -> str:
+        """身份证脱敏
+
+        保留前before位和后after位，中间用*替换
+
+        :param idcard: 身份证号
+        :param before: 保留前N位，默认3
+        :param after: 保留后N位，默认4
+        :return: 脱敏后的身份证号
+        """
+        if not idcard:
+            return ""
+        idcard = idcard.strip()
+        length = len(idcard)
+        if before + after >= length:
+            return idcard
+        return idcard[:before] + "*" * (length - before - after) + idcard[length - after :]
+
+    @staticmethod
+    def mobile_phone(phone: str) -> str:
+        """手机号脱敏：138****1234
+
+        :param phone: 手机号
+        :return: 脱敏后的手机号
+        """
+        if not phone:
+            return ""
+        phone = phone.strip()
+        if len(phone) < 7:
+            return phone
+        return phone[:3] + "****" + phone[7:]
+
+    @staticmethod
+    def fixed_phone(phone: str) -> str:
+        """固定电话脱敏
+
+        保留区号和后4位，中间用*替换
+
+        :param phone: 固定电话
+        :return: 脱敏后的固定电话
+        """
+        if not phone:
+            return ""
+        phone = phone.strip()
+        # 查找分隔符位置（区号后的'-'）
+        dash_pos = phone.find("-")
+        if dash_pos == -1:
+            # 无分隔符，按规则：前3位为区号保留，后4位保留
+            if len(phone) <= 7:
+                return phone[:3] + "****" if len(phone) > 3 else phone
+            return phone[:3] + "*" * (len(phone) - 7) + phone[-4:]
+        area_code = phone[:dash_pos]
+        number = phone[dash_pos + 1 :]
+        if len(number) <= 4:
+            return area_code + "-" + number
+        return area_code + "-" + "*" * (len(number) - 4) + number[-4:]
+
+    @staticmethod
+    def email(email: str) -> str:
+        """邮箱脱敏：t***@example.com
+
+        保留@前的首字母和@后的完整域名
+
+        :param email: 邮箱地址
+        :return: 脱敏后的邮箱
+        """
+        if not email:
+            return ""
+        email = email.strip()
+        at_pos = email.find("@")
+        if at_pos <= 0:
+            return email
+        prefix = email[:at_pos]
+        domain = email[at_pos:]
+        if len(prefix) <= 1:
+            return prefix + "***" + domain
+        return prefix[0] + "***" + domain
+
+    @staticmethod
+    def address(address: str, sensitive_size: int = 6) -> str:
+        """地址脱敏
+
+        从敏感_size位之前开始替换为*
+
+        :param address: 地址
+        :param sensitive_size: 需要脱敏的字符数，默认6
+        :return: 脱敏后的地址
+        """
+        if not address:
+            return ""
+        address = address.strip()
+        length = len(address)
+        if sensitive_size >= length:
+            return "*" * length
+        return address[: length - sensitive_size] + "*" * sensitive_size
+
+    @staticmethod
+    def bank_card(card: str) -> str:
+        """银行卡脱敏
+
+        保留前4位和后4位，中间用*替换
+
+        :param card: 银行卡号
+        :return: 脱敏后的银行卡号
+        """
+        if not card:
+            return ""
+        card = card.strip().replace(" ", "")
+        if len(card) <= 8:
+            return card
+        return card[:4] + "*" * (len(card) - 8) + card[-4:]
+
+    @staticmethod
+    def password(password: str) -> str:
+        """密码脱敏：全部替换为*
+
+        :param password: 密码
+        :return: 脱敏后的密码（全为*）
+        """
+        if not password:
+            return ""
+        return "*" * len(password)
+
+    @staticmethod
+    def car_license(license_no: str) -> str:
+        """车牌号脱敏
+
+        保留前2位和后1位，中间用*替换
+
+        :param license_no: 车牌号
+        :return: 脱敏后的车牌号
+        """
+        if not license_no:
+            return ""
+        license_no = license_no.strip()
+        if len(license_no) <= 3:
+            return license_no
+        return license_no[:2] + "*" * (len(license_no) - 3) + license_no[-1:]
+
+    @staticmethod
+    def ipv4(ipv4: str) -> str:
+        """IPv4脱敏
+
+        保留前两段，后两段替换为*
+
+        :param ipv4: IPv4地址
+        :return: 脱敏后的IPv4地址
+        """
+        if not ipv4:
+            return ""
+        ipv4 = ipv4.strip()
+        parts = ipv4.split(".")
+        if len(parts) != 4:
+            return ipv4
+        return parts[0] + "." + parts[1] + ".*.*"
+
+    @staticmethod
+    def license_plate(plate: str) -> str:
+        """车牌号脱敏
+
+        保留省份简称和地区代码，后面替换为*
+
+        :param plate: 车牌号
+        :return: 脱敏后的车牌号
+        """
+        if not plate:
+            return ""
+        plate = plate.strip()
+        if len(plate) <= 2:
+            return plate
+        return plate[:2] + "*" * (len(plate) - 2)

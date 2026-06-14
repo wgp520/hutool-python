@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hutool-python"
+version = "1.0.0"
+description = "Python port of Java Hutool utility library"
+readme = "README.md"
+license = {text = "MulanPSL-2.0"}
+requires-python = ">=3.8"
+authors = [
+    { name = "Hutool-Python" },
+]
+keywords = [
+    "hutool",
+    "util",
+    "utility",
+    "toolkit",
+    "java-hutool",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Others",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "pendulum>=3.0",
+    "httpx>=0.27",
+    "cryptography>=42.0",
+    "qrcode[pil]>=7.0",
+    "Pillow>=10.0",
+    "pypinyin>=0.50",
+    "emoji>=2.0",
+    "jinja2>=3.0",
+    "pyjwt>=2.8",
+    "pyyaml>=6.0",
+    "watchdog>=4.0",
+    "sortedcontainers>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.4.0"]
+
+[project.urls]
+Homepage = "https://github.com/wgp520/hutool-python"
+Documentation = "https://wgp520.github.io/hutool-python"
+Repository = "https://github.com/wgp520/hutool-python"
+Issues = "https://github.com/wgp520/hutool-python/issues"
+Changelog = "https://github.com/wgp520/hutool-python/blob/master/docs/changelog.md"
+
+[tool.setuptools.packages.find]
+include = ["hutool*"]
+exclude = ["tests*", "docs*"]

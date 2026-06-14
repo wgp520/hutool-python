@@ -1,0 +1,7 @@
+# Hutool-Python 文档依赖（独立于项目依赖）
+sphinx>=7.2
+myst-parser>=2.0
+sphinx-autodoc2>=0.5
+furo>=2024.1
+sphinx-copybutton>=0.5
+sphinx-design>=0.5
