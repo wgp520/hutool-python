@@ -28,33 +28,62 @@ class CollUtil:
 
     @staticmethod
     def is_empty(coll) -> bool:
-        """集合是否为空，None 也视为空。支持 list/tuple/set/dict/frozenset"""
+        """
+        集合是否为空，None 也视为空。
+
+        支持 list/tuple/set/dict/frozenset。
+
+        :param coll: 集合对象
+        :return: 是否为空
+        """
         if coll is None:
             return True
         return len(coll) == 0
 
     @staticmethod
     def is_not_empty(coll) -> bool:
-        """集合是否为非空"""
+        """
+        集合是否为非空。
+
+        :param coll: 集合对象
+        :return: 是否为非空
+        """
         return not CollUtil.is_empty(coll)
 
     @staticmethod
     def has_null(coll: Sequence) -> bool:
-        """集合中是否有 None 元素"""
+        """
+        集合中是否有 None 元素。
+
+        :param coll: 序列对象
+        :return: 是否包含 None 元素
+        """
         if coll is None:
             return True
         return any(element is None for element in coll)
 
     @staticmethod
     def contains(coll: Iterable, element: Any) -> bool:
-        """是否包含指定元素"""
+        """
+        是否包含指定元素。
+
+        :param coll: 可迭代集合
+        :param element: 待查找的元素
+        :return: 是否包含
+        """
         if coll is None:
             return False
         return element in coll
 
     @staticmethod
     def contains_any(coll: Iterable, *elements) -> bool:
-        """是否包含任意一个"""
+        """
+        是否包含任意一个指定元素。
+
+        :param coll: 可迭代集合
+        :param elements: 待查找的元素
+        :return: 是否包含任意一个
+        """
         if coll is None or not elements:
             return False
         if isinstance(coll, (set, frozenset)):
@@ -64,7 +93,13 @@ class CollUtil:
 
     @staticmethod
     def contains_all(coll: Iterable, *elements) -> bool:
-        """是否包含全部"""
+        """
+        是否包含全部指定元素。
+
+        :param coll: 可迭代集合
+        :param elements: 待查找的元素
+        :return: 是否包含全部
+        """
         if coll is None:
             return False
         if not elements:
@@ -76,19 +111,34 @@ class CollUtil:
 
     @staticmethod
     def new_array_list(*args) -> list:
-        """新建 ArrayList（Python list），可传入初始元素"""
+        """
+        新建 ArrayList（Python list），可传入初始元素。
+
+        :param args: 初始元素
+        :return: 新列表
+        """
         return list(args) if args else []
 
     @staticmethod
     def new_hash_set(*args) -> set:
-        """新建 HashSet（Python set），可传入初始元素"""
+        """
+        新建 HashSet（Python set），可传入初始元素。
+
+        :param args: 初始元素
+        :return: 新集合
+        """
         return set(args) if args else set()
 
     # ── 转换 ──────────────────────────────────────────────
 
     @staticmethod
     def to_list(iterable: Iterable) -> list:
-        """转为列表"""
+        """
+        转为列表。
+
+        :param iterable: 可迭代对象
+        :return: 列表
+        """
         if iterable is None:
             return []
         if isinstance(iterable, list):
@@ -97,7 +147,12 @@ class CollUtil:
 
     @staticmethod
     def to_set(iterable: Iterable) -> set:
-        """转为集合"""
+        """
+        转为集合。
+
+        :param iterable: 可迭代对象
+        :return: 集合
+        """
         if iterable is None:
             return set()
         return set(iterable)

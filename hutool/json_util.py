@@ -4,16 +4,24 @@ from typing import Any, List, Optional, Type, Union
 
 
 class JSONUtil:
-    """JSON工具类"""
+    """JSON工具类，提供 JSON 的解析、序列化、校验、路径操作等功能。"""
 
     @staticmethod
     def create_obj() -> dict:
-        """创建空JSON对象"""
+        """
+        创建空JSON对象。
+
+        :return: 空字典
+        """
         return {}
 
     @staticmethod
     def create_array() -> list:
-        """创建空JSON数组"""
+        """
+        创建空JSON数组。
+
+        :return: 空列表
+        """
         return []
 
     # ------------------------------------------------------------------ #
@@ -22,7 +30,13 @@ class JSONUtil:
 
     @staticmethod
     def parse_obj(json_str: str) -> dict:
-        """解析JSON字符串为字典"""
+        """
+        解析JSON字符串为字典。
+
+        :param json_str: JSON字符串
+        :return: 字典
+        :raises ValueError: JSON字符串不是对象类型时
+        """
         result = json.loads(json_str)
         if not isinstance(result, dict):
             raise ValueError("JSON字符串不是对象类型")
@@ -30,7 +44,13 @@ class JSONUtil:
 
     @staticmethod
     def parse_array(json_str: str) -> list:
-        """解析JSON字符串为列表"""
+        """
+        解析JSON字符串为列表。
+
+        :param json_str: JSON字符串
+        :return: 列表
+        :raises ValueError: JSON字符串不是数组类型时
+        """
         result = json.loads(json_str)
         if not isinstance(result, list):
             raise ValueError("JSON字符串不是数组类型")
@@ -38,7 +58,12 @@ class JSONUtil:
 
     @staticmethod
     def parse(json_str: str):
-        """解析JSON字符串，自动返回对应Python类型"""
+        """
+        解析JSON字符串，自动返回对应Python类型。
+
+        :param json_str: JSON字符串
+        :return: 解析后的Python对象
+        """
         return json.loads(json_str)
 
     # ------------------------------------------------------------------ #
@@ -47,16 +72,23 @@ class JSONUtil:
 
     @staticmethod
     def to_json_str(obj: Any, indent: Optional[int] = None) -> str:
-        """对象转JSON字符串
+        """
+        对象转JSON字符串。
 
         :param obj: 待序列化的对象
         :param indent: 缩进空格数，None表示不缩进
+        :return: JSON字符串
         """
         return json.dumps(obj, ensure_ascii=False, indent=indent)
 
     @staticmethod
     def to_json_pretty_str(obj: Any) -> str:
-        """对象转格式化JSON字符串（缩进2空格）"""
+        """
+        对象转格式化JSON字符串（缩进2空格）。
+
+        :param obj: 待序列化的对象
+        :return: 格式化的JSON字符串
+        """
         return json.dumps(obj, ensure_ascii=False, indent=2)
 
     # ------------------------------------------------------------------ #
@@ -65,10 +97,15 @@ class JSONUtil:
 
     @staticmethod
     def to_bean(json_str: str, bean_class: Type):
-        """JSON字符串转对象
+        """
+        JSON字符串转对象。
 
-        将JSON解析为字典后，通过 bean_class(\\*\\*dict) 构造实例。
-        如果 bean_class 提供了 from_dict 类方法，则优先调用。
+        将JSON解析为字典后，通过 ``bean_class(**dict)`` 构造实例。
+        如果 bean_class 提供了 ``from_dict`` 类方法，则优先调用。
+
+        :param json_str: JSON字符串
+        :param bean_class: 目标类型
+        :return: 目标类型的实例
         """
         data = json.loads(json_str)
         if hasattr(bean_class, "from_dict") and callable(bean_class.from_dict):
@@ -79,7 +116,14 @@ class JSONUtil:
 
     @staticmethod
     def to_bean_list(json_str: str, element_class: Type) -> list:
-        """JSON字符串转对象列表"""
+        """
+        JSON字符串转对象列表。
+
+        :param json_str: JSON字符串（数组格式）
+        :param element_class: 元素目标类型
+        :return: 对象列表
+        :raises ValueError: JSON字符串不是数组类型时
+        """
         data = json.loads(json_str)
         if not isinstance(data, list):
             raise ValueError("JSON字符串不是数组类型")
@@ -89,9 +133,13 @@ class JSONUtil:
 
     @staticmethod
     def from_bean(obj: Any) -> str:
-        """对象转JSON字符串
+        """
+        对象转JSON字符串。
 
-        如果对象具有 to_dict 方法则先调用，否则直接序列化。
+        如果对象具有 ``to_dict`` 方法则先调用，否则直接序列化。
+
+        :param obj: 待序列化的对象
+        :return: JSON字符串
         """
         if hasattr(obj, "to_dict") and callable(obj.to_dict):
             return json.dumps(obj.to_dict(), ensure_ascii=False)
@@ -103,13 +151,26 @@ class JSONUtil:
 
     @staticmethod
     def read_json(path: str, charset: str = "utf-8"):
-        """读取JSON文件并解析"""
+        """
+        读取JSON文件并解析。
+
+        :param path: 文件路径
+        :param charset: 文件编码
+        :return: 解析后的Python对象
+        """
         with open(path, encoding=charset) as f:
             return json.load(f)
 
     @staticmethod
     def read_json_object(path: str, charset: str = "utf-8") -> dict:
-        """读取JSON文件为字典"""
+        """
+        读取JSON文件为字典。
+
+        :param path: 文件路径
+        :param charset: 文件编码
+        :return: 字典
+        :raises ValueError: JSON文件内容不是对象类型时
+        """
         result = JSONUtil.read_json(path, charset)
         if not isinstance(result, dict):
             raise ValueError("JSON文件内容不是对象类型")
@@ -117,7 +178,14 @@ class JSONUtil:
 
     @staticmethod
     def read_json_array(path: str, charset: str = "utf-8") -> list:
-        """读取JSON文件为列表"""
+        """
+        读取JSON文件为列表。
+
+        :param path: 文件路径
+        :param charset: 文件编码
+        :return: 列表
+        :raises ValueError: JSON文件内容不是数组类型时
+        """
         result = JSONUtil.read_json(path, charset)
         if not isinstance(result, list):
             raise ValueError("JSON文件内容不是数组类型")
@@ -125,7 +193,8 @@ class JSONUtil:
 
     @staticmethod
     def write_json(path: str, obj: Any, charset: str = "utf-8", indent: Optional[int] = None) -> None:
-        """写入JSON文件
+        """
+        写入JSON文件。
 
         :param path: 文件路径
         :param obj: 待写入对象
@@ -141,7 +210,12 @@ class JSONUtil:
 
     @staticmethod
     def is_json(str_val: str) -> bool:
-        """是否为有效JSON"""
+        """
+        是否为有效JSON。
+
+        :param str_val: 待检查的字符串
+        :return: 是否为有效JSON
+        """
         try:
             json.loads(str_val)
             return True
@@ -150,7 +224,12 @@ class JSONUtil:
 
     @staticmethod
     def is_json_obj(str_val: str) -> bool:
-        """是否为JSON对象"""
+        """
+        是否为JSON对象。
+
+        :param str_val: 待检查的字符串
+        :return: 是否为JSON对象
+        """
         try:
             return isinstance(json.loads(str_val), dict)
         except (json.JSONDecodeError, TypeError):
@@ -158,7 +237,12 @@ class JSONUtil:
 
     @staticmethod
     def is_json_array(str_val: str) -> bool:
-        """是否为JSON数组"""
+        """
+        是否为JSON数组。
+
+        :param str_val: 待检查的字符串
+        :return: 是否为JSON数组
+        """
         try:
             return isinstance(json.loads(str_val), list)
         except (json.JSONDecodeError, TypeError):
@@ -170,13 +254,24 @@ class JSONUtil:
 
     @staticmethod
     def format_json(json_str: str, indent: int = 2) -> str:
-        """格式化JSON字符串"""
+        """
+        格式化JSON字符串。
+
+        :param json_str: JSON字符串
+        :param indent: 缩进空格数
+        :return: 格式化后的JSON字符串
+        """
         obj = json.loads(json_str)
         return json.dumps(obj, ensure_ascii=False, indent=indent)
 
     @staticmethod
     def compress(json_str: str) -> str:
-        """压缩JSON（去除所有空白）"""
+        """
+        压缩JSON（去除所有空白）。
+
+        :param json_str: JSON字符串
+        :return: 压缩后的JSON字符串
+        """
         obj = json.loads(json_str)
         return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
 
@@ -186,9 +281,13 @@ class JSONUtil:
 
     @staticmethod
     def _parse_path_keys(path: str) -> List[Union[str, int]]:
-        """将路径字符串解析为键列表
+        """
+        将路径字符串解析为键列表。
 
-        例如 'a.b[0].c' -> ['a', 'b', 0, 'c']
+        例如 ``'a.b[0].c'`` 解析为 ``['a', 'b', 0, 'c']``
+
+        :param path: 路径字符串
+        :return: 键列表
         """
         keys: List[Union[str, int]] = []
         for part in re.split(r"\.(?![^\[]*\])", path):

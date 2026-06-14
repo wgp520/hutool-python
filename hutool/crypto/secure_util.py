@@ -23,7 +23,12 @@ class SecureUtil:
 
     @staticmethod
     def _ensure_bytes(data: Union[str, bytes]) -> bytes:
-        """将输入统一转为 bytes"""
+        """
+        将输入统一转为 bytes。
+
+        :param data: 字符串或字节数据
+        :return: 字节数据
+        """
         if isinstance(data, str):
             return data.encode("utf-8")
         return data
@@ -129,7 +134,11 @@ class SecureUtil:
 
     @staticmethod
     def generate_des_key() -> bytes:
-        """生成DES密钥（8字节）"""
+        """
+        生成DES密钥（8字节）。
+
+        :return: 随机DES密钥 bytes
+        """
         return os.urandom(8)
 
     @staticmethod

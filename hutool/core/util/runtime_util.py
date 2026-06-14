@@ -9,11 +9,18 @@ from typing import List, Optional
 
 
 class RuntimeUtil:
-    """运行时工具类"""
+    """运行时工具类，提供进程信息获取和系统命令执行功能。"""
 
     @staticmethod
     def exec(command: str, timeout: Optional[int] = None) -> str:
-        """执行系统命令，返回输出"""
+        """
+        执行系统命令并返回标准输出。
+
+        :param command: 要执行的命令字符串
+        :param timeout: 超时时间（秒），默认不限制
+        :return: 命令的标准输出内容
+        :raises subprocess.TimeoutExpired: 命令执行超时时
+        """
         result = subprocess.run(
             command,
             shell=True,
@@ -25,7 +32,13 @@ class RuntimeUtil:
 
     @staticmethod
     def exec_lines(command: str, timeout: Optional[int] = None) -> List[str]:
-        """执行系统命令，返回输出行列表"""
+        """
+        执行系统命令并返回输出行列表（自动去除末尾空行）。
+
+        :param command: 要执行的命令字符串
+        :param timeout: 超时时间（秒），默认不限制
+        :return: 输出行列表
+        """
         output = RuntimeUtil.exec(command, timeout=timeout)
         lines = output.splitlines()
         # 去除末尾空行
@@ -35,14 +48,21 @@ class RuntimeUtil:
 
     @staticmethod
     def get_pid() -> int:
-        """获取当前进程PID"""
+        """
+        获取当前进程 PID。
+
+        :return: 当前进程 ID
+        """
         return os.getpid()
 
     @staticmethod
     def get_memory_info() -> dict:
-        """获取内存信息（单位字节）
-        返回 {'total': ..., 'available': ..., 'used': ...}
-        使用 /proc/meminfo (Linux) 或 psutil 回退
+        """
+        获取系统内存信息（单位：字节）。
+
+        优先使用 psutil（需安装），Linux 下回退到 ``/proc/meminfo``。
+
+        :return: 包含 ``total``、``available``、``used`` 的字典
         """
         # 尝试使用 psutil（跨平台）
         try:
@@ -82,7 +102,11 @@ class RuntimeUtil:
 
     @staticmethod
     def get_available_processors() -> int:
-        """获取可用CPU核心数"""
+        """
+        获取可用 CPU 核心数。
+
+        :return: CPU 核心数，获取失败时返回 1
+        """
         try:
             return os.cpu_count() or 1
         except Exception:

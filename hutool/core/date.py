@@ -48,39 +48,75 @@ class DateTime:
     # ---- 日期部分获取 ----
 
     def year(self) -> int:
-        """获取年份。"""
+        """
+        获取年份。
+
+        :return: 年份
+        """
         return self._dt.year
 
     def month(self) -> int:
-        """获取月份（1-12）。"""
+        """
+        获取月份（1-12）。
+
+        :return: 月份
+        """
         return self._dt.month
 
     def day_of_month(self) -> int:
-        """获取日（1-31）。"""
+        """
+        获取日（1-31）。
+
+        :return: 日
+        """
         return self._dt.day
 
     def hour(self) -> int:
-        """获取小时（0-23）。"""
+        """
+        获取小时（0-23）。
+
+        :return: 小时
+        """
         return self._dt.hour
 
     def minute(self) -> int:
-        """获取分钟（0-59）。"""
+        """
+        获取分钟（0-59）。
+
+        :return: 分钟
+        """
         return self._dt.minute
 
     def second(self) -> int:
-        """获取秒（0-59）。"""
+        """
+        获取秒（0-59）。
+
+        :return: 秒
+        """
         return self._dt.second
 
     def day_of_week(self) -> int:
-        """获取星期几（ISO 标准：1=周一, 7=周日）。"""
+        """
+        获取星期几（ISO 标准：1=周一, 7=周日）。
+
+        :return: 星期几（1-7）
+        """
         return self._dt.isoweekday()
 
     def quarter(self) -> int:
-        """获取季度（1-4）。"""
+        """
+        获取季度（1-4）。
+
+        :return: 季度
+        """
         return (self._dt.month - 1) // 3 + 1
 
     def week_of_year(self) -> int:
-        """获取一年中的第几周（ISO 标准）。"""
+        """
+        获取一年中的第几周（ISO 标准）。
+
+        :return: 周数
+        """
         return self._dt.week_of_year
 
     # ---- 格式化与转换 ----
@@ -94,11 +130,19 @@ class DateTime:
         return self._dt.format(fmt)
 
     def to_date(self) -> date:
-        """转换为 date 对象。"""
+        """
+        转换为 date 对象。
+
+        :return: date 对象
+        """
         return self._dt.date()
 
     def to_datetime(self) -> datetime:
-        """转换为标准 datetime 对象。"""
+        """
+        转换为标准 datetime 对象。
+
+        :return: datetime 对象
+        """
         return self._dt
 
     # ---- 日期偏移 ----
@@ -116,43 +160,83 @@ class DateTime:
         return DateTime(self._dt.add(**kwargs))
 
     def begin_of_day(self) -> DateTime:
-        """获取当天开始时间（00:00:00）。"""
+        """
+        获取当天开始时间（00:00:00）。
+
+        :return: 当天开始的 DateTime 对象
+        """
         return DateTime(self._dt.start_of("day"))
 
     def end_of_day(self) -> DateTime:
-        """获取当天结束时间（23:59:59.999999）。"""
+        """
+        获取当天结束时间（23:59:59.999999）。
+
+        :return: 当天结束的 DateTime 对象
+        """
         return DateTime(self._dt.end_of("day"))
 
     def begin_of_month(self) -> DateTime:
-        """获取当月开始时间。"""
+        """
+        获取当月开始时间。
+
+        :return: 当月开始的 DateTime 对象
+        """
         return DateTime(self._dt.start_of("month"))
 
     def end_of_month(self) -> DateTime:
-        """获取当月结束时间。"""
+        """
+        获取当月结束时间。
+
+        :return: 当月结束的 DateTime 对象
+        """
         return DateTime(self._dt.end_of("month"))
 
     def begin_of_year(self) -> DateTime:
-        """获取当年开始时间。"""
+        """
+        获取当年开始时间。
+
+        :return: 当年开始的 DateTime 对象
+        """
         return DateTime(self._dt.start_of("year"))
 
     def end_of_year(self) -> DateTime:
-        """获取当年结束时间。"""
+        """
+        获取当年结束时间。
+
+        :return: 当年结束的 DateTime 对象
+        """
         return DateTime(self._dt.end_of("year"))
 
     def begin_of_week(self) -> DateTime:
-        """获取本周开始时间（周一）。"""
+        """
+        获取本周开始时间（周一）。
+
+        :return: 本周开始的 DateTime 对象
+        """
         return DateTime(self._dt.start_of("week"))
 
     def end_of_week(self) -> DateTime:
-        """获取本周结束时间（周日）。"""
+        """
+        获取本周结束时间（周日）。
+
+        :return: 本周结束的 DateTime 对象
+        """
         return DateTime(self._dt.end_of("week"))
 
     def begin_of_quarter(self) -> DateTime:
-        """获取本季度开始时间。"""
+        """
+        获取本季度开始时间。
+
+        :return: 本季度开始的 DateTime 对象
+        """
         return DateTime(self._dt.start_of("quarter"))
 
     def end_of_quarter(self) -> DateTime:
-        """获取本季度结束时间。"""
+        """
+        获取本季度结束时间。
+
+        :return: 本季度结束的 DateTime 对象
+        """
         return DateTime(self._dt.end_of("quarter"))
 
     # ---- 魔术方法 ----

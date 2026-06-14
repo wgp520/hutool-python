@@ -7,19 +7,32 @@ from typing import List
 
 
 class PageUtil:
-    """分页工具类"""
+    """分页工具类，提供分页计算相关的工具方法。"""
 
     @staticmethod
     def total_page(total_count: int, page_size: int) -> int:
-        """计算总页数"""
+        """
+        根据总记录数和每页条数计算总页数。
+
+        :param total_count: 总记录数
+        :param page_size: 每页条数
+        :return: 总页数，参数非法时返回 0
+        """
         if total_count <= 0 or page_size <= 0:
             return 0
         return math.ceil(total_count / page_size)
 
     @staticmethod
     def rainbow(page_num: int, total_page: int, display_count: int) -> List[int]:
-        """彩虹分页，获取页码列表
-        例如: rainbow(5, 10, 3) -> [3,4,5,6,7]
+        """
+        彩虹分页算法，获取当前页周围的页码列表。
+
+        例如: ``rainbow(5, 10, 3)`` 返回 ``[3, 4, 5, 6, 7]``
+
+        :param page_num: 当前页码
+        :param total_page: 总页数
+        :param display_count: 显示的页码个数
+        :return: 页码列表
         """
         if page_num < 1 or total_page < 1 or display_count < 1:
             return []
@@ -36,26 +49,48 @@ class PageUtil:
 
     @staticmethod
     def to_page(start_index: int, page_size: int) -> int:
-        """起始索引转页码（从1开始）"""
+        """
+        将起始索引转换为页码（从 1 开始）。
+
+        :param start_index: 起始索引
+        :param page_size: 每页条数
+        :return: 页码，page_size 非法时返回 1
+        """
         if page_size <= 0:
             return 1
         return start_index // page_size + 1
 
     @staticmethod
     def first_page() -> int:
-        """第一页页码，始终返回1"""
+        """
+        获取第一页页码。
+
+        :return: 始终返回 1
+        """
         return 1
 
     @staticmethod
     def get_start(page: int, limit: int) -> int:
-        """根据页码和每页条数计算起始行号（从0开始）"""
+        """
+        根据页码和每页条数计算起始行号（从 0 开始）。
+
+        :param page: 页码（从 1 开始）
+        :param limit: 每页条数
+        :return: 起始行号
+        """
         if page < 1 or limit < 1:
             return 0
         return (page - 1) * limit
 
     @staticmethod
     def to_start_index(page_num: int, page_size: int) -> int:
-        """页码转起始索引"""
+        """
+        将页码转换为起始索引（从 0 开始）。
+
+        :param page_num: 页码（从 1 开始）
+        :param page_size: 每页条数
+        :return: 起始索引
+        """
         if page_num < 1 or page_size < 1:
             return 0
         return (page_num - 1) * page_size

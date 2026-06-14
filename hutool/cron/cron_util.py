@@ -36,7 +36,8 @@ class CronUtil:
 
     @classmethod
     def schedule(cls, cron_pattern: str, func: Callable) -> None:
-        """添加定时任务
+        """
+        添加定时任务。
 
         :param cron_pattern: cron表达式字符串，格式为 "分 时 日 月 周"
         :param func: 定时执行的函数
@@ -47,7 +48,8 @@ class CronUtil:
 
     @classmethod
     def schedule_at_fixed_rate(cls, func: Callable, period_seconds: int) -> None:
-        """添加固定频率任务
+        """
+        添加固定频率任务。
 
         :param func: 定时执行的函数
         :param period_seconds: 执行间隔（秒）
@@ -58,7 +60,8 @@ class CronUtil:
 
     @classmethod
     def start(cls) -> None:
-        """启动调度器
+        """
+        启动调度器。
 
         调度器在后台线程中运行，每秒检查一次是否有需要执行的任务。
         """
@@ -70,7 +73,7 @@ class CronUtil:
 
     @classmethod
     def stop(cls) -> None:
-        """停止调度器"""
+        """停止调度器。"""
         cls._running = False
         if cls._thread is not None:
             cls._thread.join(timeout=5)
@@ -78,7 +81,7 @@ class CronUtil:
 
     @classmethod
     def restart(cls) -> None:
-        """重启调度器"""
+        """重启调度器。"""
         cls.stop()
         cls.start()
 

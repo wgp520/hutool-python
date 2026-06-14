@@ -85,9 +85,18 @@ class LRUCache:
         return self._cache.keys()
 
     def __contains__(self, key: Any) -> bool:
-        """判断键是否存在于缓存中。"""
+        """
+        判断键是否存在于缓存中。
+
+        :param key: 缓存键
+        :return: 是否存在
+        """
         return key in self._cache
 
     def __len__(self) -> int:
-        """返回缓存大小。"""
+        """
+        返回缓存大小。
+
+        :return: 缓存条目数
+        """
         return len(self._cache)

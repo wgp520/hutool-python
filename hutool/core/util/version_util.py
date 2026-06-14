@@ -4,12 +4,18 @@ from __future__ import annotations
 
 
 class VersionUtil:
-    """版本比较工具类"""
+    """版本比较工具类，提供版本号的比较和解析功能。"""
 
     @staticmethod
     def compare(version1: str, version2: str) -> int:
-        """比较两个版本号，1: v1>v2, 0: 相等, -1: v1<v2
-        支持 "1.2.3" 格式
+        """
+        比较两个版本号大小。
+
+        支持 ``"1.2.3"`` 格式，逐段比较。
+
+        :param version1: 版本号字符串
+        :param version2: 版本号字符串
+        :return: 1 表示 version1 > version2，0 表示相等，-1 表示 version1 < version2
         """
         v1_parts = version1.split(".")
         v2_parts = version2.split(".")
@@ -27,15 +33,32 @@ class VersionUtil:
 
     @staticmethod
     def is_greater(version1: str, version2: str) -> bool:
-        """version1是否大于version2"""
+        """
+        判断 version1 是否大于 version2。
+
+        :param version1: 版本号字符串
+        :param version2: 版本号字符串
+        :return: 是否大于
+        """
         return VersionUtil.compare(version1, version2) == 1
 
     @staticmethod
     def is_lower(version1: str, version2: str) -> bool:
-        """version1是否小于version2"""
+        """
+        判断 version1 是否小于 version2。
+
+        :param version1: 版本号字符串
+        :param version2: 版本号字符串
+        :return: 是否小于
+        """
         return VersionUtil.compare(version1, version2) == -1
 
     @staticmethod
     def get_main_version(version: str) -> str:
-        """获取主版本号，如 "1.2.3" -> "1" """
+        """
+        获取主版本号。
+
+        :param version: 版本号字符串，如 ``"1.2.3"``
+        :return: 主版本号，如 ``"1"``
+        """
         return version.split(".")[0]

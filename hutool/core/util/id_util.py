@@ -12,6 +12,13 @@ class _SnowflakeWorkerPool:
 
     @classmethod
     def get(cls, worker_id: int, datacenter_id: int) -> "_SnowflakeIdWorker":
+        """
+        获取或创建指定 worker_id + datacenter_id 的雪花算法工作器（线程安全）。
+
+        :param worker_id: 工作机器ID
+        :param datacenter_id: 数据中心ID
+        :return: 对应的雪花算法ID生成器实例
+        """
         key = (worker_id, datacenter_id)
         with cls._lock:
             if key not in cls._workers:
@@ -24,22 +31,38 @@ class IdUtil:
 
     @staticmethod
     def random_uuid() -> str:
-        """生成随机UUID（带横线）"""
+        """
+        生成随机UUID（带横线格式）。
+
+        :return: UUID字符串，如 ``"550e8400-e29b-41d4-a716-446655440000"``
+        """
         return str(uuid.uuid4())
 
     @staticmethod
     def simple_uuid() -> str:
-        """生成简单UUID（不带横线）"""
+        """
+        生成简单UUID（不带横线格式）。
+
+        :return: 32位十六进制UUID字符串，如 ``"550e8400e29b41d4a716446655440000"``
+        """
         return str(uuid.uuid4()).replace("-", "")
 
     @staticmethod
     def fast_uuid() -> str:
-        """快速生成UUID"""
+        """
+        快速生成UUID（带横线格式）。
+
+        :return: UUID字符串
+        """
         return str(uuid.uuid4())
 
     @staticmethod
     def fast_simple_uuid() -> str:
-        """快速生成简单UUID"""
+        """
+        快速生成简单UUID（不带横线格式）。
+
+        :return: 32位十六进制UUID字符串
+        """
         return str(uuid.uuid4()).replace("-", "")
 
     @staticmethod
@@ -68,7 +91,13 @@ class IdUtil:
 
     @staticmethod
     def object_id() -> str:
-        """生成MongoDB ObjectId格式的24位十六进制字符串"""
+        """
+        生成MongoDB ObjectId格式的24位十六进制字符串。
+
+        由 4字节时间戳 + 5字节随机值 + 3字节递增计数器 组成。
+
+        :return: 24位十六进制字符串
+        """
         # 4字节时间戳 + 5字节随机值 + 3字节递增计数器
         timestamp_part = format(int(time.time()), "08x")
         random_part = secrets.token_hex(5)
@@ -116,7 +145,12 @@ class _SnowflakeIdWorker:
         self._lock = threading.Lock()
 
     def next_id(self) -> int:
-        """生成下一个ID（线程安全）"""
+        """
+        生成下一个雪花算法ID（线程安全）。
+
+        :return: 唯一的64位整数ID
+        :raises RuntimeError: 发生时钟回拨时
+        """
         with self._lock:
             timestamp = self._current_millis()
             if timestamp < self._last_timestamp:

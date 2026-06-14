@@ -23,36 +23,64 @@ class FileUtil:
 
     @staticmethod
     def is_windows() -> bool:
-        """判断当前操作系统是否为 Windows"""
+        """
+        判断当前操作系统是否为 Windows。
+
+        :return: 是否为 Windows 系统
+        """
         return os.name == "nt"
 
     @staticmethod
     def exist(path: Union[str, Path]) -> bool:
-        """判断文件或目录是否存在"""
+        """
+        判断文件或目录是否存在。
+
+        :param path: 文件或目录路径
+        :return: 是否存在
+        """
         return Path(path).exists()
 
     @staticmethod
     def is_dir(path: Union[str, Path]) -> bool:
-        """判断是否为目录"""
+        """
+        判断是否为目录。
+
+        :param path: 路径
+        :return: 是否为目录
+        """
         return Path(path).is_dir()
 
     @staticmethod
     def is_file(path: Union[str, Path]) -> bool:
-        """判断是否为文件"""
+        """
+        判断是否为文件。
+
+        :param path: 路径
+        :return: 是否为文件
+        """
         return Path(path).is_file()
 
     @staticmethod
     def is_absolute(path: Union[str, Path]) -> bool:
-        """判断路径是否为绝对路径"""
+        """
+        判断路径是否为绝对路径。
+
+        :param path: 路径
+        :return: 是否为绝对路径
+        """
         return Path(path).is_absolute()
 
     @staticmethod
     def is_empty(path: Union[str, Path]) -> bool:
-        """文件或目录是否为空
+        """
+        文件或目录是否为空。
 
         - 文件：大小为 0 视为空。
         - 目录：不含任何子项视为空。
         - 路径不存在视为空。
+
+        :param path: 文件或目录路径
+        :return: 是否为空
         """
         p = Path(path)
         if not p.exists():
@@ -70,9 +98,14 @@ class FileUtil:
 
     @staticmethod
     def file(*names: str) -> Path:
-        """根据多个名称段构建文件路径
+        """
+        根据多个名称段构建文件路径。
 
-        例如: FileUtil.file("home", "user", "test.txt")
+        例如: ``FileUtil.file("home", "user", "test.txt")``
+
+        :param names: 路径段
+        :return: Path 对象
+        :raises ValueError: 未传入任何路径段时
         """
         if not names:
             raise ValueError("至少需要一个路径段")
@@ -83,9 +116,13 @@ class FileUtil:
 
     @staticmethod
     def touch(path: Union[str, Path]) -> Path:
-        """创建文件（包括父目录）
+        """
+        创建文件（包括父目录）。
 
         如果文件已存在则只更新访问/修改时间。
+
+        :param path: 文件路径
+        :return: 创建的文件路径
         """
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -94,9 +131,13 @@ class FileUtil:
 
     @staticmethod
     def mkdir(path: Union[str, Path]) -> Path:
-        """创建目录
+        """
+        创建目录。
 
         如果目录已存在则直接返回。
+
+        :param path: 目录路径
+        :return: 创建的目录路径
         """
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
@@ -104,7 +145,12 @@ class FileUtil:
 
     @staticmethod
     def mkdirs(path: Union[str, Path]) -> Path:
-        """创建多级目录（与 mkdir 行为一致，支持多级创建）"""
+        """
+        创建多级目录（与 mkdir 行为一致，支持多级创建）。
+
+        :param path: 目录路径
+        :return: 创建的目录路径
+        """
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
         return p
@@ -209,9 +255,15 @@ class FileUtil:
         src: Union[str, Path],
         dest: Union[str, Path],
     ) -> Path:
-        """复制文件
+        """
+        复制文件。
 
         如果目标目录不存在则自动创建。
+
+        :param src: 源文件路径
+        :param dest: 目标文件路径
+        :return: 目标文件路径
+        :raises FileNotFoundError: 源文件不存在或不是文件时
         """
         src_path = Path(src)
         dest_path = Path(dest)
@@ -286,23 +338,45 @@ class FileUtil:
 
     @staticmethod
     def read_bytes(path: Union[str, Path]) -> bytes:
-        """读取文件内容为字节数组"""
+        """
+        读取文件内容为字节数组。
+
+        :param path: 文件路径
+        :return: 字节数据
+        """
         return Path(path).read_bytes()
 
     @staticmethod
     def read_lines(path: Union[str, Path], charset: str = "utf-8") -> List[str]:
-        """读取文件内容为字符串列表（每行一个元素，保留换行符）"""
+        """
+        读取文件内容为字符串列表（每行一个元素，保留换行符）。
+
+        :param path: 文件路径
+        :param charset: 字符编码
+        :return: 行列表
+        """
         with open(path, encoding=charset) as f:
             return f.readlines()
 
     @staticmethod
     def read_utf8_lines(path: Union[str, Path]) -> List[str]:
-        """以 UTF-8 编码读取文件的每一行（去除行尾换行符）"""
+        """
+        以 UTF-8 编码读取文件的每一行（去除行尾换行符）。
+
+        :param path: 文件路径
+        :return: 行列表
+        """
         return FileUtil.read_lines_str(path, charset="utf-8")
 
     @staticmethod
     def read_lines_str(path: Union[str, Path], charset: str = "utf-8") -> List[str]:
-        """读取文件的每一行，去除行尾换行符"""
+        """
+        读取文件的每一行，去除行尾换行符。
+
+        :param path: 文件路径
+        :param charset: 字符编码
+        :return: 行列表
+        """
         with open(path, encoding=charset) as f:
             return f.read().splitlines()
 
@@ -467,7 +541,8 @@ class FileUtil:
         path: Union[str, Path],
         consumer: Callable[[Path], None],
     ) -> None:
-        """递归遍历文件并对每个文件执行操作
+        """
+        递归遍历文件并对每个文件执行操作。
 
         :param path: 根目录路径
         :param consumer: 对每个文件执行的回调函数
@@ -487,9 +562,14 @@ class FileUtil:
 
     @staticmethod
     def size(path: Union[str, Path]) -> int:
-        """获取文件大小（字节）
+        """
+        获取文件大小（字节）。
 
         对于目录，返回整个目录树的总大小。
+
+        :param path: 文件或目录路径
+        :return: 大小（字节）
+        :raises FileNotFoundError: 路径不存在时
         """
         p = Path(path)
         if p.is_file():
@@ -516,7 +596,12 @@ class FileUtil:
 
     @staticmethod
     def get_total_lines(path: Union[str, Path]) -> int:
-        """获取文件总行数"""
+        """
+        获取文件总行数。
+
+        :param path: 文件路径
+        :return: 总行数
+        """
         count = 0
         with open(path, "rb") as f:
             for _ in f:
@@ -525,19 +610,27 @@ class FileUtil:
 
     @staticmethod
     def get_name(path: Union[str, Path]) -> str:
-        """获取文件名（含扩展名）
+        """
+        获取文件名（含扩展名）。
 
-        例如: /home/user/test.txt -> test.txt
+        例如: ``/home/user/test.txt -> test.txt``
+
+        :param path: 文件路径
+        :return: 文件名
         """
         return Path(path).name
 
     @staticmethod
     def get_suffix(path: Union[str, Path]) -> str:
-        """获取文件扩展名（不带点号）
+        """
+        获取文件扩展名（不带点号）。
 
-        例如: /home/user/test.txt -> txt
+        例如: ``/home/user/test.txt -> txt``
 
         如果没有扩展名则返回空字符串。
+
+        :param path: 文件路径
+        :return: 扩展名，无扩展名时返回空字符串
         """
         name = Path(path).name
         dot_index = name.rfind(".")
@@ -547,9 +640,13 @@ class FileUtil:
 
     @staticmethod
     def get_prefix(path: Union[str, Path]) -> str:
-        """获取文件名前缀（不含扩展名）
+        """
+        获取文件名前缀（不含扩展名）。
 
-        例如: /home/user/test.txt -> test
+        例如: ``/home/user/test.txt -> test``
+
+        :param path: 文件路径
+        :return: 文件名前缀
         """
         name = Path(path).name
         dot_index = name.rfind(".")
@@ -559,13 +656,20 @@ class FileUtil:
 
     @staticmethod
     def main_name(path: Union[str, Path]) -> str:
-        """获取主文件名（同 get_prefix）"""
+        """
+        获取主文件名（同 get_prefix）。
+
+        :param path: 文件路径
+        :return: 主文件名
+        """
         return FileUtil.get_prefix(path)
 
     @staticmethod
     def normalize(path: Union[str, Path]) -> str:
-        """标准化路径，解析 ~ 和相对路径符号
+        """
+        标准化路径，解析 ~ 和相对路径符号。
 
+        :param path: 原始路径
         :return: 标准化后的路径字符串
         """
         p = Path(path).expanduser()
@@ -580,22 +684,38 @@ class FileUtil:
 
     @staticmethod
     def get_tmp_dir_path() -> str:
-        """获取系统临时目录路径（字符串）"""
+        """
+        获取系统临时目录路径（字符串）。
+
+        :return: 临时目录路径
+        """
         return tempfile.gettempdir()
 
     @staticmethod
     def get_tmp_dir() -> Path:
-        """获取系统临时目录（Path 对象）"""
+        """
+        获取系统临时目录（Path 对象）。
+
+        :return: 临时目录 Path 对象
+        """
         return Path(tempfile.gettempdir())
 
     @staticmethod
     def get_user_home_path() -> str:
-        """获取用户主目录路径（字符串）"""
+        """
+        获取用户主目录路径（字符串）。
+
+        :return: 用户主目录路径
+        """
         return str(Path.home())
 
     @staticmethod
     def get_user_home_dir() -> Path:
-        """获取用户主目录（Path 对象）"""
+        """
+        获取用户主目录（Path 对象）。
+
+        :return: 用户主目录 Path 对象
+        """
         return Path.home()
 
     # ------------------------------------------------------------------
@@ -624,7 +744,12 @@ class FileUtil:
 
     @staticmethod
     def is_symlink(path: Union[str, Path]) -> bool:
-        """判断是否为符号链接"""
+        """
+        判断是否为符号链接。
+
+        :param path: 路径
+        :return: 是否为符号链接
+        """
         return Path(path).is_symlink()
 
     @staticmethod

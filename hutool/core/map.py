@@ -53,12 +53,22 @@ class MapUtil:
 
     @staticmethod
     def is_empty(m: dict) -> bool:
-        """字典是否为空"""
+        """
+        字典是否为空。
+
+        :param m: 字典
+        :return: 是否为空
+        """
         return m is None or len(m) == 0
 
     @staticmethod
     def is_not_empty(m: dict) -> bool:
-        """字典是否为非空"""
+        """
+        字典是否为非空。
+
+        :param m: 字典
+        :return: 是否为非空
+        """
         return not MapUtil.is_empty(m)
 
     # ----------------------------------------------------------------
@@ -67,12 +77,20 @@ class MapUtil:
 
     @staticmethod
     def new_hash_map(*args, **kwargs) -> dict:
-        """新建HashMap"""
+        """
+        新建 HashMap（Python dict）。
+
+        :return: 新字典
+        """
         return dict(*args, **kwargs)
 
     @staticmethod
     def new_linked_hash_map(*args, **kwargs) -> OrderedDict:
-        """新建LinkedHashMap（有序字典）"""
+        """
+        新建 LinkedHashMap（有序字典）。
+
+        :return: 新有序字典
+        """
         return OrderedDict(*args, **kwargs)
 
     @staticmethod
@@ -724,15 +742,27 @@ class BiMap(MapWrapper[_K, _V]):
     # ------ 其他 ------
 
     def keys(self):  # type: ignore[override]
-        """获取所有键"""
+        """
+        获取所有键。
+
+        :return: 键的视图
+        """
         return super().keys()
 
     def values(self):  # type: ignore[override]
-        """获取所有值"""
+        """
+        获取所有值。
+
+        :return: 值的视图
+        """
         return super().values()
 
     def items(self):  # type: ignore[override]
-        """获取所有键值对"""
+        """
+        获取所有键值对。
+
+        :return: 键值对的视图
+        """
         return super().items()
 
     def copy(self) -> BiMap[_K, _V]:
@@ -811,12 +841,20 @@ class FuncKeyDict(MapWrapper[_K, _V]):
 
     @property
     def key_func(self) -> Optional[Callable[[_K], _K]]:
-        """获取键函数"""
+        """
+        获取键函数。
+
+        :return: 键函数
+        """
         return self._key_func
 
     @key_func.setter
     def key_func(self, func: Callable[[_K], _K]) -> None:
-        """设置键函数"""
+        """
+        设置键函数。
+
+        :param func: 键函数
+        """
         self._key_func = func
 
     def __repr__(self):
