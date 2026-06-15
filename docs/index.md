@@ -52,14 +52,14 @@ IdUtil.simple_uuid()           # 无横线 UUID
 ```
 
 ```{grid-item-card} HTTP 客户端
-:link: modules/http
+:link: modules/httpx_client
 :link-type: doc
 
 基于 httpx 的 HTTP 请求工具，支持链式调用、文件上传、Cookie 管理
 ```
 
 ```{grid-item-card} JSON 工具
-:link: modules/json_util
+:link: modules/json
 :link-type: doc
 
 JSON 解析、序列化、路径查询、XML 互转
@@ -108,7 +108,7 @@ Cron 表达式定时任务调度
 ```
 
 ```{grid-item-card} JWT 工具
-:link: modules/jwt_util
+:link: modules/jwt
 :link-type: doc
 
 JWT 令牌生成、解析、验证
@@ -130,15 +130,15 @@ YAML、Properties 配置文件读写
 | Python 模块 | Java Hutool 模块 | 说明 |
 |---|---|---|
 | `hutool.core` | `cn.hutool.core` | 核心工具类 |
-| `hutool.http` | `cn.hutool.http` | HTTP 客户端 |
-| `hutool.json_util` | `cn.hutool.json` | JSON 工具 |
+| `hutool.httpx_client` | `cn.hutool.http` | HTTP 客户端 |
+| `hutool.json` | `cn.hutool.json` | JSON 工具 |
 | `hutool.crypto` | `cn.hutool.crypto` | 加密解密 |
 | `hutool.cache` | `cn.hutool.cache` | 缓存 |
 | `hutool.captcha` | `cn.hutool.captcha` | 验证码 |
 | `hutool.dfa` | `cn.hutool.dfa` | 敏感词过滤 |
 | `hutool.extra` | `cn.hutool.extra` | 扩展工具 |
 | `hutool.cron` | `cn.hutool.cron` | 定时任务 |
-| `hutool.jwt_util` | `cn.hutool.jwt` | JWT |
+| `hutool.jwt` | `cn.hutool.jwt` | JWT |
 | `hutool.setting` | `cn.hutool.setting` | 配置工具 |
 
 ---
@@ -161,15 +161,15 @@ contributing
 :caption: 模块文档
 
 modules/core/overview
-modules/http
-modules/json_util
+modules/httpx_client
+modules/json
 modules/crypto
 modules/cache
 modules/captcha
 modules/dfa
 modules/extra
 modules/cron
-modules/jwt_util
+modules/jwt
 modules/setting
 ```
 

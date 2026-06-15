@@ -1,6 +1,6 @@
-from .html_util import HtmlUtil
+from .html import HtmlUtil
+from .http_client import HttpUtil
 from .http_request import HttpRequest
 from .http_response import HttpResponse
-from .http_util import HttpUtil
 
 __all__ = ["HtmlUtil", "HttpRequest", "HttpResponse", "HttpUtil"]

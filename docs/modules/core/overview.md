@@ -59,7 +59,7 @@
 | `MoneyUtil` | 货币计算（元/分转换、税价计算） |
 | `BankUtil` | 银行工具（IBAN 计算与验证） |
 | `IterUtil` | 迭代工具（itertools recipes） |
-| `TimingUtil` | 计时工具（装饰器 + Timer） |
+| `TimingUtil` / `timethis` | 计时工具（装饰器 + Timer） |
 | `ExecUtil` | 并发执行（线程池/进程池） |
 | `ProfUtil` | 性能分析（cProfile） |
 | `MemoryRepo` | 内存数据仓库（链式查询） |
@@ -69,28 +69,28 @@
 :maxdepth: 2
 :caption: 工具类
 
-str_util
-number_util
-array_util
-object_util
-boolean_util
-random_util
-id_util
-hex_util
-hash_util
-re_util
-escape_util
-url_util
-xml_util
-desensitized_util
-idcard_util
-phone_util
-coordinate_util
-zip_util
-charset_util
-version_util
-page_util
-credit_code_util
+strings
+number
+array
+object
+boolean
+randoms
+id
+hex
+hasher
+regex
+escape
+url
+xml
+desensitized
+idcard
+phone
+coordinate
+zip
+charset
+version
+page
+credit_code
 ```
 
 ```{toctree}
@@ -119,7 +119,7 @@ codec
 
 text
 net
-math_util
+math
 ```
 
 ```{toctree}
@@ -136,17 +136,17 @@ io
 :maxdepth: 2
 :caption: v1.1.0 新增
 
-check_util
-workday_util
-money_util
-bank_util
-iter_util
-timing_util
-exec_util
-prof_util
+check
+workday
+money
+bank
+iter
+timing
+exec
+prof
 memory_repo
-convert_util
-color_util
-image_util
-user_agent_util
+convert
+color
+image
+user_agent
 ```

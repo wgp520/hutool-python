@@ -12,7 +12,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Final, Iterable, List, Literal, Optional, Union
 
 from .._base import DefaultParam
-from .str_util import StrUtil
+from .strings import StrUtil
 
 __all__ = [
     "NumberUtil",

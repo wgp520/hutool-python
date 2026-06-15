@@ -2,7 +2,7 @@
 
 import pytest
 
-from hutool.core.util.color_util import ColorUtil
+from hutool import ColorUtil
 
 
 class TestColorUtil:

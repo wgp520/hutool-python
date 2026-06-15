@@ -1,6 +1,6 @@
 from typing import Dict
 
-from .digest_util import DigestUtil
+from .digest import DigestUtil
 
 
 class SignUtil:

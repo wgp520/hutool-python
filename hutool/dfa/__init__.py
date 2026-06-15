@@ -1,3 +1,3 @@
-from .sensitive_util import SensitiveUtil
+from .sensitive import SensitiveUtil
 
 __all__ = ["SensitiveUtil"]

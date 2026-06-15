@@ -2,7 +2,7 @@
 
 import pytest
 
-from hutool.core.util.image_util import ImageUtil
+from hutool import ImageUtil
 
 
 class TestImageUtil:

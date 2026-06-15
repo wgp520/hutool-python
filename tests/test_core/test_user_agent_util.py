@@ -1,13 +1,13 @@
 """Tests for UserAgentUtil."""
 
-from hutool.core.util.user_agent_util import UserAgentUtil
+from hutool import UserAgentUtil
 
 
 class TestUserAgentUtil:
     def test_chrome_starts_with_mozilla(self):
         ua = UserAgentUtil.chrome()
         assert ua.startswith("Mozilla/5.0")
-        assert "Chrome/" in ua
+        assert "Chrome/" in ua or "CriOS/" in ua  # iOS uses CriOS
 
     def test_firefox_starts_with_mozilla(self):
         ua = UserAgentUtil.firefox()

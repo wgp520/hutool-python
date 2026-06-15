@@ -1,6 +1,6 @@
 """Tests for ConvertUtil."""
 
-from hutool.core.util.convert_util import ConvertUtil
+from hutool import ConvertUtil
 
 
 class TestConvertUtil:

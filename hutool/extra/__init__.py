@@ -1,6 +1,6 @@
-from .emoji_util import EmojiUtil
-from .pinyin_util import PinyinUtil
-from .qr_code_util import QrCodeUtil
-from .template_util import TemplateUtil
+from .emoji import EmojiUtil
+from .pinyin import PinyinUtil
+from .qr_code import QrCodeUtil
+from .template import TemplateUtil
 
 __all__ = ["EmojiUtil", "PinyinUtil", "QrCodeUtil", "TemplateUtil"]
