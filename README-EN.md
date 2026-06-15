@@ -36,10 +36,10 @@
 
 | Module | Description | Java Hutool Equivalent |
 |--------|-------------|----------------------|
-| `core/util/` | Core utilities: string, number, array, object, boolean, random, ID, regex, hash, escape, URL, version, pagination, check, enum, reflect, color, convert, etc. (32 utility classes) | `cn.hutool.core.util` |
+| `core/util/` | Core utilities: string, number, array, object, boolean, random, ID, regex, hash, escape, URL, version, pagination, etc. | `cn.hutool.core.util` |
 | `core/coll.py` | Collection utilities: `CollUtil`, `ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map utilities: `MapUtil`, `BiMap`, `DictUtil` | `cn.hutool.core.map` |
-| `core/io/` | IO utilities: file, IO streams, path, filename, data size, resources (6 classes) | `cn.hutool.core.io` |
+| `core/io/` | IO utilities: file, IO streams, path, filename, data size, resources | `cn.hutool.core.io` |
 | `core/date.py` | Date utilities: `DateUtil`, `DateTime` (powered by pendulum) | `cn.hutool.core.date` |
 | `core/bean.py` | Bean utilities: property copy, Map conversion | `cn.hutool.core.bean` |
 | `core/codec.py` | Encoding/decoding: `Base64`, `Base32` | `cn.hutool.core.codec` |
@@ -47,14 +47,7 @@
 | `core/net.py` | Network utilities: `NetUtil`, `Ipv4Util` | `cn.hutool.core.net` |
 | `core/math.py` | Math utilities: `MathUtil`, `BitStatusUtil` | `cn.hutool.core.math` |
 | `core/tree.py` | Tree utilities: `TreeUtil` | `cn.hutool.core.lang.tree` |
-| `core/bank.py` | Banking utilities: `BankUtil` (IBAN validation) | `cn.hutool.core.bank` |
-| `core/money.py` | Currency utilities: `MoneyUtil` (yuan/fen conversion, precise calculation) | `cn.hutool.core.money` |
-| `core/workday.py` | Workday utilities: `WorkdayUtil` (public holidays) | `cn.hutool.core.workday` |
-| `core/iter.py` | Iterator utilities: `IterUtil` (itertools recipes) | `cn.hutool.core.collection.IterUtil` |
-| `core/timing.py` | Timing utilities: `TimingUtil` | `cn.hutool.core.util.TimingUtil` |
-| `core/exec.py` | Concurrent execution: `ExecUtil` | `cn.hutool.core.thread.ExecUtil` |
-| `core/prof.py` | Profiling utilities: `ProfUtil` | `cn.hutool.core.util.ProfilerUtil` |
-| `core/memory_repo.py` | In-memory data store: `MemoryRepo` | `cn.hutool.core.lang.memorystore` |
+| `core/iter.py` | Iterator utilities: `IterUtil` | `cn.hutool.core.collection.IterUtil` |
 | `httpx_client/` | HTTP client: `HttpUtil`, `HttpRequest`, `HttpResponse`, `HtmlUtil` (powered by httpx) | `cn.hutool.http` |
 | `json.py` | JSON utilities: `JSONUtil` (built-in json extension) | `cn.hutool.json` |
 | `crypto/` | Encryption: `DigestUtil`, `SecureUtil`, `SignUtil` (powered by cryptography) | `cn.hutool.crypto` |
@@ -65,6 +58,18 @@
 | `cron/` | Scheduled tasks: `CronUtil`, `CronPattern` | `cn.hutool.cron` |
 | `jwt.py` | JWT utilities: `JWTUtil` (powered by PyJWT) | `cn.hutool.jwt` |
 | `setting/` | Configuration: `SettingUtil`, `YamlUtil`, `PropsUtil` | `cn.hutool.setting` |
+
+#### Python-only Modules
+
+| Module | Description |
+|--------|-------------|
+| `core/bank.py` | Banking utilities: `BankUtil` (IBAN validation) |
+| `core/money.py` | Currency utilities: `MoneyUtil` (yuan/fen conversion, precise calculation) |
+| `core/workday.py` | Workday utilities: `WorkdayUtil` (public holidays) |
+| `core/timing.py` | Timing utilities: `TimingUtil` (timer) |
+| `core/exec.py` | Concurrent execution: `ExecUtil` (thread/process pool) |
+| `core/prof.py` | Profiling utilities: `ProfUtil` (cProfile) |
+| `core/memory_repo.py` | In-memory data store: `MemoryRepo` (chained query) |
 
 > Note: Java-specific modules such as AOP, JDBC, Swing, POI, JNDI, ClassLoader, BloomFilter, Log, Script, Socket, and System are excluded from Hutool-Python.
 

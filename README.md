@@ -38,7 +38,7 @@
 
 | 模块 | 介绍 | 对应 Java Hutool |
 |------|------|-----------------|
-| `core/util/` | 核心工具类：字符串、数字、数组、对象、布尔、随机、ID、正则、哈希、转义、URL、版本、分页、校验、枚举、反射、颜色、类型转换等 32 个工具类 | `cn.hutool.core.util` |
+| `core/util/` | 核心工具类：字符串、数字、数组、对象、布尔、随机、ID、正则、哈希、转义、URL、版本、分页等 | `cn.hutool.core.util` |
 | `core/coll.py` | 集合工具：`CollUtil`、`ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map 工具：`MapUtil`、`BiMap`、`DictUtil` | `cn.hutool.core.map` |
 | `core/io/` | IO 工具：文件、IO 流、路径、文件名、数据大小、资源 | `cn.hutool.core.io` |
@@ -49,14 +49,7 @@
 | `core/net.py` | 网络工具：`NetUtil`、`Ipv4Util` | `cn.hutool.core.net` |
 | `core/math.py` | 数学工具：`MathUtil`、`BitStatusUtil` | `cn.hutool.core.math` |
 | `core/tree.py` | 树工具：`TreeUtil` | `cn.hutool.core.lang.tree` |
-| `core/bank.py` | 银行工具：`BankUtil`（IBAN 校验） | `cn.hutool.core.bank` |
-| `core/money.py` | 货币工具：`MoneyUtil`（元/分转换、精确计算） | `cn.hutool.core.money` |
-| `core/workday.py` | 工作日工具：`WorkdayUtil`（法定节假日） | `cn.hutool.core.workday` |
-| `core/iter.py` | 迭代工具：`IterUtil`（itertools recipes） | `cn.hutool.core.collection.IterUtil` |
-| `core/timing.py` | 计时工具：`TimingUtil` | `cn.hutool.core.util.TimingUtil` |
-| `core/exec.py` | 并发执行工具：`ExecUtil` | `cn.hutool.core.thread.ExecUtil` |
-| `core/prof.py` | 性能分析工具：`ProfUtil` | `cn.hutool.core.util.ProfilerUtil` |
-| `core/memory_repo.py` | 内存数据仓库：`MemoryRepo` | `cn.hutool.core.lang.memorystore` |
+| `core/iter.py` | 迭代工具：`IterUtil` | `cn.hutool.core.collection.IterUtil` |
 | `httpx_client/` | HTTP 客户端：`HttpUtil`、`HttpRequest`、`HttpResponse`、`HtmlUtil`（基于 httpx） | `cn.hutool.http` |
 | `json.py` | JSON 工具：`JSONUtil`（基于内置 json 扩展） | `cn.hutool.json` |
 | `crypto/` | 加密工具：`DigestUtil`、`SecureUtil`、`SignUtil`（基于 cryptography） | `cn.hutool.crypto` |
@@ -67,6 +60,18 @@
 | `cron/` | 定时任务：`CronUtil`、`CronPattern` | `cn.hutool.cron` |
 | `jwt.py` | JWT 工具：`JWTUtil`（基于 PyJWT） | `cn.hutool.jwt` |
 | `setting/` | 配置工具：`SettingUtil`、`YamlUtil`、`PropsUtil` | `cn.hutool.setting` |
+
+#### Python 独有模块
+
+| 模块 | 介绍 |
+|------|------|
+| `core/bank.py` | 银行工具：`BankUtil`（IBAN 校验） |
+| `core/money.py` | 货币工具：`MoneyUtil`（元/分转换、精确计算） |
+| `core/workday.py` | 工作日工具：`WorkdayUtil`（法定节假日） |
+| `core/timing.py` | 计时工具：`TimingUtil`（计时器） |
+| `core/exec.py` | 并发执行工具：`ExecUtil`（线程池/进程池） |
+| `core/prof.py` | 性能分析工具：`ProfUtil`（cProfile） |
+| `core/memory_repo.py` | 内存数据仓库：`MemoryRepo`（链式查询） |
 
 > 注：Java Hutool 中的 AOP、JDBC/Swing、POI、JNDI、ClassLoader、BloomFilter、Log、Script、Socket 等 Java 专属模块不包含在 Hutool-Python 中。
 
