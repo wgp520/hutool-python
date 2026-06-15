@@ -337,15 +337,15 @@ pytest tests/test_core/test_strings.py -v
 | Library | Purpose | Module |
 |---------|---------|--------|
 | `pendulum>=3.0` | Date/time handling | `core/date.py` |
-| `httpx>=0.27` | HTTP client | `http/` |
+| `httpx>=0.27` | HTTP client | `httpx_client/` |
 | `cryptography>=42.0` | Encryption algorithms | `crypto/` |
-| `qrcode[pil]>=7.0` | QR code generation | `extra/qr_code_util.py` |
+| `qrcode[pil]>=7.0` | QR code generation | `extra/qr_code.py` |
 | `Pillow>=10.0` | Image processing (CAPTCHA) | `captcha/` |
-| `pypinyin>=0.50` | Chinese Pinyin conversion | `extra/pinyin_util.py` |
-| `emoji>=2.0` | Emoji handling | `extra/emoji_util.py` |
-| `jinja2>=3.0` | Template engine | `extra/template_util.py` |
-| `pyjwt>=2.8` | JWT handling | `jwt_util.py` |
-| `pyyaml>=6.0` | YAML parsing | `setting/yaml_util.py` |
+| `pypinyin>=0.50` | Chinese Pinyin conversion | `extra/pinyin.py` |
+| `emoji>=2.0` | Emoji handling | `extra/emoji.py` |
+| `jinja2>=3.0` | Template engine | `extra/template.py` |
+| `pyjwt>=2.8` | JWT handling | `jwt.py` |
+| `pyyaml>=6.0` | YAML parsing | `setting/yaml.py` |
 | `sortedcontainers>=2.0` | Sorted containers | `cache/` |
 
 ---

@@ -339,15 +339,15 @@ pytest tests/test_core/test_strings.py -v
 | 依赖库 | 用途 | 对应模块 |
 |--------|------|---------|
 | `pendulum>=3.0` | 日期时间处理 | `core/date.py` |
-| `httpx>=0.27` | HTTP 客户端 | `http/` |
+| `httpx>=0.27` | HTTP 客户端 | `httpx_client/` |
 | `cryptography>=42.0` | 加密算法 | `crypto/` |
-| `qrcode[pil]>=7.0` | 二维码生成 | `extra/qr_code_util.py` |
+| `qrcode[pil]>=7.0` | 二维码生成 | `extra/qr_code.py` |
 | `Pillow>=10.0` | 图像处理（验证码） | `captcha/` |
-| `pypinyin>=0.50` | 中文拼音转换 | `extra/pinyin_util.py` |
-| `emoji>=2.0` | Emoji 处理 | `extra/emoji_util.py` |
-| `jinja2>=3.0` | 模板引擎 | `extra/template_util.py` |
-| `pyjwt>=2.8` | JWT 处理 | `jwt_util.py` |
-| `pyyaml>=6.0` | YAML 解析 | `setting/yaml_util.py` |
+| `pypinyin>=0.50` | 中文拼音转换 | `extra/pinyin.py` |
+| `emoji>=2.0` | Emoji 处理 | `extra/emoji.py` |
+| `jinja2>=3.0` | 模板引擎 | `extra/template.py` |
+| `pyjwt>=2.8` | JWT 处理 | `jwt.py` |
+| `pyyaml>=6.0` | YAML 解析 | `setting/yaml.py` |
 | `sortedcontainers>=2.0` | 有序容器 | `cache/` |
 
 ---
