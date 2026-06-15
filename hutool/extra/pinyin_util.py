@@ -1,7 +1,6 @@
 """拼音工具类，基于pypinyin"""
 
 
-
 class PinyinUtil:
     """拼音工具类，基于pypinyin"""
 

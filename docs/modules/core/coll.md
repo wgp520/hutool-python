@@ -78,6 +78,15 @@ CollUtil.get_last([1, 2, 3])    # 3
 CollUtil.min([3, 1, 4])         # 1
 CollUtil.max([3, 1, 4])         # 4
 CollUtil.count([1, 2, 3, 4], lambda x: x > 2)  # 2
+
+# 安全取最值（空集合返回 None）
+CollUtil.safe_min([])       # None
+CollUtil.safe_min([3, 1])   # 1
+CollUtil.safe_max([])       # None
+CollUtil.safe_max([3, 1])   # 3
+
+# 查找重复元素
+CollUtil.find_duplicates([1, 2, 2, 3, 3, 3])  # [2, 3]
 ```
 
 ## ListUtil

@@ -58,3 +58,31 @@ class TestSecureUtil:
         encrypted = SecureUtil.encrypt_des(data, key)
         decrypted = SecureUtil.decrypt_des(encrypted, key)
         assert decrypted == data
+
+    # ── 凯撒密码 ──────────────────────────────────────────────
+
+    def test_caesar_encode_basic(self):
+        """测试凯撒密码加密（交替大小写表，偏移2步 = 标准字母表偏移1位）"""
+        result = SecureUtil.caesar_encode("Hello", 2)
+        assert result == "Ifmmp"
+
+    def test_caesar_decode_basic(self):
+        """测试凯撒密码解密"""
+        result = SecureUtil.caesar_decode("Ifmmp", 2)
+        assert result == "Hello"
+
+    def test_caesar_roundtrip(self):
+        """测试凯撒密码加解密往返"""
+        original = "Hello, World! 123"
+        encoded = SecureUtil.caesar_encode(original, 5)
+        decoded = SecureUtil.caesar_decode(encoded, 5)
+        assert decoded == original
+
+    def test_caesar_preserves_non_letter(self):
+        """测试非字母字符不变"""
+        assert SecureUtil.caesar_encode("123!@#", 3) == "123!@#"
+
+    def test_caesar_large_offset(self):
+        """测试大偏移量（环绕）"""
+        result = SecureUtil.caesar_encode("abc", 52)
+        assert result == "abc"

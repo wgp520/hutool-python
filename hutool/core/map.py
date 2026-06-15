@@ -526,6 +526,27 @@ class MapUtil:
         return value in m.values()
 
     @staticmethod
+    def top_n_keys(m: dict, n: int) -> list:
+        """
+        获取字典中值最大的前 N 个键。
+
+        按值从大到小排序后返回前 N 个键。
+
+        :param m: 字典
+        :param n: 返回的键数量
+        :return: 值最大的前 N 个键的列表
+
+        ::
+
+            >>> MapUtil.top_n_keys({'a': 3, 'b': 1, 'c': 5, 'd': 2}, 2)
+            ['c', 'a']
+        """
+        if MapUtil.is_empty(m):
+            return []
+        sorted_items = sorted(m.items(), key=lambda item: item[1], reverse=True)
+        return [k for k, _ in sorted_items[:n]]
+
+    @staticmethod
     def merge(m1: dict, m2: dict) -> dict:
         """合并两个字典，返回新字典（m2 覆盖 m1）
 

@@ -3,8 +3,7 @@ import tempfile
 
 import pytest
 
-from hutool import PropsUtil
-from hutool import YamlUtil
+from hutool import PropsUtil, YamlUtil
 
 
 class TestYamlUtil:

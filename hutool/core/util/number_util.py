@@ -9,7 +9,7 @@ import math
 import random
 import re
 from decimal import Decimal, InvalidOperation
-from typing import Final, List, Literal, Optional, Union
+from typing import Any, Final, Iterable, List, Literal, Optional, Union
 
 from .._base import DefaultParam
 from .str_util import StrUtil
@@ -31,6 +31,9 @@ class NumberUtil:
     DEFAULT_DIV_SCALE: Final[int] = 10
     # 零
     ZERO: Final[Decimal] = Decimal("0")
+    # Base62 编码常量
+    _BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    _BASE62_REVERSE = {c: i for i, c in enumerate(_BASE62_ALPHABET)}
 
     @staticmethod
     def add(*values: Union[int, float, str, None, Decimal]) -> Decimal:
@@ -718,3 +721,160 @@ class NumberUtil:
         :return: 是否是偶数
         """
         return not NumberUtil.is_odd(num)
+
+    @staticmethod
+    def int_or_default(data: Any, default: int = 0) -> int:
+        """
+        安全地将数据转换为整数，失败时返回默认值。
+
+        支持 int、float、str、list/tuple（取第一个元素）等类型。
+        ``None``、空容器直接返回默认值。
+
+        :param data: 待转换的数据
+        :param default: 转换失败时的默认值，默认 0
+        :return: 整数值
+        """
+        if data is None:
+            return default
+        if isinstance(data, (list, tuple)):
+            if not data:
+                return default
+            return NumberUtil.int_or_default(data[0], default)
+        try:
+            return int(float(data))
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def float_or_default(data: Any, default: float = 0.0) -> float:
+        """
+        安全地将数据转换为浮点数，失败时返回默认值。
+
+        ``None``、空容器直接返回默认值。
+
+        :param data: 待转换的数据
+        :param default: 转换失败时的默认值，默认 0.0
+        :return: 浮点数值
+        """
+        if data is None:
+            return default
+        if isinstance(data, (list, tuple)):
+            if not data:
+                return default
+            return NumberUtil.float_or_default(data[0], default)
+        try:
+            return float(data)
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def avg(data: Iterable) -> float:
+        """
+        计算数值列表的平均值。
+
+        空列表返回 ``0.0``。
+
+        :param data: 数值可迭代对象
+        :return: 平均值
+        """
+        items = list(data)
+        if not items:
+            return 0.0
+        return sum(items) / float(len(items))
+
+    @staticmethod
+    def median(data: Iterable) -> float:
+        """
+        计算数值列表的中位数。
+
+        空列表返回 ``0.0``。
+
+        :param data: 数值可迭代对象
+        :return: 中位数
+        """
+        items = sorted(data)
+        n = len(items)
+        if n == 0:
+            return 0.0
+        if n % 2 == 1:
+            return float(items[n // 2])
+        return (items[n // 2 - 1] + items[n // 2]) / 2.0
+
+    @staticmethod
+    def num_encode(n: int) -> str:
+        """
+        将整数编码为 base62 字符串（字符集：``0-9A-Za-z``）。
+
+        负数会以 ``$`` 前缀表示。
+
+        :param n: 待编码的整数
+        :return: base62 编码字符串
+        """
+        if n < 0:
+            return "$" + NumberUtil.num_encode(-n)
+        alphabet = NumberUtil._BASE62_ALPHABET
+        base = len(alphabet)
+        if n == 0:
+            return alphabet[0]
+        s = []
+        while n > 0:
+            n, r = divmod(n, base)
+            s.append(alphabet[r])
+        return "".join(reversed(s))
+
+    @staticmethod
+    def bytes_to_int(data: bytes) -> int:
+        """
+        将 bytes 按大端序转换为 int。
+
+        :param data: 字节数据
+        :return: 转换后的整数
+
+        ::
+
+            >>> NumberUtil.bytes_to_int(b'\\x00\\x00\\x01\\x00')
+            256
+            >>> NumberUtil.bytes_to_int(b'\\xff')
+            255
+        """
+        return int.from_bytes(data, byteorder="big", signed=False)
+
+    @staticmethod
+    def int_to_bytes(value: int, length: int = 4) -> bytes:
+        """
+        将 int 按大端序转换为指定长度的 bytes。
+
+        :param value: 整数值
+        :param length: 输出 bytes 的长度（字节数），默认 4
+        :return: 字节数据
+
+        ::
+
+            >>> NumberUtil.int_to_bytes(256, 2)
+            b'\\x01\\x00'
+            >>> NumberUtil.int_to_bytes(0, 1)
+            b'\\x00'
+        """
+        if value < 0:
+            raise ValueError("value 必须为非负整数")
+        return value.to_bytes(length, byteorder="big", signed=False)
+
+    @staticmethod
+    def num_decode(s: str) -> int:
+        """
+        将 base62 字符串解码为整数。
+
+        :param s: base62 编码字符串
+        :return: 解码后的整数
+        :raises ValueError: 字符串包含非法字符时
+        """
+        if s.startswith("$"):
+            return -NumberUtil.num_decode(s[1:])
+        reverse = NumberUtil._BASE62_REVERSE
+        base = len(NumberUtil._BASE62_ALPHABET)
+        n = 0
+        for c in s:
+            if c not in reverse:
+                raise ValueError(f"非法 base62 字符: {c!r}")
+            n = n * base + reverse[c]
+        return n

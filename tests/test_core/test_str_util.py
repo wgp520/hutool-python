@@ -298,3 +298,181 @@ class TestStrUtil:
         assert StrUtil.prepend_if_missing("prefile", "pre", "suf") == "prefile"
         assert StrUtil.prepend_if_missing("suffile", "pre", "suf") == "suffile"
         assert StrUtil.prepend_if_missing("file", "pre", "suf") == "prefile"
+
+
+class TestStrUtilOnlyDigits:
+    """测试 only_digits 方法"""
+
+    def test_only_digits_basic(self):
+        """测试基本数字提取"""
+        assert StrUtil.only_digits("abc123def456") == "123456"
+
+    def test_only_digits_all_digits(self):
+        """测试纯数字字符串"""
+        assert StrUtil.only_digits("12345") == "12345"
+
+    def test_only_digits_no_digits(self):
+        """测试无数字字符串"""
+        assert StrUtil.only_digits("abcdef") == ""
+
+    def test_only_digits_empty(self):
+        """测试空字符串"""
+        assert StrUtil.only_digits("") == ""
+
+    def test_only_digits_none(self):
+        """测试 None"""
+        assert StrUtil.only_digits(None) == ""
+
+    def test_only_digits_special_chars(self):
+        """测试特殊字符"""
+        assert StrUtil.only_digits("tel: 138-0000-1234") == "13800001234"
+
+    def test_only_digits_with_spaces(self):
+        """测试带空格"""
+        assert StrUtil.only_digits("1 2 3 4 5") == "12345"
+
+
+class TestStrUtilDeUmlaut:
+    """测试 de_umlaut 方法"""
+
+    def test_de_umlaut_basic(self):
+        """测试基本变音符号转换"""
+        assert StrUtil.de_umlaut("ä") == "ae"
+        assert StrUtil.de_umlaut("ö") == "oe"
+        assert StrUtil.de_umlaut("ü") == "ue"
+        assert StrUtil.de_umlaut("ß") == "ss"
+
+    def test_de_umlaut_uppercase(self):
+        """测试大写变音符号"""
+        assert StrUtil.de_umlaut("Ä") == "Ae"
+        assert StrUtil.de_umlaut("Ö") == "Oe"
+        assert StrUtil.de_umlaut("Ü") == "Ue"
+
+    def test_de_umlaut_in_word(self):
+        """测试单词中的变音符号"""
+        assert StrUtil.de_umlaut("München") == "Muenchen"
+        assert StrUtil.de_umlaut("Straße") == "Strasse"
+
+    def test_de_umlaut_no_umlaut(self):
+        """测试无变音符号"""
+        assert StrUtil.de_umlaut("hello") == "hello"
+
+    def test_de_umlaut_empty(self):
+        """测试空字符串"""
+        assert StrUtil.de_umlaut("") == ""
+
+
+class TestStrUtilNewMethods:
+    """hutoolpy 移植方法测试"""
+
+    # ── 全角半角转换 ──────────────────────────────────────
+
+    def test_full_to_half_width_basic(self):
+        """测试全角转半角"""
+        assert StrUtil.full_to_half_width("Ｈｅｌｌｏ") == "Hello"
+        assert StrUtil.full_to_half_width("１２３") == "123"
+
+    def test_full_to_half_width_space(self):
+        """测试全角空格转半角"""
+        assert StrUtil.full_to_half_width("Ａ　Ｂ") == "A B"
+
+    def test_half_to_full_width_basic(self):
+        """测试半角转全角"""
+        assert StrUtil.half_to_full_width("Hello") == "Ｈｅｌｌｏ"
+        assert StrUtil.half_to_full_width("123") == "１２３"
+
+    def test_half_to_full_width_space(self):
+        """测试半角空格转全角"""
+        assert StrUtil.half_to_full_width("A B") == "Ａ　Ｂ"
+
+    # ── Levenshtein 编辑距离 ──────────────────────────────
+
+    def test_levenshtein_distance_same(self):
+        """测试相同字符串"""
+        assert StrUtil.levenshtein_distance("abc", "abc") == 0
+
+    def test_levenshtein_distance_empty(self):
+        """测试空字符串"""
+        assert StrUtil.levenshtein_distance("", "abc") == 3
+        assert StrUtil.levenshtein_distance("abc", "") == 3
+        assert StrUtil.levenshtein_distance("", "") == 0
+
+    def test_levenshtein_distance_one_edit(self):
+        """测试单次编辑"""
+        assert StrUtil.levenshtein_distance("abc", "abd") == 1  # 替换
+        assert StrUtil.levenshtein_distance("abc", "abcd") == 1  # 插入
+        assert StrUtil.levenshtein_distance("abcd", "abc") == 1  # 删除
+
+    def test_levenshtein_distance_classic(self):
+        """测试经典示例"""
+        assert StrUtil.levenshtein_distance("kitten", "sitting") == 3
+        assert StrUtil.levenshtein_distance("saturday", "sunday") == 3
+
+    # ── 中文过滤 ──────────────────────────────────────────
+
+    def test_filter_chinese_basic(self):
+        """测试移除中文字符"""
+        assert StrUtil.filter_chinese("Hello世界") == "Hello"
+        assert StrUtil.filter_chinese("abc123") == "abc123"
+
+    def test_filter_chinese_all_chinese(self):
+        """测试全中文"""
+        assert StrUtil.filter_chinese("你好世界") == ""
+
+    def test_filter_chinese_empty(self):
+        """测试空字符串"""
+        assert StrUtil.filter_chinese("") == ""
+
+    def test_filter_chinese_punctuations_basic(self):
+        """测试移除标点"""
+        result = StrUtil.filter_chinese_punctuations("Hello, World!")
+        assert "Hello" in result
+        assert "World" in result
+
+    # ── left_space_count ────────────────────────────────────────────
+
+    def test_left_space_count_spaces(self):
+        """测试前导空格计数"""
+        assert StrUtil.left_space_count("  hello") == 2
+
+    def test_left_space_count_tab(self):
+        """测试 Tab 算 4 个空格"""
+        assert StrUtil.left_space_count("\thello") == 4
+
+    def test_left_space_count_mixed(self):
+        """测试混合前导空白"""
+        assert StrUtil.left_space_count(" \t hello") == 6  # 1 space + 1 tab(=4) + 1 space
+
+    def test_left_space_count_none(self):
+        """测试无前导空白"""
+        assert StrUtil.left_space_count("hello") == 0
+
+    def test_left_space_count_empty(self):
+        """测试空字符串"""
+        assert StrUtil.left_space_count("") == 0
+
+    # ── find_all_indices ────────────────────────────────────────────
+
+    def test_find_all_indices_basic(self):
+        """测试查找所有子串位置"""
+        assert StrUtil.find_all_indices("abcabc", "b") == [1, 4]
+
+    def test_find_all_indices_no_match(self):
+        """测试无匹配"""
+        assert StrUtil.find_all_indices("abcabc", "x") == []
+
+    def test_find_all_indices_overlapping(self):
+        """测试重叠子串（非重叠查找）"""
+        assert StrUtil.find_all_indices("aaa", "aa") == [0]
+
+    def test_find_all_indices_empty_text(self):
+        """测试空文本"""
+        assert StrUtil.find_all_indices("", "a") == []
+
+    def test_find_all_indices_empty_sub(self):
+        """测试空子串"""
+        assert StrUtil.find_all_indices("abc", "") == []
+
+    def test_find_all_indices_single(self):
+        """测试单次匹配"""
+        assert StrUtil.find_all_indices("hello world", "world") == [6]

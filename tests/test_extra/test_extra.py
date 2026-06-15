@@ -1,9 +1,7 @@
 import jinja2
 import pytest
 
-from hutool import EmojiUtil
-from hutool import PinyinUtil
-from hutool import TemplateUtil
+from hutool import EmojiUtil, PinyinUtil, TemplateUtil
 
 
 class TestEmojiUtil:

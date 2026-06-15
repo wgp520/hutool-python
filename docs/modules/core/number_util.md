@@ -71,3 +71,50 @@ NumberUtil.is_power_of_two(8) # True
 NumberUtil.divisor(12, 8)     # 4（最大公约数）
 NumberUtil.multiple(3, 4)     # 12（最小公倍数）
 ```
+
+### 安全转换
+
+```python
+# 安全转整数（失败时返回默认值）
+NumberUtil.int_or_default("123")       # 123
+NumberUtil.int_or_default("abc")       # 0
+NumberUtil.int_or_default("abc", -1)   # -1
+NumberUtil.int_or_default(None)        # 0
+
+# 安全转浮点数
+NumberUtil.float_or_default("3.14")    # 3.14
+NumberUtil.float_or_default("abc")     # 0.0
+```
+
+### 统计
+
+```python
+NumberUtil.avg([1, 2, 3, 4, 5])        # 3.0
+NumberUtil.avg([1.5, 2.5, 3.5])        # 2.5
+
+NumberUtil.median([3, 1, 2])           # 2（奇数个取中间）
+NumberUtil.median([1, 2, 3, 4])        # 2.5（偶数个取中间均值）
+```
+
+### 编解码
+
+```python
+# Base62 编解码（0-9, A-Z, a-z）
+NumberUtil.num_encode(0)    # "0"
+NumberUtil.num_encode(35)   # "Z"
+NumberUtil.num_encode(61)   # "z"
+NumberUtil.num_encode(100)  # "1C"
+
+NumberUtil.num_decode("1C")  # 100
+```
+
+### 字节转换
+
+```python
+# bytes → int（大端序）
+NumberUtil.bytes_to_int(b'\x00\x00\x01\x00')  # 256
+
+# int → bytes（大端序）
+NumberUtil.int_to_bytes(256, 2)    # b'\x01\x00'
+NumberUtil.int_to_bytes(1, 4)      # b'\x00\x00\x00\x01'
+```

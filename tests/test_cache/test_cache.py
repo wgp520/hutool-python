@@ -1,10 +1,6 @@
 import time
 
-from hutool import CacheUtil
-from hutool import FIFOCache
-from hutool import LFUCache
-from hutool import LRUCache
-from hutool import TimedCache
+from hutool import CacheUtil, FIFOCache, LFUCache, LRUCache, TimedCache
 
 
 class TestFIFOCache:

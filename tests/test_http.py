@@ -1,6 +1,4 @@
-from hutool import HtmlUtil
-from hutool import HttpRequest
-from hutool import HttpUtil
+from hutool import HtmlUtil, HttpRequest, HttpUtil
 
 
 class TestHttpRequest:

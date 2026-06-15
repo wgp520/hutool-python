@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hutool-python"
-version = "1.0.1"
+version = "1.1.0"
 description = "Python port of Java Hutool utility library"
 readme = "README.md"
 license = {text = "MulanPSL-2.0"}

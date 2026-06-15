@@ -173,8 +173,10 @@ class CollUtil:
         if items is None:
             return {}
         if value_func is None:
+
             def value_func(x):
                 return x
+
         return {key_func(item): value_func(item) for item in items}
 
     @staticmethod
@@ -380,6 +382,38 @@ class CollUtil:
         return max(items)
 
     @staticmethod
+    def safe_min(coll: Iterable):
+        # type: (Iterable) -> Optional[Any]
+        """
+        安全地获取集合最小值，空集合返回 ``None`` 而非抛出异常。
+
+        :param coll: 可迭代集合
+        :return: 最小值，集合为空或为 ``None`` 时返回 ``None``
+        """
+        if coll is None:
+            return None
+        items = list(coll)
+        if not items:
+            return None
+        return min(items)
+
+    @staticmethod
+    def safe_max(coll: Iterable):
+        # type: (Iterable) -> Optional[Any]
+        """
+        安全地获取集合最大值，空集合返回 ``None`` 而非抛出异常。
+
+        :param coll: 可迭代集合
+        :return: 最大值，集合为空或为 ``None`` 时返回 ``None``
+        """
+        if coll is None:
+            return None
+        items = list(coll)
+        if not items:
+            return None
+        return max(items)
+
+    @staticmethod
     def count(coll: Iterable, predicate: Callable) -> int:
         """统计满足条件的元素个数
 
@@ -474,6 +508,30 @@ class CollUtil:
         if coll is None:
             return ""
         return separator.join(str(item) for item in coll)
+
+    @staticmethod
+    def find_duplicates(lst: List[T]) -> List[T]:
+        """
+        查找列表中的重复元素，保留首次出现顺序。
+
+        Examples::
+
+            find_duplicates([1, 2, 3, 2, 4, 3]) -> [2, 3]
+
+        :param lst: 待查找列表
+        :return: 重复元素列表（保序）
+        """
+        if lst is None:
+            return []
+        seen = set()
+        duplicates = []
+        for item in lst:
+            if item in seen:
+                if item not in duplicates:
+                    duplicates.append(item)
+            else:
+                seen.add(item)
+        return duplicates
 
     @staticmethod
     def get_first(coll: Iterable) -> Optional[T]:

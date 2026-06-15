@@ -124,6 +124,42 @@ StrUtil.similar("hello", "hallo")    # 0.8
 StrUtil.similar("hello", "hello")    # 1.0
 ```
 
+### 文本分析
+
+```python
+# 计算前导空白（tab 算 4 个空格）
+StrUtil.left_space_count("    hello")  # 4
+StrUtil.left_space_count("\thello")    # 4
+StrUtil.left_space_count("hello")      # 0
+
+# 查找子串所有出现位置
+StrUtil.find_all_indices("abcabc", "bc")  # [1, 4]
+StrUtil.find_all_indices("hello", "x")    # []
+```
+
+### 安全字符串处理
+
+```python
+# 提取数字
+StrUtil.only_digits("abc123def456")  # "123456"
+
+# 全角/半角转换
+StrUtil.full_to_half_width("Ｈｅｌｌｏ")  # "Hello"
+StrUtil.half_to_full_width("Hello")        # "Ｈｅｌｌｏ"
+
+# 移除中文字符
+StrUtil.filter_chinese("你好World")  # "World"
+
+# 移除中文标点
+StrUtil.filter_chinese_punctuations("你好，World！")  # "你好World"
+
+# 德语变音符号转 ASCII
+StrUtil.de_umlaut("München")  # "Muenchen"
+
+# Levenshtein 编辑距离
+StrUtil.levenshtein_distance("kitten", "sitting")  # 3
+```
+
 ---
 
 ```{note}

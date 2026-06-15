@@ -1,5 +1,4 @@
-from hutool import RuntimeUtil
-from hutool import SystemUtil
+from hutool import RuntimeUtil, SystemUtil
 
 
 class TestSystemUtil:

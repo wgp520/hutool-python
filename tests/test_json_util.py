@@ -95,3 +95,36 @@ class TestJSONUtil:
 
         result = JSONUtil.from_bean(User())
         assert "test" in result
+
+    # ── 键名映射 ──────────────────────────────────────────────
+
+    def test_map_dict_keys(self):
+        """测试递归映射字典键名"""
+        data = {"user_name": "test", "address": {"street_name": "main"}}
+        result = JSONUtil.map_dict_keys(str.upper, data)
+        assert result == {"USER_NAME": "test", "ADDRESS": {"STREET_NAME": "main"}}
+
+    def test_map_dict_keys_nested_list(self):
+        """测试含列表的嵌套字典"""
+        data = {"user_list": [{"first_name": "a"}, {"first_name": "b"}]}
+        result = JSONUtil.map_dict_keys(str.upper, data)
+        assert result == {"USER_LIST": [{"FIRST_NAME": "a"}, {"FIRST_NAME": "b"}]}
+
+    def test_convert_keys_to_camel(self):
+        """测试 snake_case 转 camelCase"""
+        data = {"user_name": "test", "age": 20, "home_address": {"street_name": "main"}}
+        result = JSONUtil.convert_keys_to_camel(data)
+        assert result == {"userName": "test", "age": 20, "homeAddress": {"streetName": "main"}}
+
+    def test_convert_keys_to_snake(self):
+        """测试 camelCase 转 snake_case"""
+        data = {"userName": "test", "age": 20, "homeAddress": {"streetName": "main"}}
+        result = JSONUtil.convert_keys_to_snake(data)
+        assert result == {"user_name": "test", "age": 20, "home_address": {"street_name": "main"}}
+
+    def test_convert_keys_roundtrip(self):
+        """测试键名转换往返"""
+        original = {"user_name": "test", "created_at": {"date_value": "2024-01-01"}}
+        camel = JSONUtil.convert_keys_to_camel(original)
+        back = JSONUtil.convert_keys_to_snake(camel)
+        assert back == original

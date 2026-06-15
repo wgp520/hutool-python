@@ -1,5 +1,3 @@
-
-
 class CreditCodeUtil:
     """统一社会信用代码工具类
 

@@ -49,6 +49,10 @@ FileUtil.write_lines("/path/to/file.txt", ["line1", "line2"])
 # 追加
 FileUtil.append_string("/path/to/file.txt", "追加内容")
 FileUtil.append_lines("/path/to/file.txt", ["追加行"])
+
+# 读取末尾 N 行
+FileUtil.tail("/path/to/file.log", 10)      # 最后 10 行
+FileUtil.tail("/path/to/file.log")           # 最后 10 行（默认）
 ```
 
 ### 复制与移动

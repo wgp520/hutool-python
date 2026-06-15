@@ -1,6 +1,4 @@
-from hutool import CsvUtil
-from hutool import StrBuilder
-from hutool import UnicodeUtil
+from hutool import CsvUtil, StrBuilder, UnicodeUtil
 
 
 class TestUnicodeUtil:

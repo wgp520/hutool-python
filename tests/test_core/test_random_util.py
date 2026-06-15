@@ -63,3 +63,27 @@ class TestRandomUtil:
         assert len(result) == 5
         for c in result:
             assert c in "AB"
+
+    # ── weighted_choice ────────────────────────────────────────
+
+    def test_weighted_choice_basic(self):
+        """测试加权随机选择"""
+        pairs = [(1, "a"), (1, "b"), (8, "c")]
+        counts = {"a": 0, "b": 0, "c": 0}
+        for _ in range(10000):
+            result = RandomUtil.weighted_choice(pairs)
+            counts[result] += 1
+        # c 的权重占 80%，应远多于 a 和 b
+        assert counts["c"] > counts["a"]
+        assert counts["c"] > counts["b"]
+
+    def test_weighted_choice_single(self):
+        """测试单元素"""
+        result = RandomUtil.weighted_choice([(1, "only")])
+        assert result == "only"
+
+    def test_weighted_choice_all_values(self):
+        """测试返回值必须在候选列表中"""
+        pairs = [(1, "x"), (2, "y"), (3, "z")]
+        for _ in range(100):
+            assert RandomUtil.weighted_choice(pairs) in ("x", "y", "z")

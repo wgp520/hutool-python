@@ -30,6 +30,11 @@
 | `VersionUtil` | 版本比较 |
 | `PageUtil` | 分页工具 |
 | `CreditCodeUtil` | 社会信用代码 |
+| `CheckUtil` | 校验码计算（EAN/Verhoeff）及格式校验 |
+| `ConvertUtil` | 类型转换工具 |
+| `ColorUtil` | 颜色格式转换（hex↔rgb） |
+| `ImageUtil` | 图片格式检测（魔数识别） |
+| `UserAgentUtil` | UserAgent 随机生成器 |
 
 ### 集合与 Map
 
@@ -50,6 +55,14 @@
 | `MathUtil` | 数学工具 |
 | `TreeUtil` | 树结构工具 |
 | `FileUtil` / `IoUtil` / `PathUtil` | IO 工具 |
+| `WorkdayUtil` | 工作日计算（中国法定假日） |
+| `MoneyUtil` | 货币计算（元/分转换、税价计算） |
+| `BankUtil` | 银行工具（IBAN 计算与验证） |
+| `IterUtil` | 迭代工具（itertools recipes） |
+| `TimingUtil` | 计时工具（装饰器 + Timer） |
+| `ExecUtil` | 并发执行（线程池/进程池） |
+| `ProfUtil` | 性能分析（cProfile） |
+| `MemoryRepo` | 内存数据仓库（链式查询） |
 
 ```{toctree}
 :hidden:
@@ -117,4 +130,23 @@ math_util
 tree
 io
 ```
+
+```{toctree}
+:hidden:
+:maxdepth: 2
+:caption: v1.1.0 新增
+
+check_util
+workday_util
+money_util
+bank_util
+iter_util
+timing_util
+exec_util
+prof_util
+memory_repo
+convert_util
+color_util
+image_util
+user_agent_util
 ```

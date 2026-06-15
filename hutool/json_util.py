@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 
 class JSONUtil:
@@ -348,3 +348,93 @@ class JSONUtil:
                 raise TypeError(f"无法在路径 '{path}' 上设置值：中间节点类型不支持")
         last_key = keys[-1]
         current[last_key] = value
+
+    # ------------------------------------------------------------------ #
+    #  键名映射
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def map_dict_keys(func: Callable, obj: Any) -> Any:
+        """
+        递归映射 JSON 对象（字典）的所有键名。
+
+        对嵌套的字典和列表递归处理。
+
+        Examples::
+
+            map_dict_keys(str.upper, {"a": 1, "b": {"c": 2}})
+            -> {"A": 1, "B": {"C": 2}}
+
+        :param func: 键名映射函数
+        :param obj: JSON 对象（字典）或列表
+        :return: 映射后的新对象
+        """
+        if isinstance(obj, dict):
+            new_obj = {}
+            for key, value in obj.items():
+                func_key = func(key)
+                if isinstance(value, dict):
+                    new_obj[func_key] = JSONUtil.map_dict_keys(func, value)
+                elif isinstance(value, list):
+                    new_obj[func_key] = JSONUtil.map_list_keys(func, value)
+                else:
+                    new_obj[func_key] = value
+            return new_obj
+        return obj
+
+    @staticmethod
+    def map_list_keys(func: Callable, lst: list) -> list:
+        """
+        递归映射列表中所有字典的键名。
+
+        :param func: 键名映射函数
+        :param lst: 列表
+        :return: 映射后的新列表
+        """
+        result = []
+        for item in lst:
+            if isinstance(item, dict):
+                result.append(JSONUtil.map_dict_keys(func, item))
+            else:
+                result.append(item)
+        return result
+
+    @staticmethod
+    def convert_keys_to_camel(obj: Dict) -> Dict:
+        """
+        将 JSON 对象的所有键名从 ``snake_case`` 转为 ``camelCase``。
+
+        Examples::
+
+            convert_keys_to_camel({"user_name": "Tom", "home_addr": {"zip_code": "100000"}})
+            -> {"userName": "Tom", "homeAddr": {"zipCode": "100000"}}
+
+        :param obj: 字典对象
+        :return: 键名转换后的新字典
+        """
+
+        def _to_camel(key: str) -> str:
+            parts = key.split("_")
+            return parts[0] + "".join(p.title() for p in parts[1:])
+
+        return JSONUtil.map_dict_keys(_to_camel, obj)
+
+    @staticmethod
+    def convert_keys_to_snake(obj: Dict) -> Dict:
+        """
+        将 JSON 对象的所有键名从 ``camelCase`` 转为 ``snake_case``。
+
+        Examples::
+
+            convert_keys_to_snake({"userName": "Tom", "homeAddr": {"zipCode": "100000"}})
+            -> {"user_name": "Tom", "home_addr": {"zip_code": "100000"}}
+
+        :param obj: 字典对象
+        :return: 键名转换后的新字典
+        """
+        _camel_pattern = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+
+        def _to_snake(key: str) -> str:
+            return _camel_pattern.sub("_", key).lower()
+
+        return JSONUtil.map_dict_keys(_to_snake, obj)

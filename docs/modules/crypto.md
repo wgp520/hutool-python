@@ -90,6 +90,18 @@ sign = SignUtil.sign_params(params, "secret_key")
 sign = SignUtil.sort_sign(params, "secret_key")  # 按 key 排序后签名
 ```
 
+## 凯撒密码
+
+简单的字母位移加密，常用于教学和轻量级混淆：
+
+```python
+# 加密
+SecureUtil.caesar_encode("Hello", 3)   # "Khoor"
+
+# 解密
+SecureUtil.caesar_decode("Khoor", 3)   # "Hello"
+```
+
 ## 支持的算法
 
 | 类型 | 算法 |

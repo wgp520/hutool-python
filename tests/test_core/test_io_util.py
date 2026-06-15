@@ -1,5 +1,4 @@
-from hutool import DataSizeUtil
-from hutool import FileNameUtil
+from hutool import DataSizeUtil, FileNameUtil
 
 
 class TestFileNameUtil:

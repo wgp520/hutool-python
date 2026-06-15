@@ -17,6 +17,8 @@ class SecureUtil:
     - RSA（加密/解密/签名/验签）
     """
 
+    _CAESAR_TABLE = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
+
     # ------------------------------------------------------------------ #
     #  内部辅助
     # ------------------------------------------------------------------ #
@@ -318,3 +320,51 @@ class SecureUtil:
             return True
         except Exception:
             return False
+
+    # ------------------------------------------------------------------ #
+    #  凯撒密码
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def caesar_encode(message: str, offset: int) -> str:
+        """
+        凯撒密码加密。
+
+        仅对 ``A-Za-z`` 字母字符进行移位，其他字符保持不变。
+        使用交替大小写的字母表（AaBbCc...Zz，共 52 个字符）。
+
+        Examples::
+
+            caesar_encode("Hello", 1) -> "Ifmmp"
+
+        :param message: 明文
+        :param offset: 移位量（正整数）
+        :return: 密文
+        """
+        table = SecureUtil._CAESAR_TABLE
+        length = len(table)
+        chars = []
+        for ch in message:
+            if ch in table:
+                idx = table.index(ch)
+                chars.append(table[(idx + offset) % length])
+            else:
+                chars.append(ch)
+        return "".join(chars)
+
+    @staticmethod
+    def caesar_decode(message: str, offset: int) -> str:
+        """
+        凯撒密码解密。
+
+        与 :meth:`caesar_encode` 配对使用。
+
+        Examples::
+
+            caesar_decode("Ifmmp", 1) -> "Hello"
+
+        :param message: 密文
+        :param offset: 移位量（与加密时相同）
+        :return: 明文
+        """
+        return SecureUtil.caesar_encode(message, -offset)

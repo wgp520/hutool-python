@@ -100,13 +100,106 @@ DateUtil.between_year(start, end)   # 0
 DateUtil.format_between(start, end) # "2个月14天"
 ```
 
-### 比较
+### 截断
 
 ```python
-dt1 = DateUtil.parse("2024-01-01")
-dt2 = DateUtil.parse("2024-01-01 12:00:00")
+from datetime import date, datetime
 
-DateUtil.is_same_day(dt1, dt2)      # True
-DateUtil.is_same_time(dt1, dt2)     # False
-DateUtil.is_leap_year(2024)         # True
+# 截断到天/月/年/季度/周/小时
+DateUtil.date_trunc("day", datetime(2024, 3, 15, 14, 30))
+# datetime(2024, 3, 15, 0, 0)
+
+DateUtil.date_trunc("month", date(2024, 3, 15))
+# date(2024, 3, 1)
+
+DateUtil.date_trunc("year", date(2024, 6, 15))
+# date(2024, 1, 1)
+
+DateUtil.date_trunc("quarter", date(2024, 5, 15))
+# date(2024, 4, 1)
+
+DateUtil.date_trunc("week", date(2024, 3, 15))
+# date(2024, 3, 11)（周一）
+```
+
+### 时间跨度
+
+```python
+# 获取周号
+DateUtil.get_week(date(2024, 1, 1))  # (1, 2024)
+
+# 获取月首末日
+first, last = DateUtil.get_monthspan(date(2024, 3, 15))
+# first=date(2024, 3, 1), last=date(2024, 3, 31)
+
+# 获取周首末日
+monday, sunday = DateUtil.get_weekspan(date(2024, 3, 15))
+# monday=date(2024, 3, 11), sunday=date(2024, 3, 17)
+
+# 获取季度首末日
+first, last = DateUtil.get_quarterspan(date(2024, 5, 15))
+# first=date(2024, 4, 1), last=date(2024, 6, 30)
+
+# 获取年首末日
+first, last = DateUtil.get_yearspan(date(2024, 6, 15))
+# first=date(2024, 1, 1), last=date(2024, 12, 31)
+```
+
+### 月份加减
+
+```python
+DateUtil.month_add(date(2024, 1, 15), 1)    # date(2024, 2, 15)
+DateUtil.month_add(date(2024, 1, 31), 1)    # date(2024, 2, 29)（月末溢出）
+DateUtil.month_add(date(2024, 3, 15), -2)   # date(2024, 1, 15)
+DateUtil.month_add(date(2024, 11, 15), 3)   # date(2025, 2, 15)（跨年）
+```
+
+### RFC 格式
+
+```python
+from datetime import datetime
+
+# RFC 3339
+DateUtil.rfc3339_date(datetime(2024, 3, 15, 14, 30))  # "2024-03-15T14:30:00+08:00"
+DateUtil.rfc3339_date_parse("2024-03-15T14:30:00")     # datetime 对象
+
+# RFC 2616（HTTP 头日期格式）
+DateUtil.rfc2616_date(datetime(2024, 3, 15, 14, 30))   # "Fri, 15 Mar 2024 14:30:00 GMT"
+DateUtil.rfc2616_date_parse("Fri, 15 Mar 2024 14:30:00 GMT")  # datetime 对象
+```
+
+### 通用转换
+
+```python
+# 字符串 → date
+DateUtil.convert_to_date("2024-03-15")          # date(2024, 3, 15)
+DateUtil.convert_to_date(datetime(2024, 3, 15)) # date(2024, 3, 15)
+
+# 字符串 → datetime
+DateUtil.convert_to_datetime("2024-03-15 14:30:00")  # datetime 对象
+DateUtil.convert_to_datetime("20240315")              # datetime 对象
+DateUtil.convert_to_datetime(date(2024, 3, 15))       # datetime 对象
+```
+
+### 实用方法
+
+```python
+import time
+
+# 根据生日计算年龄
+DateUtil.age_by_birthday("1990-06-15")          # 34
+DateUtil.age_by_birthday(date(1990, 6, 15))     # 34
+
+# 判断同月/同周
+DateUtil.is_same_month(date(2024, 3, 1), date(2024, 3, 31))  # True
+DateUtil.is_same_week(date(2024, 1, 15), date(2024, 1, 17))  # True
+
+# 相对时间
+DateUtil.time_ago(time.time())           # "刚刚"
+DateUtil.time_ago(time.time() - 300)     # "5分钟前"
+DateUtil.time_ago(time.time() - 7200)    # "2小时前"
+DateUtil.time_ago(time.time() - 86400*3) # "3天前"
+
+# ISO 时间戳
+DateUtil.iso_timestamp()  # "2024-01-01T12:00:00.000Z"
 ```

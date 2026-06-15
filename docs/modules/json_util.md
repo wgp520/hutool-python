@@ -97,3 +97,24 @@ JSONUtil.format_json('{"a":1,"b":2}')
 JSONUtil.compress('{\n  "a": 1,\n  "b": 2\n}')
 # '{"a":1,"b":2}'
 ```
+
+### 键名映射
+
+```python
+# 递归映射字典键名
+data = {"user_name": "test", "user_info": {"home_address": "NYC"}}
+JSONUtil.map_dict_keys(data, lambda k: k.upper())
+# {"USER_NAME": "test", "USER_INFO": {"HOME_ADDRESS": "NYC"}}
+
+# 映射列表中每个字典的键名
+items = [{"item_name": "a"}, {"item_name": "b"}]
+JSONUtil.map_list_keys(items, lambda k: k.upper())
+
+# snake_case → camelCase
+JSONUtil.convert_keys_to_camel({"user_name": "test"})
+# {"userName": "test"}
+
+# camelCase → snake_case
+JSONUtil.convert_keys_to_snake({"userName": "test"})
+# {"user_name": "test"}
+```

@@ -1106,3 +1106,412 @@ class DateUtil:
         :return: 经过的毫秒数。
         """
         return int(_time.time() * 1000) - pre_time
+
+    @staticmethod
+    def date_trunc(trunc_type: str, dt: Union[datetime, date]) -> Union[datetime, date]:
+        """
+        截断日期到指定精度。
+
+        受 PostgreSQL 的 ``date_trunc`` 函数启发。
+        支持的截断类型：``year``、``quarter``、``month``、``week``、``day``、``hour``、``minute``、``second``。
+
+        :param trunc_type: 截断类型
+        :param dt: 日期或日期时间对象
+        :return: 截断后的日期/日期时间对象（类型与输入一致）
+        :raises ValueError: 不支持的截断类型时
+        """
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        tmp = dt.timetuple()
+
+        if trunc_type == "year":
+            ret = datetime(tmp.tm_year, 1, 1)
+        elif trunc_type == "quarter":
+            q = (tmp.tm_mon - 1) // 3
+            ret = datetime(tmp.tm_year, q * 3 + 1, 1)
+        elif trunc_type == "month":
+            ret = datetime(tmp.tm_year, tmp.tm_mon, 1)
+        elif trunc_type == "week":
+            firstday = dt - timedelta(days=tmp.tm_wday)
+            ret = datetime(firstday.year, firstday.month, firstday.day)
+        elif trunc_type == "day":
+            ret = datetime(tmp.tm_year, tmp.tm_mon, tmp.tm_mday)
+        elif trunc_type == "hour":
+            ret = datetime(tmp.tm_year, tmp.tm_mon, tmp.tm_mday, tmp.tm_hour)
+        elif trunc_type == "minute":
+            ret = datetime(tmp.tm_year, tmp.tm_mon, tmp.tm_mday, tmp.tm_hour, tmp.tm_min)
+        elif trunc_type == "second":
+            ret = datetime(tmp.tm_year, tmp.tm_mon, tmp.tm_mday, tmp.tm_hour, tmp.tm_min, tmp.tm_sec)
+        else:
+            raise ValueError(f"不支持的截断类型: {trunc_type}")
+
+        return ret.date() if is_date_only else ret
+
+    @staticmethod
+    def get_week(dt: Union[datetime, date]):
+        """
+        获取日期所在年周号。
+
+        返回 ``(week_number, year)`` 元组，其中 ``week_number`` 为周号，
+        ``year`` 为该周所属的年份（跨年时可能与 ``dt.year`` 不同）。
+
+        :param dt: 日期或日期时间对象
+        :return: ``(week_number, year)`` 元组
+        """
+        # 截断到周
+        week_start = DateUtil.date_trunc("week", dt)
+        year_start_week = DateUtil.date_trunc("week", DateUtil.date_trunc("year", dt))
+        # 如果年份第一个周一在下一年（如 1 月 1 日是周二~周日），则调整
+        if year_start_week.year < dt.year:
+            year_start_week = year_start_week + timedelta(weeks=1)
+        # 如果 week_start 与 year_start_week 在同一年但跨年了
+        if week_start.year > dt.year:
+            return 1, week_start.year
+        if week_start.year < dt.year:
+            diff = DateUtil.date_trunc("day", week_start) - DateUtil.date_trunc(
+                "day", DateUtil.date_trunc("week", DateUtil.date_trunc("year", week_start))
+            )
+            return 1 + diff.days // 7, week_start.year
+        diff = DateUtil.date_trunc("day", week_start) - DateUtil.date_trunc("day", year_start_week)
+        week = 1 + diff.days // 7
+        return week, dt.year
+
+    @staticmethod
+    def get_monthspan(dt: Union[datetime, date]):
+        """
+        获取日期所在月的首日和末日。
+
+        :param dt: 日期或日期时间对象
+        :return: ``(首日, 末日)`` 元组，类型与输入一致
+        """
+        import calendar as _cal
+
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        first = datetime(dt.year, dt.month, 1)
+        _, last_day = _cal.monthrange(dt.year, dt.month)
+        last = datetime(dt.year, dt.month, last_day)
+        if is_date_only:
+            return first.date(), last.date()
+        return first, last
+
+    @staticmethod
+    def get_weekspan(dt: Union[datetime, date]):
+        """
+        获取日期所在周的周一和周日。
+
+        :param dt: 日期或日期时间对象
+        :return: ``(周一, 周日)`` 元组，类型与输入一致
+        """
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        monday = dt - timedelta(days=dt.weekday())
+        sunday = monday + timedelta(days=6)
+        first = datetime(monday.year, monday.month, monday.day)
+        last = datetime(sunday.year, sunday.month, sunday.day)
+        if is_date_only:
+            return first.date(), last.date()
+        return first, last
+
+    @staticmethod
+    def get_quarterspan(dt: Union[datetime, date]):
+        """
+        获取日期所在季度的首日和末日。
+
+        :param dt: 日期或日期时间对象
+        :return: ``(首日, 末日)`` 元组，类型与输入一致
+        """
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        q = (dt.month - 1) // 3
+        start = datetime(dt.year, q * 3 + 1, 1)
+        # 季度末日 = 下季度首日 - 1 天
+        if q == 3:
+            end = datetime(dt.year, 12, 31)
+        else:
+            end = datetime(dt.year, (q + 1) * 3 + 1, 1) - timedelta(days=1)
+        if is_date_only:
+            return start.date(), end.date()
+        return start, end
+
+    @staticmethod
+    def get_yearspan(dt: Union[datetime, date]):
+        """
+        获取日期所在年的首日和末日。
+
+        :param dt: 日期或日期时间对象
+        :return: ``(首日, 末日)`` 元组，类型与输入一致
+        """
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        start = datetime(dt.year, 1, 1)
+        end = datetime(dt.year, 12, 31)
+        if is_date_only:
+            return start.date(), end.date()
+        return start, end
+
+    @staticmethod
+    def month_add(dt: Union[datetime, date], months: int) -> Union[datetime, date]:
+        """
+        日期加减指定月数。
+
+        自动处理月末溢出（如 1月31日 + 1月 = 2月28日）。
+
+        :param dt: 日期或日期时间对象
+        :param months: 加减月数（正数为加，负数为减）
+        :return: 新的日期/日期时间对象
+        """
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        year, month = divmod(dt.year * 12 + dt.month + months - 1, 12)
+        month += 1
+        import calendar as _cal
+
+        max_day = _cal.monthrange(year, month)[1]
+        day = min(dt.day, max_day)
+        if is_date_only:
+            return date(year, month, day)
+        return datetime(year, month, day, dt.hour, dt.minute, dt.second, dt.microsecond)
+
+    @staticmethod
+    def rfc3339_date(dt: Optional[datetime] = None) -> str:
+        """
+        格式化为 RFC 3339 日期字符串。
+
+        例如 ``"2024-01-15T08:30:00Z"``。
+
+        :param dt: 日期时间对象，为 None 时使用当前时间
+        :return: RFC 3339 格式字符串
+        """
+        dt = dt or datetime.now()
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    @staticmethod
+    def rfc3339_date_parse(date_str: str) -> datetime:
+        """
+        解析 RFC 3339 日期字符串为 datetime 对象。
+
+        :param date_str: RFC 3339 格式字符串，如 ``"2024-01-15T08:30:00Z"``
+        :return: datetime 对象
+        :raises ValueError: 格式不合法时
+        """
+        date_str = date_str.rstrip("Z")
+        return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+
+    @staticmethod
+    def rfc2616_date(dt: Optional[datetime] = None) -> str:
+        """
+        格式化为 RFC 2616 (HTTP) 日期字符串。
+
+        例如 ``"Mon, 15 Jan 2024 08:30:00 GMT"``。
+
+        :param dt: 日期时间对象，为 None 时使用当前时间
+        :return: RFC 2616 格式字符串
+        """
+        import calendar as _cal
+        import email.utils as _eu
+
+        dt = dt or datetime.now()
+        timestamp = _cal.timegm(dt.timetuple())
+        return _eu.formatdate(timeval=timestamp, usegmt=True)
+
+    @staticmethod
+    def rfc2616_date_parse(date_str: str) -> datetime:
+        """
+        解析 RFC 2616 (HTTP) 日期字符串为 datetime 对象。
+
+        :param date_str: RFC 2616 格式字符串
+        :return: datetime 对象
+        :raises ValueError: 格式不合法时
+        """
+        import email.utils as _eu
+
+        timestamp = _eu.mktime_tz(_eu.parsedate_tz(date_str))
+        return datetime.fromtimestamp(timestamp)
+
+    @staticmethod
+    def age_by_birthday(birthday: Union[str, date, datetime]) -> int:
+        """
+        根据生日计算年龄。
+
+        :param birthday: 生日，支持 str（``YYYY-MM-DD`` 或 ``YYYYMMDD``）、date、datetime
+        :return: 年龄（周岁）
+        :raises ValueError: 无法解析生日时
+        """
+        if isinstance(birthday, str):
+            birthday = DateUtil.convert_to_date(birthday)
+        if isinstance(birthday, datetime):
+            bd = birthday.date()
+        elif isinstance(birthday, date):
+            bd = birthday
+        else:
+            raise TypeError(f"不支持的类型: {type(birthday)}")
+        today = date.today()
+        age = today.year - bd.year
+        if (today.month, today.day) < (bd.month, bd.day):
+            age -= 1
+        return age
+
+    @staticmethod
+    def is_same_month(dt1: Union[DateTime, datetime, date], dt2: Union[DateTime, datetime, date]) -> bool:
+        """
+        判断两个日期是否在同一月（同年同月）。
+
+        :param dt1: 第一个日期
+        :param dt2: 第二个日期
+        :return: 是否在同一月
+        """
+        d1 = dt1.date() if isinstance(dt1, datetime) and not isinstance(dt1, date) else dt1
+        d2 = dt2.date() if isinstance(dt2, datetime) and not isinstance(dt2, date) else dt2
+        if isinstance(d1, DateTime):
+            d1 = d1.to_date()
+        if isinstance(d2, DateTime):
+            d2 = d2.to_date()
+        return d1.year == d2.year and d1.month == d2.month
+
+    @staticmethod
+    def is_same_week(dt1: Union[DateTime, datetime, date], dt2: Union[DateTime, datetime, date]) -> bool:
+        """
+        判断两个日期是否在同一周（ISO 周，周一为一周起始）。
+
+        :param dt1: 第一个日期
+        :param dt2: 第二个日期
+        :return: 是否在同一周
+        """
+        d1 = dt1.date() if isinstance(dt1, datetime) and not isinstance(dt1, date) else dt1
+        d2 = dt2.date() if isinstance(dt2, datetime) and not isinstance(dt2, date) else dt2
+        if isinstance(d1, DateTime):
+            d1 = d1.to_date()
+        if isinstance(d2, DateTime):
+            d2 = d2.to_date()
+        return d1.isocalendar()[:2] == d2.isocalendar()[:2]
+
+    @staticmethod
+    def time_ago(timestamp: Union[int, float]) -> str:
+        """
+        将时间戳转换为人类可读的相对时间描述。
+
+        例如 ``"3天前"``、``"2小时前"``。
+
+        :param timestamp: Unix 时间戳（秒级）
+        :return: 中文相对时间描述
+
+        ::
+
+            >>> DateUtil.time_ago(time.time())     # 刚刚
+            '刚刚'
+        """
+        now = _time.time()
+        diff = now - timestamp
+        if diff < 0:
+            return "刚刚"
+        seconds = int(diff)
+        if seconds < 60:
+            return "刚刚"
+        minutes = seconds // 60
+        if minutes < 60:
+            return f"{minutes}分钟前"
+        hours = minutes // 60
+        if hours < 24:
+            return f"{hours}小时前"
+        days = hours // 24
+        if days < 30:
+            return f"{days}天前"
+        months = days // 30
+        if months < 12:
+            return f"{months}个月前"
+        years = days // 365
+        return f"{years}年前"
+
+    @staticmethod
+    def iso_timestamp() -> str:
+        """
+        获取当前 ISO 8601 格式的时间戳字符串。
+
+        格式为 ``YYYY-MM-DDTHH:MM:SS.mmmZ``。
+
+        :return: ISO 8601 时间戳字符串
+
+        ::
+
+            >>> DateUtil.iso_timestamp()  # doctest: +SKIP
+            '2024-01-01T12:00:00.000Z'
+        """
+        from datetime import datetime as _dt
+        from datetime import timezone as _tz
+
+        now = _dt.now(_tz.utc)
+        return now.strftime("%Y-%m-%dT%H:%M:%S.") + f"{now.microsecond // 1000:03d}Z"
+
+    @staticmethod
+    def convert_to_date(value) -> Optional[date]:
+        """
+        将各种日期格式统一转换为 ``date`` 对象。
+
+        支持：``datetime``、``date``、``str``（ISO 格式或 ``YYYYMMDD``）。
+
+        :param value: 待转换的值
+        :return: date 对象，输入为 None/空时返回 None
+        :raises ValueError: 无法识别的格式时
+        """
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, date):
+            return value
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return None
+            # 尝试 YYYY-MM-DD
+            if len(value) >= 10:
+                try:
+                    return datetime.strptime(value[:10], "%Y-%m-%d").date()
+                except ValueError:
+                    pass
+            # 尝试 YYYYMMDD
+            if len(value) >= 8:
+                try:
+                    return datetime.strptime(value[:8], "%Y%m%d").date()
+                except ValueError:
+                    pass
+        raise ValueError(f"无法识别的日期格式: {value!r}")
+
+    @staticmethod
+    def convert_to_datetime(value) -> Optional[datetime]:
+        """
+        将各种日期格式统一转换为 ``datetime`` 对象。
+
+        支持：``datetime``、``date``、``str``（多种 ISO 格式）。
+
+        :param value: 待转换的值
+        :return: datetime 对象，输入为 None/空时返回 None
+        :raises ValueError: 无法识别的格式时
+        """
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, date):
+            return datetime(value.year, value.month, value.day)
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return None
+            # 移除 Z 后缀
+            if value.endswith("Z"):
+                value = value[:-1]
+            # 移除时区后缀（如 +0000）
+            if " +" in value:
+                value = value.split(" +")[0]
+            # 各种格式尝试
+            for fmt in (
+                "%Y-%m-%dT%H:%M:%S.%f",
+                "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%d %H:%M:%S.%f",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M",
+                "%Y-%m-%d",
+                "%Y%m%dT%H%M%S",
+                "%Y%m%d",
+            ):
+                try:
+                    return datetime.strptime(value, fmt)
+                except ValueError:
+                    continue
+        raise ValueError(f"无法识别的日期时间格式: {value!r}")

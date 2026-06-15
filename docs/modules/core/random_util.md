@@ -40,3 +40,11 @@ RandomUtil.random_eles(items, 2)       # 随机选两个
 ```python
 RandomUtil.random_color()              # "#a1b2c3"（随机十六进制颜色）
 ```
+
+### 加权随机
+
+```python
+# 按权重随机选择
+RandomUtil.weighted_choice(["a", "b", "c"], [1, 2, 3])
+# "c" 出现概率最高（权重 3/6）
+```

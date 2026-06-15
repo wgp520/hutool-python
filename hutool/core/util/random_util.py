@@ -3,7 +3,7 @@ import secrets
 import string
 import sys
 from datetime import datetime, timedelta
-from typing import List, Optional, Sequence, TypeVar
+from typing import Any, List, Optional, Sequence, Tuple, TypeVar
 
 T = TypeVar("T")
 
@@ -193,3 +193,32 @@ class RandomUtil:
         delta = end - start
         random_seconds = random.uniform(0, delta.total_seconds())
         return start + timedelta(seconds=random_seconds)
+
+    @staticmethod
+    def weighted_choice(pairs: List[Tuple[int, Any]]) -> Any:
+        """
+        根据权重随机选择。
+
+        *pairs* 为 ``(weight, value)`` 列表，权重越大被选中的概率越高。
+
+        Examples::
+
+            weighted_choice([(1, "a"), (3, "b"), (6, "c")])
+            # "c" 被选中的概率为 60%
+
+        :param pairs: 权重-值对列表，如 ``[(1, "a"), (3, "b")]``
+        :return: 随机选中的值
+        :raises ValueError: pairs 为空或权重和为 0
+        """
+        if not pairs:
+            raise ValueError("pairs 不能为空")
+        total = sum(w for w, _ in pairs)
+        if total <= 0:
+            raise ValueError("权重总和必须大于 0")
+        r = random.randint(1, total)
+        for weight, value in pairs:
+            r -= weight
+            if r <= 0:
+                return value
+        # 不应到达此处
+        return pairs[-1][1]

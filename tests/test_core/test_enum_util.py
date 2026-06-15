@@ -1,8 +1,6 @@
 from enum import Enum
 
-from hutool import ClassUtil
-from hutool import EnumUtil
-from hutool import ReflectUtil
+from hutool import ClassUtil, EnumUtil, ReflectUtil
 
 
 class Color(Enum):

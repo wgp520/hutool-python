@@ -2070,6 +2070,218 @@ class CharSequenceUtil:
             return False
         return string.isalpha() and string.islower()  # type: ignore[union-attr]
 
+    @staticmethod
+    def only_digits(string: Optional[str]) -> str:
+        """
+        移除字符串中所有非数字字符，仅保留数字。
+
+        :param string: 源字符串
+        :return: 仅包含数字的字符串，输入为 None 时返回空字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return ""
+        return re.sub(r"[^0-9]", "", string)  # type: ignore[arg-type]
+
+    @staticmethod
+    def de_umlaut(text: str) -> str:
+        """
+        将德语变音符号（äöüß等）转换为 ASCII 等价形式。
+
+        例如 ``ä`` → ``ae``，``ö`` → ``oe``，``ü`` → ``ue``，``ß`` → ``ss``。
+
+        :param text: 包含德语变音符号的文本
+        :return: 转换后的 ASCII 文本
+        :raises ValueError: 文本无法转换为 ASCII 时
+        """
+        import unicodedata as _ud
+
+        _replacements = {
+            "ä": "ae",  # ä
+            "ö": "oe",  # ö
+            "ü": "ue",  # ü
+            "Ä": "Ae",  # Ä
+            "Ö": "Oe",  # Ö
+            "Ü": "Ue",  # Ü
+            "ß": "ss",  # ß
+        }
+        for src, dst in _replacements.items():
+            text = text.replace(src, dst)
+        # 使用 NFKD 分解并去除组合字符
+        text = _ud.normalize("NFKD", text)
+        return text.encode("ascii", "ignore").decode("ascii")
+
+    # ------------------------------------------------------------------
+    # 全角半角转换
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def full_to_half_width(text: str) -> str:
+        """
+        将全角字符转换为半角字符。
+
+        仅转换 ASCII 可见字符范围（0x21~0x7E）和全角空格（0x3000）。
+
+        Examples::
+
+            "ＨｅｌｌｏＷｏｒｌｄ" -> "HelloWorld"
+            "１２３" -> "123"
+
+        :param text: 包含全角字符的文本
+        :return: 转换后的半角文本
+        """
+        _FULL2HALF = dict((i + 0xFEE0, i) for i in range(0x21, 0x7F))
+        _FULL2HALF[0x3000] = 0x20
+        return text.translate(_FULL2HALF)
+
+    @staticmethod
+    def half_to_full_width(text: str) -> str:
+        """
+        将半角字符转换为全角字符。
+
+        仅转换 ASCII 可见字符范围（0x21~0x7E）和空格（0x20）。
+
+        Examples::
+
+            "Hello" -> "Ｈｅｌｌｏ"
+            "123" -> "１２３"
+
+        :param text: 包含半角字符的文本
+        :return: 转换后的全角文本
+        """
+        _HALF2FULL = dict((i, i + 0xFEE0) for i in range(0x21, 0x7F))
+        _HALF2FULL[0x20] = 0x3000
+        return text.translate(_HALF2FULL)
+
+    # ------------------------------------------------------------------
+    # Levenshtein 编辑距离
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def levenshtein_distance(s: str, t: str) -> int:
+        """
+        计算两个字符串的 Levenshtein 编辑距离。
+
+        编辑距离是指将一个字符串变换为另一个字符串所需的最少
+        单字符编辑（插入、删除、替换）操作数。
+
+        :param s: 第一个字符串
+        :param t: 第二个字符串
+        :return: 编辑距离（非负整数）
+        """
+        m, n = len(s), len(t)
+        if m == 0:
+            return n
+        if n == 0:
+            return m
+
+        # 使用两行滚动数组优化空间
+        prev = list(range(n + 1))
+        curr = [0] * (n + 1)
+
+        for i in range(m):
+            curr[0] = i + 1
+            for j in range(n):
+                cost = 0 if s[i] == t[j] else 1
+                curr[j + 1] = min(
+                    curr[j] + 1,  # 插入
+                    prev[j + 1] + 1,  # 删除
+                    prev[j] + cost,  # 替换
+                )
+            prev, curr = curr, prev
+
+        return prev[n]
+
+    # ------------------------------------------------------------------
+    # 中文字符/标点过滤
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def filter_chinese(text: str) -> str:
+        """
+        移除字符串中的所有中文字符（Unicode 范围 ``\\u4e00-\\u9fa5``）。
+
+        :param text: 源字符串
+        :return: 移除中文字符后的字符串
+        """
+        return re.sub(r"[一-龥]", "", text)
+
+    @staticmethod
+    def filter_chinese_punctuations(text: str) -> str:
+        """
+        移除字符串中的中英文标点符号和多余空白。
+
+        移除范围包括：英文标点 ``!@#$%^&*()`` 等，中文标点
+        ``！，。？、（）：；《》""`` 等，以及制表符。
+
+        :param text: 源字符串
+        :return: 移除标点后的字符串
+        """
+        return re.sub(
+            r"[+.!/_,$%^*(\"\'\-]+|"
+            r"[、-〃〈-】〔-〟〽゠・！-／"
+            r"：-＠［-｀｛-･ -⁯⸀-⹿"
+            r"¡-¿‐-‧‰-⁞]+",
+            "",
+            text,
+        )
+
+    @staticmethod
+    def left_space_count(text: str) -> int:
+        """
+        计算字符串前导空白字符数。
+
+        空格计 1，Tab 计 4。
+
+        :param text: 待检查的字符串
+        :return: 前导空白字符数（等效空格数）
+
+        ::
+
+            >>> StrUtil.left_space_count('  hello')
+            2
+            >>> StrUtil.left_space_count('\\thello')
+            4
+        """
+        count = 0
+        for ch in text:
+            if ch == " ":
+                count += 1
+            elif ch == "\t":
+                count += 4
+            else:
+                break
+        return count
+
+    @staticmethod
+    def find_all_indices(text: str, sub: str) -> List[int]:
+        """
+        查找子串在文本中所有出现的起始索引。
+
+        无匹配时返回空列表。
+
+        :param text: 待搜索的文本
+        :param sub: 待查找的子串
+        :return: 起始索引列表
+
+        ::
+
+            >>> StrUtil.find_all_indices('abcabc', 'b')
+            [1, 4]
+            >>> StrUtil.find_all_indices('abcabc', 'x')
+            []
+        """
+        if CharSequenceUtil.is_empty(text) or CharSequenceUtil.is_empty(sub):
+            return []
+        indices: List[int] = []
+        start = 0
+        while True:
+            idx = text.find(sub, start)
+            if idx == -1:
+                break
+            indices.append(idx)
+            start = idx + len(sub)
+        return indices
+
 
 # ---------------------------------------------------------------------------
 # StrPool

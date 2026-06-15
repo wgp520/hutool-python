@@ -753,6 +753,43 @@ class FileUtil:
         return Path(path).is_symlink()
 
     @staticmethod
+    def tail(path: Union[str, Path], lines: int = 10) -> List[str]:
+        """
+        读取文件最后 N 行。
+
+        使用反向读取实现，不会将整个文件加载到内存。
+
+        :param path: 文件路径
+        :param lines: 返回的行数，默认 10
+        :return: 最后 N 行的列表（不含行尾换行符）
+
+        ::
+
+            >>> FileUtil.tail('/path/to/file.log', 5)   # doctest: +SKIP
+            ['line96', 'line97', 'line98', 'line99', 'line100']
+        """
+        if not Path(path).is_file():
+            raise FileNotFoundError(f"文件不存在: {path}")
+        result: List[str] = []
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            file_size = f.tell()
+            if file_size == 0:
+                return []
+            # 从文件末尾往前读
+            buffer = b""
+            pos = file_size
+            while pos > 0 and len(result) < lines + 1:
+                read_size = min(8192, pos)
+                pos -= read_size
+                f.seek(pos)
+                chunk = f.read(read_size)
+                buffer = chunk + buffer
+                result = buffer.decode("utf-8", errors="replace").splitlines()
+        # 取最后 N 行
+        return result[-lines:] if len(result) >= lines else result
+
+    @staticmethod
     def sub_path(path: Union[str, Path], start: int, end: int) -> str:
         """获取子路径
 

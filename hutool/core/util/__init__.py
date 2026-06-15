@@ -3,6 +3,7 @@
 from .array_util import ArrayUtil
 from .boolean_util import BooleanUtil
 from .charset_util import CharsetUtil
+from .check_util import CheckUtil
 from .class_util import ClassUtil
 from .coordinate_util import CoordinateUtil
 from .credit_code_util import CreditCodeUtil
@@ -35,6 +36,7 @@ __all__ = [
     "CharSequenceUtil",
     "CharUtil",
     "CharsetUtil",
+    "CheckUtil",
     "ClassUtil",
     "CoordinateUtil",
     "CreditCodeUtil",

@@ -25,4 +25,8 @@ EscapeUtil.unescape_xml('&lt;root&gt;content&lt;/root&gt;')
 
 # SQL 转义
 EscapeUtil.escape_sql("it's a test")  # "it''s a test"
+
+# HTML 实体反转义
+EscapeUtil.unescape_html_chars("&lt;div&gt;hello&lt;/div&gt;")
+# '<div>hello</div>'
 ```

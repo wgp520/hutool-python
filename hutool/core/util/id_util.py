@@ -90,6 +90,73 @@ class IdUtil:
         return _SnowflakeWorkerPool.get(worker_id, datacenter_id).next_id()
 
     @staticmethod
+    def unique_machine_id() -> int:
+        """
+        生成机器唯一 ID（64 位整数）。
+
+        基于当前时间戳（毫秒）、进程 ID 和原子计数器组合生成，
+        在同一进程内保证唯一性。
+
+        :return: 64 位整数 ID
+        """
+        import os
+        import threading
+
+        # 使用模块级计数器，线程安全
+        if not hasattr(IdUtil, "_machine_counter"):
+            IdUtil._machine_counter = 0
+            IdUtil._machine_lock = threading.Lock()
+
+        with IdUtil._machine_lock:
+            IdUtil._machine_counter = (IdUtil._machine_counter + 1) & 0xFFFF
+            counter = IdUtil._machine_counter
+
+        timestamp = int(time.time() * 1000) & 0x1FFFFFFFFFF  # 41 bits
+        pid = os.getpid() & 0xFFFF  # 16 bits
+        return (timestamp << 23) | (pid << 7) | (counter & 0x7F)
+
+    @staticmethod
+    def guid128(salt=None):
+        # type: (Optional[str]) -> str
+        """
+        生成 26 字符的全局唯一 ID。
+
+        使用 Base32 编码（Crockford 方案：0-9A-HJKMNP-TV-Z），
+        由时间戳 + 随机字节 + 可选盐值哈希组成，保证全局唯一。
+
+        :param salt: 可选盐值字符串，相同盐值会增加差异性
+        :return: 26 字符的全局唯一 ID 字符串
+        """
+        import hashlib
+
+        # Crockford Base32 字典（去除易混淆字符 I/L/O/U）
+        _BASE32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+
+        # 时间戳部分（8 字节）
+        ts = int(time.time() * 1000)
+        ts_bytes = ts.to_bytes(8, byteorder="big")
+
+        # 随机部分（8 字节）
+        rand_bytes = secrets.token_bytes(8)
+
+        # 如果有盐值，将其混入随机部分
+        if salt is not None:
+            salt_hash = hashlib.md5(salt.encode("utf-8")).digest()
+            rand_bytes = bytes(a ^ b for a, b in zip(rand_bytes, salt_hash))
+
+        # 合并为 16 字节
+        raw = ts_bytes + rand_bytes
+
+        # 转为整数再做 Base32 编码（128 位 -> 26 字符）
+        num = int.from_bytes(raw, byteorder="big")
+        chars = []
+        for _ in range(26):
+            chars.append(_BASE32[num & 0x1F])
+            num >>= 5
+
+        return "".join(reversed(chars))
+
+    @staticmethod
     def object_id() -> str:
         """
         生成MongoDB ObjectId格式的24位十六进制字符串。

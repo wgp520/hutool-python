@@ -171,3 +171,40 @@ class TestFileUtil:
             time.sleep(0.01)
             FileUtil.write_string(new, "new")
             assert FileUtil.newer_than(new, old) is True
+
+    # ── tail ────────────────────────────────────────────────────────
+
+    def test_tail_basic(self):
+        """测试读取文件末尾行"""
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "tail.txt")
+            lines = [f"line{i}" for i in range(100)]
+            FileUtil.write_lines(path, lines)
+            result = FileUtil.tail(path, 5)
+            assert len(result) == 5
+            assert result[0] == "line95"
+            assert result[4] == "line99"
+
+    def test_tail_fewer_lines(self):
+        """测试请求行数超过文件实际行数"""
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "tail_short.txt")
+            FileUtil.write_lines(path, ["a", "b", "c"])
+            result = FileUtil.tail(path, 10)
+            assert len(result) == 3
+            assert result == ["a", "b", "c"]
+
+    def test_tail_empty_file(self):
+        """测试空文件"""
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "empty.txt")
+            FileUtil.write_string(path, "")
+            result = FileUtil.tail(path, 5)
+            assert result == []
+
+    def test_tail_file_not_found(self):
+        """测试文件不存在"""
+        import pytest
+
+        with pytest.raises(FileNotFoundError):
+            FileUtil.tail("/nonexistent/file.txt")

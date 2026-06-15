@@ -53,6 +53,9 @@ MapUtil.sort_by_value({"a": 3, "b": 1, "c": 2}) # 按值排序
 
 # 反转
 MapUtil.inverse({"a": 1, "b": 2})  # {1: "a", 2: "b"}
+
+# 取值最大的前 N 个键
+MapUtil.top_n_keys({"a": 3, "b": 1, "c": 5, "d": 2}, 2)  # ["c", "a"]
 ```
 
 ### 安全取值

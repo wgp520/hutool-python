@@ -111,3 +111,31 @@ class TestDictUtil:
     def test_is_empty(self):
         assert DictUtil.is_empty({}) is True
         assert DictUtil.is_empty({"a": 1}) is False
+
+
+class TestMapUtilTopN:
+    def test_top_n_keys_basic(self):
+        """测试取值最大的前 N 个键"""
+        result = MapUtil.top_n_keys({"a": 3, "b": 1, "c": 5, "d": 2}, 2)
+        assert result == ["c", "a"]
+
+    def test_top_n_keys_zero(self):
+        """测试 n=0"""
+        result = MapUtil.top_n_keys({"a": 1}, 0)
+        assert result == []
+
+    def test_top_n_keys_n_larger_than_dict(self):
+        """测试 n 大于字典长度"""
+        result = MapUtil.top_n_keys({"a": 1, "b": 2}, 5)
+        assert len(result) == 2
+        assert result == ["b", "a"]
+
+    def test_top_n_keys_empty_dict(self):
+        """测试空字典"""
+        result = MapUtil.top_n_keys({}, 3)
+        assert result == []
+
+    def test_top_n_keys_single(self):
+        """测试取前 1 个"""
+        result = MapUtil.top_n_keys({"x": 10, "y": 20, "z": 15}, 1)
+        assert result == ["y"]

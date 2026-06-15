@@ -95,3 +95,27 @@ class EscapeUtil:
         if not url:
             return url
         return unquote(url, encoding=charset)
+
+    @staticmethod
+    def unescape_html_chars(content: str) -> str:
+        """将常用HTML实体（&lt; &gt; &amp; &quot; &#39;）还原为原始字符。
+
+        与 :meth:`unescape_html` 的区别在于本方法仅处理 5 个基本实体，
+        不使用 ``html.unescape``（后者会处理所有 HTML5 实体）。
+
+        Examples::
+
+            "&lt;p&gt;Hello &amp; World&lt;/p&gt;" -> "<p>Hello & World</p>"
+
+        :param content: 包含HTML实体的字符串
+        :return: 还原后的字符串
+        """
+        if not content:
+            return content
+        return (
+            content.replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
+            .replace("&quot;", '"')
+            .replace("&#39;", "'")
+        )

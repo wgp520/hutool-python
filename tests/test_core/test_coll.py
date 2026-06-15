@@ -154,3 +154,81 @@ class TestListUtil:
     def test_default_if_empty(self):
         assert ListUtil.default_if_empty([], [1, 2]) == [1, 2]
         assert ListUtil.default_if_empty([3], [1, 2]) == [3]
+
+
+class TestCollUtilSafeMinMax:
+    """测试 safe_min 和 safe_max 方法"""
+
+    # ── safe_min ────────────────────────────────────────────
+
+    def test_safe_min_basic(self):
+        """测试基本最小值"""
+        assert CollUtil.safe_min([3, 1, 2]) == 1
+
+    def test_safe_min_none(self):
+        """测试 None 返回 None"""
+        assert CollUtil.safe_min(None) is None
+
+    def test_safe_min_empty(self):
+        """测试空列表返回 None"""
+        assert CollUtil.safe_min([]) is None
+
+    def test_safe_min_single(self):
+        """测试单元素"""
+        assert CollUtil.safe_min([42]) == 42
+
+    def test_safe_min_negative(self):
+        """测试负数"""
+        assert CollUtil.safe_min([-5, -1, -10]) == -10
+
+    def test_safe_min_strings(self):
+        """测试字符串"""
+        assert CollUtil.safe_min(["banana", "apple", "cherry"]) == "apple"
+
+    # ── safe_max ────────────────────────────────────────────
+
+    def test_safe_max_basic(self):
+        """测试基本最大值"""
+        assert CollUtil.safe_max([3, 1, 2]) == 3
+
+    def test_safe_max_none(self):
+        """测试 None 返回 None"""
+        assert CollUtil.safe_max(None) is None
+
+    def test_safe_max_empty(self):
+        """测试空列表返回 None"""
+        assert CollUtil.safe_max([]) is None
+
+    def test_safe_max_single(self):
+        """测试单元素"""
+        assert CollUtil.safe_max([42]) == 42
+
+    def test_safe_max_negative(self):
+        """测试负数"""
+        assert CollUtil.safe_max([-5, -1, -10]) == -1
+
+    def test_safe_max_strings(self):
+        """测试字符串"""
+        assert CollUtil.safe_max(["banana", "apple", "cherry"]) == "cherry"
+
+    # ── find_duplicates ────────────────────────────────────
+
+    def test_find_duplicates_basic(self):
+        """测试基本查重"""
+        assert CollUtil.find_duplicates([1, 2, 3, 2, 4, 3]) == [2, 3]
+
+    def test_find_duplicates_no_duplicates(self):
+        """测试无重复"""
+        assert CollUtil.find_duplicates([1, 2, 3]) == []
+
+    def test_find_duplicates_none_input(self):
+        """测试 None 输入"""
+        assert CollUtil.find_duplicates(None) == []
+
+    def test_find_duplicates_empty(self):
+        """测试空列表"""
+        assert CollUtil.find_duplicates([]) == []
+
+    def test_find_duplicates_strings(self):
+        """测试字符串查重"""
+        assert CollUtil.find_duplicates(["a", "b", "a", "c", "b"]) == ["a", "b"]

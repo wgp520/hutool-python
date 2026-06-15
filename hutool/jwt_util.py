@@ -1,6 +1,5 @@
 """JWT工具类"""
 
-
 import jwt
 
 
