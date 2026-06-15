@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
     <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
-    <img src="https://img.shields.io/badge/tests-1014 passed-brightgreen.svg" />
+    <img src="https://img.shields.io/badge/tests-1199 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
@@ -36,7 +36,7 @@
 
 | Module | Description | Java Hutool Equivalent |
 |--------|-------------|----------------------|
-| `core/util/` | Core utilities: string, number, array, object, boolean, random, ID, regex, hash, escape, URL, version, pagination, etc. (25 utility classes) | `cn.hutool.core.util` |
+| `core/util/` | Core utilities: string, number, array, object, boolean, random, ID, regex, hash, escape, URL, version, pagination, check, enum, reflect, color, convert, etc. (32 utility classes) | `cn.hutool.core.util` |
 | `core/coll.py` | Collection utilities: `CollUtil`, `ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map utilities: `MapUtil`, `BiMap`, `DictUtil` | `cn.hutool.core.map` |
 | `core/io/` | IO utilities: file, IO streams, path, filename, data size, resources (6 classes) | `cn.hutool.core.io` |
@@ -45,17 +45,25 @@
 | `core/codec.py` | Encoding/decoding: `Base64`, `Base32` | `cn.hutool.core.codec` |
 | `core/text/` | Text utilities: `UnicodeUtil`, `CsvUtil`, `StrBuilder` | `cn.hutool.core.text` |
 | `core/net.py` | Network utilities: `NetUtil`, `Ipv4Util` | `cn.hutool.core.net` |
-| `core/math_util.py` | Math utilities: `MathUtil`, `BitStatusUtil` | `cn.hutool.core.math` |
+| `core/math.py` | Math utilities: `MathUtil`, `BitStatusUtil` | `cn.hutool.core.math` |
 | `core/tree.py` | Tree utilities: `TreeUtil` | `cn.hutool.core.lang.tree` |
-| `http/` | HTTP client: `HttpUtil`, `HttpRequest`, `HttpResponse`, `HtmlUtil` (powered by httpx) | `cn.hutool.http` |
-| `json_util.py` | JSON utilities: `JSONUtil` (built-in json extension) | `cn.hutool.json` |
+| `core/bank.py` | Banking utilities: `BankUtil` (IBAN validation) | `cn.hutool.core.bank` |
+| `core/money.py` | Currency utilities: `MoneyUtil` (yuan/fen conversion, precise calculation) | `cn.hutool.core.money` |
+| `core/workday.py` | Workday utilities: `WorkdayUtil` (public holidays) | `cn.hutool.core.workday` |
+| `core/iter.py` | Iterator utilities: `IterUtil` (itertools recipes) | `cn.hutool.core.collection.IterUtil` |
+| `core/timing.py` | Timing utilities: `TimingUtil` | `cn.hutool.core.util.TimingUtil` |
+| `core/exec.py` | Concurrent execution: `ExecUtil` | `cn.hutool.core.thread.ExecUtil` |
+| `core/prof.py` | Profiling utilities: `ProfUtil` | `cn.hutool.core.util.ProfilerUtil` |
+| `core/memory_repo.py` | In-memory data store: `MemoryRepo` | `cn.hutool.core.lang.memorystore` |
+| `httpx_client/` | HTTP client: `HttpUtil`, `HttpRequest`, `HttpResponse`, `HtmlUtil` (powered by httpx) | `cn.hutool.http` |
+| `json.py` | JSON utilities: `JSONUtil` (built-in json extension) | `cn.hutool.json` |
 | `crypto/` | Encryption: `DigestUtil`, `SecureUtil`, `SignUtil` (powered by cryptography) | `cn.hutool.crypto` |
 | `cache/` | Cache: `FIFOCache`, `LFUCache`, `LRUCache`, `TimedCache` | `cn.hutool.cache` |
 | `captcha/` | CAPTCHA: `CaptchaUtil` (powered by Pillow) | `cn.hutool.captcha` |
 | `dfa/` | Sensitive word filtering: `SensitiveUtil` (DFA algorithm) | `cn.hutool.dfa` |
 | `extra/` | Extensions: `EmojiUtil`, `PinyinUtil`, `TemplateUtil`, `QrCodeUtil` | `cn.hutool.extra` |
 | `cron/` | Scheduled tasks: `CronUtil`, `CronPattern` | `cn.hutool.cron` |
-| `jwt_util.py` | JWT utilities: `JWTUtil` (powered by PyJWT) | `cn.hutool.jwt` |
+| `jwt.py` | JWT utilities: `JWTUtil` (powered by PyJWT) | `cn.hutool.jwt` |
 | `setting/` | Configuration: `SettingUtil`, `YamlUtil`, `PropsUtil` | `cn.hutool.setting` |
 
 > Note: Java-specific modules such as AOP, JDBC, Swing, POI, JNDI, ClassLoader, BloomFilter, Log, Script, Socket, and System are excluded from Hutool-Python.
@@ -170,7 +178,7 @@ IdUtil.object_id()         # "5f8b2c3d4e5f6a7b8c9d0e1f"
 ### HTTP Client
 
 ```python
-from hutool.http import HttpUtil
+from hutool import HttpUtil
 
 # GET request
 html = HttpUtil.get("https://example.com")
@@ -179,7 +187,7 @@ html = HttpUtil.get("https://example.com")
 result = HttpUtil.post("https://api.example.com/data", json_data={"key": "value"})
 
 # Chained request builder
-from hutool.http import HttpRequest
+from hutool import HttpRequest
 
 resp = (HttpRequest.post("https://api.example.com/data")
     .header("Authorization", "Bearer token")
@@ -250,10 +258,10 @@ from hutool.core.util import (
 )
 from hutool.core.codec import Base64
 from hutool.core.io import FileUtil, IoUtil, PathUtil
-from hutool.json_util import JSONUtil
+from hutool import JSONUtil
 from hutool.cache import CacheUtil
 from hutool.extra import PinyinUtil, EmojiUtil, TemplateUtil
-from hutool.jwt_util import JWTUtil
+from hutool import JWTUtil
 ```
 
 ---
@@ -265,7 +273,7 @@ hutool-python/
 ├── hutool/                    # Python package
 │   ├── __init__.py
 │   ├── core/                  # Core module (equivalent to hutool-core)
-│   │   ├── util/              # Core utilities (25 classes)
+│   │   ├── util/              # Core utilities (32 classes)
 │   │   ├── io/                # IO utilities (6 classes)
 │   │   ├── text/              # Text utilities (3 classes)
 │   │   ├── date.py            # Date utilities
@@ -274,19 +282,27 @@ hutool-python/
 │   │   ├── bean.py            # Bean utilities
 │   │   ├── codec.py           # Encoding/decoding
 │   │   ├── net.py             # Network utilities
-│   │   ├── math_util.py       # Math utilities
-│   │   └── tree.py            # Tree utilities
-│   ├── http/                  # HTTP client (powered by httpx)
-│   ├── json_util.py           # JSON utilities
+│   │   ├── math.py            # Math utilities
+│   │   ├── tree.py            # Tree utilities
+│   │   ├── bank.py            # Banking utilities (IBAN)
+│   │   ├── money.py           # Currency utilities
+│   │   ├── workday.py         # Workday utilities
+│   │   ├── iter.py            # Iterator utilities
+│   │   ├── timing.py          # Timing utilities
+│   │   ├── exec.py            # Concurrent execution
+│   │   ├── prof.py            # Profiling utilities
+│   │   └── memory_repo.py     # In-memory data store
+│   ├── httpx_client/          # HTTP client (powered by httpx)
+│   ├── json.py                # JSON utilities
 │   ├── crypto/                # Encryption (powered by cryptography)
 │   ├── cache/                 # Cache (FIFO/LFU/LRU/Timed)
 │   ├── captcha/               # CAPTCHA (powered by Pillow)
 │   ├── dfa/                   # Sensitive word filtering (DFA algorithm)
 │   ├── extra/                 # Extensions (Pinyin/Emoji/Template/QR Code)
 │   ├── cron/                  # Scheduled tasks
-│   ├── jwt_util.py            # JWT utilities
+│   ├── jwt.py                 # JWT utilities
 │   └── setting/               # Configuration (YAML/Properties)
-├── tests/                     # Tests (47 files, 613 test cases)
+├── tests/                     # Tests (61 files, 1199 test cases)
 ├── requirements.txt
 └── setup.py
 ```
@@ -306,7 +322,7 @@ pytest tests/ -v
 pytest tests/test_core/ -v
 
 # Run a single module
-pytest tests/test_core/test_str_util.py -v
+pytest tests/test_core/test_strings.py -v
 ```
 
 ---

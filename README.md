@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
     <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
-    <img src="https://img.shields.io/badge/tests-1014 passed-brightgreen.svg" />
+    <img src="https://img.shields.io/badge/tests-1199 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
@@ -38,7 +38,7 @@
 
 | 模块 | 介绍 | 对应 Java Hutool |
 |------|------|-----------------|
-| `core/util/` | 核心工具类：字符串、数字、数组、对象、布尔、随机、ID、正则、哈希、转义、URL、版本、分页等 25 个工具类 | `cn.hutool.core.util` |
+| `core/util/` | 核心工具类：字符串、数字、数组、对象、布尔、随机、ID、正则、哈希、转义、URL、版本、分页、校验、枚举、反射、颜色、类型转换等 32 个工具类 | `cn.hutool.core.util` |
 | `core/coll.py` | 集合工具：`CollUtil`、`ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map 工具：`MapUtil`、`BiMap`、`DictUtil` | `cn.hutool.core.map` |
 | `core/io/` | IO 工具：文件、IO 流、路径、文件名、数据大小、资源 | `cn.hutool.core.io` |
@@ -47,17 +47,25 @@
 | `core/codec.py` | 编解码：`Base64`、`Base32` | `cn.hutool.core.codec` |
 | `core/text/` | 文本工具：`UnicodeUtil`、`CsvUtil`、`StrBuilder` | `cn.hutool.core.text` |
 | `core/net.py` | 网络工具：`NetUtil`、`Ipv4Util` | `cn.hutool.core.net` |
-| `core/math_util.py` | 数学工具：`MathUtil`、`BitStatusUtil` | `cn.hutool.core.math` |
+| `core/math.py` | 数学工具：`MathUtil`、`BitStatusUtil` | `cn.hutool.core.math` |
 | `core/tree.py` | 树工具：`TreeUtil` | `cn.hutool.core.lang.tree` |
-| `http/` | HTTP 客户端：`HttpUtil`、`HttpRequest`、`HttpResponse`、`HtmlUtil`（基于 httpx） | `cn.hutool.http` |
-| `json_util.py` | JSON 工具：`JSONUtil`（基于内置 json 扩展） | `cn.hutool.json` |
+| `core/bank.py` | 银行工具：`BankUtil`（IBAN 校验） | `cn.hutool.core.bank` |
+| `core/money.py` | 货币工具：`MoneyUtil`（元/分转换、精确计算） | `cn.hutool.core.money` |
+| `core/workday.py` | 工作日工具：`WorkdayUtil`（法定节假日） | `cn.hutool.core.workday` |
+| `core/iter.py` | 迭代工具：`IterUtil`（itertools recipes） | `cn.hutool.core.collection.IterUtil` |
+| `core/timing.py` | 计时工具：`TimingUtil` | `cn.hutool.core.util.TimingUtil` |
+| `core/exec.py` | 并发执行工具：`ExecUtil` | `cn.hutool.core.thread.ExecUtil` |
+| `core/prof.py` | 性能分析工具：`ProfUtil` | `cn.hutool.core.util.ProfilerUtil` |
+| `core/memory_repo.py` | 内存数据仓库：`MemoryRepo` | `cn.hutool.core.lang.memorystore` |
+| `httpx_client/` | HTTP 客户端：`HttpUtil`、`HttpRequest`、`HttpResponse`、`HtmlUtil`（基于 httpx） | `cn.hutool.http` |
+| `json.py` | JSON 工具：`JSONUtil`（基于内置 json 扩展） | `cn.hutool.json` |
 | `crypto/` | 加密工具：`DigestUtil`、`SecureUtil`、`SignUtil`（基于 cryptography） | `cn.hutool.crypto` |
 | `cache/` | 缓存工具：`FIFOCache`、`LFUCache`、`LRUCache`、`TimedCache` | `cn.hutool.cache` |
 | `captcha/` | 验证码：`CaptchaUtil`（基于 Pillow） | `cn.hutool.captcha` |
 | `dfa/` | 敏感词过滤：`SensitiveUtil`（基于 DFA 算法） | `cn.hutool.dfa` |
 | `extra/` | 扩展工具：`EmojiUtil`、`PinyinUtil`、`TemplateUtil`、`QrCodeUtil` | `cn.hutool.extra` |
 | `cron/` | 定时任务：`CronUtil`、`CronPattern` | `cn.hutool.cron` |
-| `jwt_util.py` | JWT 工具：`JWTUtil`（基于 PyJWT） | `cn.hutool.jwt` |
+| `jwt.py` | JWT 工具：`JWTUtil`（基于 PyJWT） | `cn.hutool.jwt` |
 | `setting/` | 配置工具：`SettingUtil`、`YamlUtil`、`PropsUtil` | `cn.hutool.setting` |
 
 > 注：Java Hutool 中的 AOP、JDBC/Swing、POI、JNDI、ClassLoader、BloomFilter、Log、Script、Socket 等 Java 专属模块不包含在 Hutool-Python 中。
@@ -172,7 +180,7 @@ IdUtil.object_id()         # "5f8b2c3d4e5f6a7b8c9d0e1f"
 ### HTTP 客户端
 
 ```python
-from hutool.http import HttpUtil
+from hutool import HttpUtil
 
 # GET 请求
 html = HttpUtil.get("https://example.com")
@@ -181,7 +189,7 @@ html = HttpUtil.get("https://example.com")
 result = HttpUtil.post("https://api.example.com/data", json_data={"key": "value"})
 
 # 链式调用
-from hutool.http import HttpRequest, HttpResponse
+from hutool import HttpRequest, HttpResponse
 
 resp = (HttpRequest.post("https://api.example.com/data")
     .header("Authorization", "Bearer token")
@@ -252,10 +260,10 @@ from hutool.core.util import (
 )
 from hutool.core.codec import Base64
 from hutool.core.io import FileUtil, IoUtil, PathUtil
-from hutool.json_util import JSONUtil
+from hutool import JSONUtil
 from hutool.cache import CacheUtil
 from hutool.extra import PinyinUtil, EmojiUtil, TemplateUtil
-from hutool.jwt_util import JWTUtil
+from hutool import JWTUtil
 ```
 
 ---
@@ -267,7 +275,7 @@ hutool-python/
 ├── hutool/                    # Python 包
 │   ├── __init__.py
 │   ├── core/                  # 核心模块（对应 hutool-core）
-│   │   ├── util/              # 核心工具类（25 个）
+│   │   ├── util/              # 核心工具类（32 个）
 │   │   ├── io/                # IO 工具类（6 个）
 │   │   ├── text/              # 文本工具类（3 个）
 │   │   ├── date.py            # 日期工具
@@ -276,19 +284,27 @@ hutool-python/
 │   │   ├── bean.py            # Bean 工具
 │   │   ├── codec.py           # 编解码工具
 │   │   ├── net.py             # 网络工具
-│   │   ├── math_util.py       # 数学工具
-│   │   └── tree.py            # 树工具
-│   ├── http/                  # HTTP 客户端（基于 httpx）
-│   ├── json_util.py           # JSON 工具
+│   │   ├── math.py            # 数学工具
+│   │   ├── tree.py            # 树工具
+│   │   ├── bank.py            # 银行工具（IBAN）
+│   │   ├── money.py           # 货币工具
+│   │   ├── workday.py         # 工作日工具
+│   │   ├── iter.py            # 迭代工具
+│   │   ├── timing.py          # 计时工具
+│   │   ├── exec.py            # 并发执行工具
+│   │   ├── prof.py            # 性能分析工具
+│   │   └── memory_repo.py     # 内存数据仓库
+│   ├── httpx_client/          # HTTP 客户端（基于 httpx）
+│   ├── json.py                # JSON 工具
 │   ├── crypto/                # 加密工具（基于 cryptography）
 │   ├── cache/                 # 缓存工具（FIFO/LFU/LRU/Timed）
 │   ├── captcha/               # 验证码（基于 Pillow）
 │   ├── dfa/                   # 敏感词过滤（DFA 算法）
 │   ├── extra/                 # 扩展工具（拼音/Emoji/模板/二维码）
 │   ├── cron/                  # 定时任务
-│   ├── jwt_util.py            # JWT 工具
+│   ├── jwt.py                 # JWT 工具
 │   └── setting/               # 配置工具（YAML/Properties）
-├── tests/                     # 测试（47 个测试文件，613 个测试用例）
+├── tests/                     # 测试（61 个测试文件，1199 个测试用例）
 ├── requirements.txt
 └── setup.py
 ```
@@ -308,7 +324,7 @@ pytest tests/ -v
 pytest tests/test_core/ -v
 
 # 运行单个模块测试
-pytest tests/test_core/test_str_util.py -v
+pytest tests/test_core/test_strings.py -v
 ```
 
 ---
