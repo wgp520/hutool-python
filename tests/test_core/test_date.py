@@ -540,3 +540,79 @@ class TestDateTime:
         assert result.endswith("Z")
         assert "T" in result
         assert len(result) == 24  # 2024-01-01T12:00:00.000Z
+
+    def test_is_last_day_of_month_true(self):
+        from datetime import date
+
+        assert DateUtil.is_last_day_of_month(date(2024, 2, 29)) is True
+        assert DateUtil.is_last_day_of_month(date(2024, 1, 31)) is True
+
+    def test_is_last_day_of_month_false(self):
+        from datetime import date
+
+        assert DateUtil.is_last_day_of_month(date(2024, 2, 28)) is False
+
+    def test_is_expired(self):
+        from datetime import date
+
+        assert DateUtil.is_expired(date(2020, 1, 1), date(2023, 1, 1), date(2025, 1, 1)) is True
+        assert DateUtil.is_expired(date(2024, 6, 15), date(2023, 1, 1), date(2025, 1, 1)) is False
+
+    def test_is_overlap_true(self):
+        from datetime import date
+
+        assert DateUtil.is_overlap(date(2024, 1, 1), date(2024, 6, 30), date(2024, 6, 1), date(2024, 12, 31)) is True
+
+    def test_is_overlap_false(self):
+        from datetime import date
+
+        assert DateUtil.is_overlap(date(2024, 1, 1), date(2024, 3, 31), date(2024, 4, 1), date(2024, 6, 30)) is False
+
+    def test_is_between(self):
+        from datetime import date
+
+        assert DateUtil.is_between(date(2024, 6, 15), date(2024, 1, 1), date(2024, 12, 31)) is True
+        assert DateUtil.is_between(date(2025, 1, 1), date(2024, 1, 1), date(2024, 12, 31)) is False
+
+    def test_day_of_year(self):
+        from datetime import date
+
+        assert DateUtil.day_of_year(date(2024, 1, 1)) == 1
+        assert DateUtil.day_of_year(date(2024, 12, 31)) == 366
+
+    def test_length_of_month(self):
+        from datetime import date
+
+        assert DateUtil.length_of_month(date(2024, 2, 1)) == 29
+        assert DateUtil.length_of_month(date(2024, 1, 1)) == 31
+
+    def test_length_of_year(self):
+        assert DateUtil.length_of_year(2024) == 366
+        assert DateUtil.length_of_year(2023) == 365
+
+    def test_millisecond(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 1, 1, 12, 0, 0, 500000)
+        assert DateUtil.millisecond(dt) == 500
+
+    def test_get_zodiac(self):
+        assert DateUtil.get_zodiac(3, 21) == "白羊座"
+        assert DateUtil.get_zodiac(12, 25) == "摩羯座"
+
+    def test_get_chinese_zodiac(self):
+        assert DateUtil.get_chinese_zodiac(2024) == "龙"
+        assert DateUtil.get_chinese_zodiac(2023) == "兔"
+
+    def test_compare(self):
+        from datetime import date
+
+        assert DateUtil.compare(date(2024, 1, 1), date(2024, 1, 2)) < 0
+        assert DateUtil.compare(date(2024, 1, 1), date(2024, 1, 1)) == 0
+        assert DateUtil.compare(None, date(2024, 1, 1)) < 0
+        assert DateUtil.compare(date(2024, 1, 1), None) > 0
+
+    def test_format_chinese_date(self):
+        from datetime import date
+
+        assert DateUtil.format_chinese_date(date(2024, 3, 15)) == "2024年3月15日"

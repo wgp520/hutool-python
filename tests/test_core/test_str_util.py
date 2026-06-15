@@ -476,3 +476,284 @@ class TestStrUtilNewMethods:
     def test_find_all_indices_single(self):
         """测试单次匹配"""
         assert StrUtil.find_all_indices("hello world", "world") == [6]
+
+    # ── 比较与判断 ──────────────────────────────────────────────
+
+    def test_equals_any_match(self):
+        assert StrUtil.equals_any("hello", "hi", "hello", "hey") is True
+
+    def test_equals_any_no_match(self):
+        assert StrUtil.equals_any("hello", "hi", "hey") is False
+
+    def test_equals_any_none(self):
+        assert StrUtil.equals_any(None, "hi", None) is True
+
+    def test_equals_any_ignore_case_match(self):
+        assert StrUtil.equals_any_ignore_case("Hello", "hi", "HELLO") is True
+
+    def test_equals_any_ignore_case_no_match(self):
+        assert StrUtil.equals_any_ignore_case("Hello", "hi", "hey") is False
+
+    def test_equals_char_at_match(self):
+        assert StrUtil.equals_char_at("hello", 0, "h") is True
+
+    def test_equals_char_at_no_match(self):
+        assert StrUtil.equals_char_at("hello", 0, "x") is False
+
+    def test_equals_char_at_out_of_range(self):
+        assert StrUtil.equals_char_at("hi", 5, "x") is False
+        assert StrUtil.equals_char_at(None, 0, "x") is False
+
+    def test_contains_only_true(self):
+        assert StrUtil.contains_only("abc", "abcdef") is True
+
+    def test_contains_only_false(self):
+        assert StrUtil.contains_only("abc", "ab") is False
+
+    def test_contains_only_empty(self):
+        assert StrUtil.contains_only("", "abc") is False
+
+    def test_has_letter_true(self):
+        assert StrUtil.has_letter("hello123") is True
+
+    def test_has_letter_false(self):
+        assert StrUtil.has_letter("12345") is False
+
+    def test_has_letter_none(self):
+        assert StrUtil.has_letter(None) is False
+
+    def test_is_sub_equals_match(self):
+        assert StrUtil.is_sub_equals("hello world", "world", 6) is True
+
+    def test_is_sub_equals_no_match(self):
+        assert StrUtil.is_sub_equals("hello world", "xyz", 6) is False
+
+    def test_is_sub_equals_ignore_case(self):
+        assert StrUtil.is_sub_equals("Hello World", "WORLD", 6, ignore_case=True) is True
+
+    def test_is_surround_true(self):
+        assert StrUtil.is_surround("[hello]", "[", "]") is True
+
+    def test_is_surround_false(self):
+        assert StrUtil.is_surround("hello", "[", "]") is False
+
+    def test_is_wrap_true(self):
+        assert StrUtil.is_wrap("***hello***", "***") is True
+
+    def test_is_wrap_false(self):
+        assert StrUtil.is_wrap("*hello*", "***") is False
+
+    def test_is_lower_case_true(self):
+        assert StrUtil.is_lower_case("hello") is True
+
+    def test_is_lower_case_false(self):
+        assert StrUtil.is_lower_case("Hello") is False
+
+    def test_is_lower_case_no_letter(self):
+        assert StrUtil.is_lower_case("123") is False
+
+    def test_is_upper_case_true(self):
+        assert StrUtil.is_upper_case("HELLO") is True
+
+    def test_is_upper_case_false(self):
+        assert StrUtil.is_upper_case("Hello") is False
+
+    def test_is_all_char_match_true(self):
+        assert StrUtil.is_all_char_match("123", str.isdigit) is True
+
+    def test_is_all_char_match_false(self):
+        assert StrUtil.is_all_char_match("12a", str.isdigit) is False
+
+    # ── 公共前缀/后缀 & 比较 ────────────────────────────────────
+
+    def test_common_prefix(self):
+        assert StrUtil.common_prefix("flower", "flow", "flight") == "fl"
+
+    def test_common_prefix_no_common(self):
+        assert StrUtil.common_prefix("abc", "xyz") == ""
+
+    def test_common_suffix(self):
+        assert StrUtil.common_suffix("testing", "running", "ing") == "ing"
+
+    def test_common_suffix_no_common(self):
+        assert StrUtil.common_suffix("abc", "xyz") == ""
+
+    def test_compare_equal(self):
+        assert StrUtil.compare("abc", "abc") == 0
+
+    def test_compare_less(self):
+        assert StrUtil.compare("abc", "abd") < 0
+
+    def test_compare_greater(self):
+        assert StrUtil.compare("abd", "abc") > 0
+
+    def test_compare_none(self):
+        assert StrUtil.compare(None, "abc") < 0
+        assert StrUtil.compare(None, "abc", null_is_greater=True) > 0
+
+    def test_compare_ignore_case(self):
+        assert StrUtil.compare_ignore_case("ABC", "abc") == 0
+
+    def test_concat(self):
+        assert StrUtil.concat("a", None, "b", "c") == "abc"
+
+    # ── 截取与格式化 ────────────────────────────────────────────
+
+    def test_brief(self):
+        assert StrUtil.brief("hello world", 8) == "hello..."
+
+    def test_brief_short(self):
+        assert StrUtil.brief("hi", 8) == "hi"
+
+    def test_brief_none(self):
+        assert StrUtil.brief(None, 8) is None
+
+    def test_max_length(self):
+        assert StrUtil.max_length("hello world", 5) == "hello"
+
+    def test_max_length_short(self):
+        assert StrUtil.max_length("hi", 5) == "hi"
+
+    def test_fix_length_pad(self):
+        assert StrUtil.fix_length("hi", 5) == "hi   "
+
+    def test_fix_length_truncate(self):
+        assert StrUtil.fix_length("hello world", 5) == "hello"
+
+    def test_fix_length_none(self):
+        assert StrUtil.fix_length(None, 3, "x") == "xxx"
+
+    def test_hide(self):
+        assert StrUtil.hide("13812345678", 3, 7) == "138****5678"
+
+    def test_hide_short(self):
+        assert StrUtil.hide("hi", 0, 5) == "**"
+
+    def test_move_basic(self):
+        assert StrUtil.move("abcde", 1, 3, 2) == "adebc"
+
+    def test_move_none(self):
+        assert StrUtil.move(None, 0, 1, 1) is None
+
+    def test_normalize(self):
+        assert StrUtil.normalize("  hello   world  ") == "hello world"
+
+    def test_normalize_none(self):
+        assert StrUtil.normalize(None) is None
+
+    def test_total_length(self):
+        assert StrUtil.total_length("abc", None, "de") == 5
+
+    def test_indexed_format(self):
+        assert StrUtil.indexed_format("{0} + {1} = {2}", 1, 2, 3) == "1 + 2 = 3"
+
+    # ── 包裹与填充 ──────────────────────────────────────────────
+
+    def test_wrap(self):
+        assert StrUtil.wrap("hello", "***") == "***hello***"
+
+    def test_wrap_different(self):
+        assert StrUtil.wrap("hello", "[", "]") == "[hello]"
+
+    def test_wrap_none(self):
+        assert StrUtil.wrap(None, "x") is None
+
+    def test_wrap_if_missing_already_wrapped(self):
+        assert StrUtil.wrap_if_missing("***hello***", "***") == "***hello***"
+
+    def test_wrap_if_missing_not_wrapped(self):
+        assert StrUtil.wrap_if_missing("hello", "***") == "***hello***"
+
+    def test_wrap_all(self):
+        assert StrUtil.wrap_all(["a", "b"], "[", "]") == ["[a]", "[b]"]
+
+    def test_wrap_all_none_list(self):
+        assert StrUtil.wrap_all(None, "[", "]") is None
+
+    def test_wrap_all_if_missing(self):
+        result = StrUtil.wrap_all_if_missing(["[a]", "b"], "[", "]")
+        assert result == ["[a]", "[b]"]
+
+    def test_pad_after(self):
+        assert StrUtil.pad_after("hi", 5) == "hi   "
+
+    def test_pad_pre(self):
+        assert StrUtil.pad_pre("hi", 5) == "   hi"
+
+    def test_repeat_by_length(self):
+        assert StrUtil.repeat_by_length("abc", 7) == "abcabca"
+
+    def test_repeat_by_length_none(self):
+        assert StrUtil.repeat_by_length(None, 5) is None
+
+    # ── 替换与移除 ──────────────────────────────────────────────
+
+    def test_replace_ignore_case(self):
+        assert StrUtil.replace_ignore_case("Hello HELLO", "hello", "hi") == "hi hi"
+
+    def test_replace_last(self):
+        assert StrUtil.replace_last("a.b.c", "\\.", "-") == "a.b-c"
+
+    def test_remove_all_prefix(self):
+        assert StrUtil.remove_all_prefix("///path", "/") == "path"
+
+    def test_remove_all_suffix(self):
+        assert StrUtil.remove_all_suffix("path///", "/") == "path"
+
+    def test_remove_suf_and_lower_first(self):
+        assert StrUtil.remove_suf_and_lower_first("UserNameDTO", "DTO") == "userName"
+
+    # ── 分割与转换 ──────────────────────────────────────────────
+
+    def test_split_trim(self):
+        assert StrUtil.split_trim(" a , b , c ") == ["a", "b", "c"]
+
+    def test_split_trim_semicolon(self):
+        assert StrUtil.split_trim("a;b ;c", ";") == ["a", "b", "c"]
+
+    def test_strip_all(self):
+        assert StrUtil.strip_all(" a ", " b ", None) == ["a", "b", None]
+
+    def test_swap_case(self):
+        assert StrUtil.swap_case("Hello World") == "hELLO wORLD"
+
+    def test_swap_case_none(self):
+        assert StrUtil.swap_case(None) is None
+
+    def test_to_symbol_case(self):
+        assert StrUtil.to_symbol_case("helloWorld", "-") == "hello-world"
+
+    def test_to_symbol_case_underscore(self):
+        assert StrUtil.to_symbol_case("helloWorld", "_") == "hello_world"
+
+    def test_trim_to_null_has_value(self):
+        assert StrUtil.trim_to_null(" hello ") == "hello"
+
+    def test_trim_to_null_empty(self):
+        assert StrUtil.trim_to_null("   ") is None
+
+    def test_trim_to_null_none(self):
+        assert StrUtil.trim_to_null(None) is None
+
+    # ── 空值处理 & 杂项 ─────────────────────────────────────────
+
+    def test_empty_if_null_none(self):
+        assert StrUtil.empty_if_null(None) == ""
+
+    def test_empty_if_null_value(self):
+        assert StrUtil.empty_if_null("hello") == "hello"
+
+    def test_desensitized(self):
+        assert StrUtil.desensitized("13812345678", 3, 4) == "138****5678"
+
+    def test_desensitized_short(self):
+        assert StrUtil.desensitized("hi", 3, 3) == "**"
+
+    def test_compare_version(self):
+        assert StrUtil.compare_version("1.2.3", "1.2.4") < 0
+        assert StrUtil.compare_version("1.2.3", "1.2.3") == 0
+        assert StrUtil.compare_version("2.0", "1.9.9") > 0
+
+    def test_compare_version_none(self):
+        assert StrUtil.compare_version(None, "1.0") < 0
+        assert StrUtil.compare_version("1.0", None) > 0

@@ -222,3 +222,109 @@ class RandomUtil:
                 return value
         # 不应到达此处
         return pairs[-1][1]
+
+    @staticmethod
+    def random_chinese(count: int = 1) -> str:
+        """
+        生成指定个数的随机中文字符（常用汉字范围 0x4E00~0x9FFF）。
+
+        :param count: 字符个数，默认 1
+        :return: 随机中文字符串
+        """
+        return "".join(chr(secrets.randbelow(0x9FFF - 0x4E00 + 1) + 0x4E00) for _ in range(count))
+
+    @staticmethod
+    def random_char(char_set: str) -> str:
+        """
+        从字符集中随机选取一个字符。
+
+        :param char_set: 字符集
+        :return: 随机字符
+        :raises ValueError: 字符集为空时
+        """
+        if not char_set:
+            raise ValueError("字符集不能为空")
+        return secrets.choice(char_set)
+
+    @staticmethod
+    def random_day(start: datetime, end: datetime) -> datetime:
+        """
+        在日期范围内生成随机日期（时分秒归零）。
+
+        :param start: 起始日期（含）
+        :param end: 结束日期（不含）
+        :return: 范围内的随机日期
+        """
+        delta = (end - start).days
+        if delta <= 0:
+            raise ValueError("结束日期必须晚于开始日期")
+        random_days = secrets.randbelow(delta)
+        return start + timedelta(days=random_days)
+
+    @staticmethod
+    def random_ints(count: int, min_include: int = 0, max_exclude: int = 100) -> List[int]:
+        """
+        生成指定个数的随机整数列表（可重复）。
+
+        :param count: 个数
+        :param min_include: 最小值（含）
+        :param max_exclude: 最大值（不含）
+        :return: 随机整数列表
+        """
+        return [secrets.randbelow(max_exclude - min_include) + min_include for _ in range(count)]
+
+    @staticmethod
+    def random_string_without_str(length: int, exclude_chars: str) -> str:
+        """
+        生成不包含指定字符的随机字符串（大小写字母 + 数字）。
+
+        :param length: 字符串长度
+        :param exclude_chars: 需要排除的字符
+        :return: 随机字符串
+        """
+        base = string.ascii_letters + string.digits
+        filtered = "".join(c for c in base if c not in exclude_chars)
+        if not filtered:
+            raise ValueError("排除后字符集为空")
+        return "".join(secrets.choice(filtered) for _ in range(length))
+
+    @staticmethod
+    def random_string_lower_without_str(length: int, exclude_chars: str) -> str:
+        """
+        生成不包含指定字符的随机小写字符串。
+
+        :param length: 字符串长度
+        :param exclude_chars: 需要排除的字符
+        :return: 随机小写字符串
+        """
+        base = string.ascii_lowercase + string.digits
+        filtered = "".join(c for c in base if c not in exclude_chars)
+        if not filtered:
+            raise ValueError("排除后字符集为空")
+        return "".join(secrets.choice(filtered) for _ in range(length))
+
+    @staticmethod
+    def random_element_weighted(pairs: List[Tuple[int, Any]]) -> Any:
+        """
+        根据权重随机选择（:meth:`weighted_choice` 的别名）。
+
+        :param pairs: 权重-值对列表
+        :return: 随机选中的值
+        """
+        return RandomUtil.weighted_choice(pairs)
+
+    @staticmethod
+    def random_ele_with_condition(sequence: Sequence[T], condition, count: int = 1) -> List[T]:
+        """
+        按条件随机选取元素。
+
+        :param sequence: 待选取的序列
+        :param condition: 过滤函数，接受元素返回 bool
+        :param count: 选取个数，默认 1
+        :return: 满足条件的随机元素列表
+        """
+        filtered = [item for item in sequence if condition(item)]
+        if not filtered:
+            return []
+        actual_count = min(count, len(filtered))
+        return random.sample(filtered, actual_count)

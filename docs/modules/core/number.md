@@ -118,3 +118,37 @@ NumberUtil.bytes_to_int(b'\x00\x00\x01\x00')  # 256
 NumberUtil.int_to_bytes(256, 2)    # b'\x01\x00'
 NumberUtil.int_to_bytes(1, 4)      # b'\x00\x00\x00\x01'
 ```
+
+### 数字范围与生成
+
+```python
+# 数字范围列表
+NumberUtil.range_(0, 5)          # [0, 1, 2, 3, 4]
+NumberUtil.range_(0, 10, 3)      # [0, 3, 6, 9]
+
+# 不重复随机数
+NumberUtil.generate_by_set(3, 1, 10)  # 3个[1,10]范围内的不重复随机数
+```
+
+### 表达式计算与开方
+
+```python
+# 安全的数学表达式计算
+NumberUtil.calculate("1 + 2 * 3")       # 7.0
+NumberUtil.calculate("(1 + 2) * 3")     # 9.0
+
+# 精确平方根
+NumberUtil.sqrt(2, 5)     # Decimal('1.41421')
+NumberUtil.sqrt(9)         # Decimal('3.0000000000')
+```
+
+### 解析
+
+```python
+# parseNumber — 智能解析数字
+NumberUtil.parse_number("123")   # 123（int）
+NumberUtil.parse_number("3.14")  # 3.14（float）
+
+# parseLong
+NumberUtil.parse_long("123456789")  # 123456789
+```

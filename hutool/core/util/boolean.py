@@ -1,6 +1,6 @@
 """布尔工具类，对应 Java cn.hutool.core.util.BooleanUtil"""
 
-from typing import Optional
+from typing import Any, Optional
 
 
 class BooleanUtil:
@@ -122,3 +122,107 @@ class BooleanUtil:
         if str_value is None:
             return False
         return str_value.strip().lower() in BooleanUtil._TRUE_STRINGS
+
+    @staticmethod
+    def to_boolean(value: Any) -> bool:
+        """
+        将值转为布尔值。
+
+        以下值解析为 True: ``True``, ``"true"``, ``"yes"``, ``"on"``, ``"1"``, ``1``。
+        其他值返回 False。
+
+        :param value: 待转换的值
+        :return: 布尔值
+        """
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in BooleanUtil._TRUE_STRINGS
+        return bool(value)
+
+    @staticmethod
+    def to_boolean_object(value: Any) -> bool:
+        """
+        与 :meth:`to_boolean` 相同。
+
+        :param value: 待转换的值
+        :return: 布尔值
+        """
+        return BooleanUtil.to_boolean(value)
+
+    @staticmethod
+    def is_boolean(s: Optional[str]) -> bool:
+        """
+        判断字符串是否为布尔字符串（``"true"``, ``"false"``, ``"yes"``, ``"no"``, ``"on"``, ``"off"``, ``"1"``, ``"0"``）。
+
+        :param s: 待检查的字符串
+        :return: 是否为布尔字符串
+        """
+        if s is None:
+            return False
+        return s.strip().lower() in {"true", "false", "yes", "no", "on", "off", "1", "0"}
+
+    @staticmethod
+    def to_string_true_false(bool_value: Optional[bool]) -> str:
+        """
+        布尔转 "true"/"false"。
+
+        :param bool_value: 布尔值
+        :return: "true" 或 "false"
+        """
+        return "true" if bool_value is True else "false"
+
+    @staticmethod
+    def to_string_yes_no(bool_value: Optional[bool]) -> str:
+        """
+        布尔转 "yes"/"no"。
+
+        :param bool_value: 布尔值
+        :return: "yes" 或 "no"
+        """
+        return "yes" if bool_value is True else "no"
+
+    @staticmethod
+    def to_string_on_off(bool_value: Optional[bool]) -> str:
+        """
+        布尔转 "on"/"off"。
+
+        :param bool_value: 布尔值
+        :return: "on" 或 "off"
+        """
+        return "on" if bool_value is True else "off"
+
+    @staticmethod
+    def xor_of_wrap(a: bool, b: bool) -> bool:
+        """
+        两个布尔值的异或运算。
+
+        :param a: 第一个布尔值
+        :param b: 第二个布尔值
+        :return: 异或结果
+        """
+        return a != b
+
+    @staticmethod
+    def exactly_one_true(*values: bool) -> bool:
+        """
+        判断是否恰好有一个 True。
+
+        :param values: 布尔值列表
+        :return: 恰好一个 True 时返回 True
+        """
+        return sum(1 for v in values if v) == 1
+
+    @staticmethod
+    def if_true(condition: bool, true_val: Any, false_val: Any) -> Any:
+        """
+        三元表达式。
+
+        :param condition: 条件
+        :param true_val: 为 True 时的返回值
+        :param false_val: 为 False 时的返回值
+        :return: 条件对应的值
+        """
+        return true_val if condition else false_val

@@ -47,3 +47,55 @@ class TestBooleanUtil:
         assert BooleanUtil.parse("no") is False
         assert BooleanUtil.parse("0") is False
         assert BooleanUtil.parse("anything_else") is False
+
+    def test_to_boolean_from_bool(self):
+        assert BooleanUtil.to_boolean(True) is True
+        assert BooleanUtil.to_boolean(False) is False
+
+    def test_to_boolean_from_string(self):
+        assert BooleanUtil.to_boolean("true") is True
+        assert BooleanUtil.to_boolean("yes") is True
+        assert BooleanUtil.to_boolean("on") is True
+        assert BooleanUtil.to_boolean("1") is True
+        assert BooleanUtil.to_boolean("false") is False
+
+    def test_to_boolean_from_int(self):
+        assert BooleanUtil.to_boolean(1) is True
+        assert BooleanUtil.to_boolean(0) is False
+
+    def test_to_boolean_object(self):
+        assert BooleanUtil.to_boolean_object("true") is True
+
+    def test_is_boolean(self):
+        assert BooleanUtil.is_boolean("true") is True
+        assert BooleanUtil.is_boolean("false") is True
+        assert BooleanUtil.is_boolean("yes") is True
+        assert BooleanUtil.is_boolean("no") is True
+        assert BooleanUtil.is_boolean("abc") is False
+        assert BooleanUtil.is_boolean(None) is False
+
+    def test_to_string_true_false(self):
+        assert BooleanUtil.to_string_true_false(True) == "true"
+        assert BooleanUtil.to_string_true_false(False) == "false"
+
+    def test_to_string_yes_no(self):
+        assert BooleanUtil.to_string_yes_no(True) == "yes"
+        assert BooleanUtil.to_string_yes_no(False) == "no"
+
+    def test_to_string_on_off(self):
+        assert BooleanUtil.to_string_on_off(True) == "on"
+        assert BooleanUtil.to_string_on_off(False) == "off"
+
+    def test_xor_of_wrap(self):
+        assert BooleanUtil.xor_of_wrap(True, False) is True
+        assert BooleanUtil.xor_of_wrap(True, True) is False
+        assert BooleanUtil.xor_of_wrap(False, False) is False
+
+    def test_exactly_one_true(self):
+        assert BooleanUtil.exactly_one_true(True, False, False) is True
+        assert BooleanUtil.exactly_one_true(True, True, False) is False
+        assert BooleanUtil.exactly_one_true(False, False, False) is False
+
+    def test_if_true(self):
+        assert BooleanUtil.if_true(True, "yes", "no") == "yes"
+        assert BooleanUtil.if_true(False, "yes", "no") == "no"

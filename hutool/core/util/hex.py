@@ -138,3 +138,28 @@ class HexUtil:
         for i in range(0, len(hex_str), group_size):
             groups.append(hex_str[i : i + group_size].upper())
         return delimiter.join(groups)
+
+    @staticmethod
+    def is_hex_number(s: str) -> bool:
+        """判断字符串是否为合法的十六进制数。
+
+        :param s: 待检查的字符串
+        :return: 是否为合法十六进制数
+        """
+        if not s:
+            return False
+        s = s.strip()
+        if s.startswith("0x") or s.startswith("0X"):
+            s = s[2:]
+        if not s:
+            return False
+        return all(c in "0123456789abcdefABCDEF" for c in s)
+
+    @staticmethod
+    def to_unicode_hex(c: str) -> str:
+        """将字符转换为 Unicode 转义序列 ``\\uXXXX``。
+
+        :param c: 单个字符
+        :return: Unicode 转义序列
+        """
+        return f"\\u{ord(c):04x}"

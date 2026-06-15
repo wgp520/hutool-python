@@ -55,3 +55,34 @@ ReUtil.count(r"\d+", "a1b2c3")     # 3
 # 转义正则特殊字符
 ReUtil.escape("[hello]")  # "\\[hello\\]"
 ```
+
+### 查找与位置
+
+```python
+# 查找所有匹配
+ReUtil.find_all(r"\d+", "a1b2c3")            # ["1", "2", "3"]
+ReUtil.find_all_group0(r"\d+", "a1b2c3")     # ["1", "2", "3"]（等价于 find_all）
+ReUtil.find_all_group1(r"(\d)(\d)", "12 34") # ["2", "4"]（捕获组1）
+
+# 查找第一个数字
+ReUtil.find_first_number("abc123def")  # "123"
+
+# 匹配位置
+ReUtil.index_of(r"\d+", "abc123")       # 3（第一个匹配的起始位置）
+ReUtil.last_index_of(r"\d+", "a1b2c3")  # 4（最后一个匹配的起始位置）
+```
+
+### 删除匹配
+
+```python
+# 删除第一个/最后一个匹配
+ReUtil.del_first(r"\d+", "a1b2c3")  # "ab2c3"
+ReUtil.del_last(r"\d+", "a1b2c3")   # "a1b2c"
+
+# 删除匹配之前的内容
+ReUtil.del_pre(r"\d+", "abc123def")  # "123def"
+
+# 提取并删除
+ReUtil.extract_multi_and_del_pre(r"\d+", "abc123def456", 0)
+# ("123", "def456")
+```

@@ -278,6 +278,60 @@ class IdcardUtil:
         return idcard17 + check_code
 
     @staticmethod
+    def get_year_by_id_card(idcard: str) -> int:
+        """获取身份证号中的出生年份
+
+        :param idcard: 身份证号（15位或18位）
+        :return: 出生年份，无效输入返回 -1
+        """
+        if not idcard:
+            return -1
+        idcard = idcard.strip()
+        birth_str = IdcardUtil.get_birth(idcard)
+        if not birth_str or len(birth_str) < 4:
+            return -1
+        try:
+            return int(birth_str[:4])
+        except ValueError:
+            return -1
+
+    @staticmethod
+    def get_month_by_id_card(idcard: str) -> int:
+        """获取身份证号中的出生月份
+
+        :param idcard: 身份证号（15位或18位）
+        :return: 出生月份（1-12），无效输入返回 -1
+        """
+        if not idcard:
+            return -1
+        idcard = idcard.strip()
+        birth_str = IdcardUtil.get_birth(idcard)
+        if not birth_str or len(birth_str) < 6:
+            return -1
+        try:
+            return int(birth_str[4:6])
+        except ValueError:
+            return -1
+
+    @staticmethod
+    def get_day_by_id_card(idcard: str) -> int:
+        """获取身份证号中的出生日
+
+        :param idcard: 身份证号（15位或18位）
+        :return: 出生日（1-31），无效输入返回 -1
+        """
+        if not idcard:
+            return -1
+        idcard = idcard.strip()
+        birth_str = IdcardUtil.get_birth(idcard)
+        if not birth_str or len(birth_str) < 8:
+            return -1
+        try:
+            return int(birth_str[6:8])
+        except ValueError:
+            return -1
+
+    @staticmethod
     def hide(idcard: str) -> str:
         """隐藏身份证号中间部分
 

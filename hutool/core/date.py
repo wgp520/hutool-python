@@ -1515,3 +1515,223 @@ class DateUtil:
                 except ValueError:
                     continue
         raise ValueError(f"无法识别的日期时间格式: {value!r}")
+
+    @staticmethod
+    def is_last_day_of_month(dt: Union[DateTime, datetime, date]) -> bool:
+        """判断是否为当月最后一天。
+
+        :param dt: 日期
+        :return: 是否月末最后一天
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            dt = datetime(dt.year, dt.month, dt.day)
+        import calendar
+
+        last_day = calendar.monthrange(dt.year, dt.month)[1]
+        return dt.day == last_day
+
+    @staticmethod
+    def is_expired(
+        check_date: Union[DateTime, datetime, date],
+        begin: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+    ) -> bool:
+        """判断日期是否在有效期外（早于 begin 或晚于 end）。
+
+        :param check_date: 待检查的日期
+        :param begin: 有效期开始（含）
+        :param end: 有效期结束（含）
+        :return: 是否过期
+        """
+        c = DateUtil._to_pendulum(check_date)
+        b = DateUtil._to_pendulum(begin)
+        e = DateUtil._to_pendulum(end)
+        return c < b or c > e
+
+    @staticmethod
+    def is_overlap(
+        begin1: Union[DateTime, datetime, date],
+        end1: Union[DateTime, datetime, date],
+        begin2: Union[DateTime, datetime, date],
+        end2: Union[DateTime, datetime, date],
+    ) -> bool:
+        """判断两个时间段是否重叠。
+
+        :param begin1: 第一段开始
+        :param end1: 第一段结束
+        :param begin2: 第二段开始
+        :param end2: 第二段结束
+        :return: 是否重叠
+        """
+        b1 = DateUtil._to_pendulum(begin1)
+        e1 = DateUtil._to_pendulum(end1)
+        b2 = DateUtil._to_pendulum(begin2)
+        e2 = DateUtil._to_pendulum(end2)
+        return b1 <= e2 and b2 <= e1
+
+    @staticmethod
+    def is_between(
+        dt: Union[DateTime, datetime, date],
+        begin: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+    ) -> bool:
+        """判断日期是否在范围内（含边界）。
+
+        :param dt: 待检查的日期
+        :param begin: 开始（含）
+        :param end: 结束（含）
+        :return: 是否在范围内
+        """
+        d = DateUtil._to_pendulum(dt)
+        b = DateUtil._to_pendulum(begin)
+        e = DateUtil._to_pendulum(end)
+        return b <= d <= e
+
+    @staticmethod
+    def day_of_year(dt: Union[DateTime, datetime, date]) -> int:
+        """获取年内第几天（1~366）。
+
+        :param dt: 日期
+        :return: 年内第几天
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, datetime):
+            return dt.timetuple().tm_yday
+        return dt.timetuple().tm_yday
+
+    @staticmethod
+    def length_of_month(dt: Union[DateTime, datetime, date]) -> int:
+        """获取当月天数。
+
+        :param dt: 日期
+        :return: 当月天数
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        import calendar
+
+        return calendar.monthrange(dt.year, dt.month)[1]
+
+    @staticmethod
+    def length_of_year(year: int) -> int:
+        """获取当年天数。
+
+        :param year: 年份
+        :return: 当年天数（365 或 366）
+        """
+        return 366 if DateUtil.is_leap_year(year) else 365
+
+    @staticmethod
+    def millisecond(dt: Union[DateTime, datetime]) -> int:
+        """获取毫秒部分。
+
+        :param dt: 日期时间
+        :return: 毫秒数
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        return dt.microsecond // 1000
+
+    @staticmethod
+    def get_zodiac(month: int, day: int) -> str:
+        """获取星座。
+
+        :param month: 月份（1-12）
+        :param day: 日期（1-31）
+        :return: 星座名称
+        """
+        zodiac_dates = [
+            (1, 20, "水瓶座"),
+            (2, 19, "双鱼座"),
+            (3, 21, "白羊座"),
+            (4, 20, "金牛座"),
+            (5, 21, "双子座"),
+            (6, 22, "巨蟹座"),
+            (7, 23, "狮子座"),
+            (8, 23, "处女座"),
+            (9, 23, "天秤座"),
+            (10, 24, "天蝎座"),
+            (11, 23, "射手座"),
+            (12, 22, "摩羯座"),
+        ]
+        if day >= zodiac_dates[month - 1][1]:
+            return zodiac_dates[month - 1][2]
+        # 当月之前
+        return zodiac_dates[(month - 2) % 12][2]
+
+    @staticmethod
+    def get_chinese_zodiac(year: int) -> str:
+        """获取生肖。
+
+        :param year: 年份
+        :return: 生肖名称
+        """
+        animals = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"]
+        return animals[(year - 4) % 12]
+
+    @staticmethod
+    def compare(
+        d1: Union[DateTime, datetime, date, None],
+        d2: Union[DateTime, datetime, date, None],
+    ) -> int:
+        """null-safe 的日期比较。
+
+        :param d1: 日期1
+        :param d2: 日期2
+        :return: 负数/0/正数
+        """
+        if d1 is None and d2 is None:
+            return 0
+        if d1 is None:
+            return -1
+        if d2 is None:
+            return 1
+        p1 = DateUtil._to_pendulum(d1)
+        p2 = DateUtil._to_pendulum(d2)
+        if p1 < p2:
+            return -1
+        if p1 > p2:
+            return 1
+        return 0
+
+    @staticmethod
+    def convert_timezone(dt: Union[DateTime, datetime], from_tz: str, to_tz: str) -> datetime:
+        """时区转换。
+
+        :param dt: 日期时间
+        :param from_tz: 源时区，如 "Asia/Shanghai"
+        :param to_tz: 目标时区，如 "US/Eastern"
+        :return: 转换后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        import pytz
+
+        src_tz = pytz.timezone(from_tz)
+        dst_tz = pytz.timezone(to_tz)
+        if dt.tzinfo is None:
+            dt = src_tz.localize(dt)
+        return dt.astimezone(dst_tz)
+
+    @staticmethod
+    def format_chinese_date(dt: Union[DateTime, datetime, date]) -> str:
+        """中文日期格式，如 "2024年1月15日"。
+
+        :param dt: 日期
+        :return: 中文日期字符串
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        return f"{dt.year}年{dt.month}月{dt.day}日"
+
+    @staticmethod
+    def _to_pendulum(dt: Union[DateTime, datetime, date]):
+        """内部辅助：转为 pendulum 对象。"""
+        if isinstance(dt, DateTime):
+            return dt._dt
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            return pendulum.instance(datetime(dt.year, dt.month, dt.day))
+        return pendulum.instance(dt)

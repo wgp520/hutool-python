@@ -25,3 +25,12 @@ class TestCharsetUtil:
     def test_clean_bom(self):
         result = CharsetUtil.clean_bom("﻿hello")
         assert not result.startswith("﻿")
+
+    def test_clean_invalid(self):
+        # 包含 NUL(0x00) 和 BEL(0x07) 控制字符
+        assert CharsetUtil.clean_invalid("hello\x00world") == "helloworld"
+        assert CharsetUtil.clean_invalid("a\x07b\x08c") == "abc"
+        # 保留 \t \n \r
+        assert CharsetUtil.clean_invalid("a\tb\nc\rd") == "a\tb\nc\rd"
+        assert CharsetUtil.clean_invalid("") == ""
+        assert CharsetUtil.clean_invalid(None) == ""

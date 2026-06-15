@@ -23,4 +23,12 @@ HexUtil.hex_to_int("ff")                  # 255
 # 颜色转换
 HexUtil.encode_color_str((255, 128, 0))   # "#ff8000"
 HexUtil.decode_color("#ff8000")           # (255, 128, 0)
+
+# 判断是否十六进制数
+HexUtil.is_hex_number("0xff")    # True
+HexUtil.is_hex_number("abc")     # True
+HexUtil.is_hex_number("xyz")     # False
+
+# 字符转 Unicode 十六进制
+HexUtil.to_unicode_hex("中")    # "\\u4e2d"
 ```

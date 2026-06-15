@@ -39,3 +39,19 @@ class TestIdcardUtil:
     def test_is_valid_idcard_none(self):
         assert IdcardUtil.is_valid_idcard(None) is False
         assert IdcardUtil.is_valid_idcard("") is False
+
+    def test_get_year_by_id_card(self):
+        assert IdcardUtil.get_year_by_id_card("110101199003071234") == 1990
+        assert IdcardUtil.get_year_by_id_card("110101900307123") == 1990
+        assert IdcardUtil.get_year_by_id_card("") == -1
+        assert IdcardUtil.get_year_by_id_card(None) == -1
+
+    def test_get_month_by_id_card(self):
+        assert IdcardUtil.get_month_by_id_card("110101199003071234") == 3
+        assert IdcardUtil.get_month_by_id_card("110101900307123") == 3
+        assert IdcardUtil.get_month_by_id_card("") == -1
+
+    def test_get_day_by_id_card(self):
+        assert IdcardUtil.get_day_by_id_card("110101199003071234") == 7
+        assert IdcardUtil.get_day_by_id_card("110101900307123") == 7
+        assert IdcardUtil.get_day_by_id_card("") == -1

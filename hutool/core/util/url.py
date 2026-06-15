@@ -230,3 +230,53 @@ class URLUtil:
             return parsed.scheme.lower() == "http"
         except Exception:
             return False
+
+    @staticmethod
+    def build_query(params: Dict[str, str], is_encode: bool = True) -> str:
+        """将参数字典转换为查询字符串。
+
+        :param params: 参数字典
+        :param is_encode: 是否 URL 编码
+        :return: 查询字符串
+        """
+        if not params:
+            return ""
+        if is_encode:
+            return urlencode(params, encoding="utf-8")
+        return "&".join(f"{k}={v}" for k, v in params.items())
+
+    @staticmethod
+    def encode_blank(url: str) -> str:
+        """编码 URL 中的空格（替换为 %20）。
+
+        :param url: URL 字符串
+        :return: 编码后的 URL
+        """
+        if not url:
+            return url
+        return url.replace(" ", "%20")
+
+    @staticmethod
+    def complete_url(base_url: str, relative_path: str) -> str:
+        """补全相对 URL。
+
+        :param base_url: 基础 URL
+        :param relative_path: 相对路径
+        :return: 完整 URL
+        """
+        from urllib.parse import urljoin
+
+        return urljoin(base_url, relative_path)
+
+    @staticmethod
+    def get_params(url: str) -> Dict[str, str]:
+        """解析 URL 参数为字典。
+
+        :param url: URL 字符串
+        :return: 参数字典
+        """
+        try:
+            parsed = urlparse(url)
+            return URLUtil.decode_param_map(parsed.query)
+        except Exception:
+            return {}

@@ -29,4 +29,9 @@ CharsetUtil.default_charset()  # "utf-8"
 
 # 清理 BOM
 clean = CharsetUtil.clean_bom("﻿内容")  # "内容"
+
+# 清理无效控制字符
+CharsetUtil.clean_invalid("hello\x00world")  # "helloworld"
+CharsetUtil.clean_invalid("a\x07b\x08c")     # "abc"（清除 BEL/BS）
+CharsetUtil.clean_invalid("a\tb\nc")          # "a\tb\nc"（保留 TAB/LF/CR）
 ```

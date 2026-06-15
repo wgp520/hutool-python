@@ -36,4 +36,28 @@ users = BeanUtil.to_bean_list(
     [{"name": "张三"}, {"name": "李四"}],
     User
 )
+
+# 判断是否为 Bean
+BeanUtil.is_bean(User())    # True
+BeanUtil.is_bean("string")  # False
+BeanUtil.is_bean({})        # False
+
+# 判断 Bean 字段是否全为 None
+user3 = User()
+user3.name = None
+user3.age = None
+BeanUtil.is_empty(user3)       # True
+BeanUtil.is_not_empty(user)    # True（user.name 非 None）
+
+# 判断 Bean 是否有 None 字段
+BeanUtil.has_null_field(user3)  # True
+
+# 遍历字段应用函数
+result = {}
+BeanUtil.desc_for_each({"a": 1, "b": 2}, lambda k, v: result.update({k: v}))
+# result = {"a": 1, "b": 2}
+
+# 用默认值填充 None 字段
+BeanUtil.fill_bean(user3, lambda key: f"default_{key}")
+# user3.name = "default_name", user3.age = "default_age"
 ```

@@ -45,6 +45,34 @@ NetUtil.ping("baidu.com")              # True/False
 NetUtil.is_open("baidu.com", 80)       # True（端口是否开放）
 ```
 
+### 新增方法
+
+```python
+# 判断内网 IP（别名）
+NetUtil.is_inner_ip("192.168.1.1")   # True
+NetUtil.is_inner_ip("8.8.8.8")       # False
+
+# IP 是否在 CIDR 范围内
+NetUtil.is_in_range("192.168.1.100", "192.168.1.0/24")  # True
+NetUtil.is_in_range("10.0.0.1", "192.168.1.0/24")       # False
+
+# 遮蔽 IP 地址
+NetUtil.hide_ip_part("192.168.1.100")   # "192.168.1.*"
+
+# 获取本机 IPv4 列表
+NetUtil.local_ipv4s()   # ["192.168.1.100", ...]
+
+# 获取本机主机名
+NetUtil.get_local_host_name()   # "my-computer"
+
+# 解析主机名
+NetUtil.get_ip_by_host("localhost")   # "127.0.0.1"
+
+# 补全相对 URL
+NetUtil.to_absolute_url("http://example.com/a/b", "../c")
+# "http://example.com/c"
+```
+
 ## Ipv4Util
 
 IPv4 地址的高级操作：

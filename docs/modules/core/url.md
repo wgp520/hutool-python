@@ -33,4 +33,22 @@ URLUtil.decode_param_map("city=%E5%8C%97%E4%BA%AC&type=test")
 # 标准化
 URLUtil.normalize("https://example.com//path/../file")
 # "https://example.com/file"
+
+# 构建查询字符串
+URLUtil.build_query({"city": "北京", "type": "test"})
+# "city=%E5%8C%97%E4%BA%AC&type=test"
+URLUtil.build_query({"key": "val"}, is_encode=False)
+# "key=val"
+
+# 编码 URL 中的空白
+URLUtil.encode_blank("https://example.com/hello world")
+# "https://example.com/hello%20world"
+
+# 补全相对 URL
+URLUtil.complete_url("https://example.com/a/b", "../c")
+# "https://example.com/c"
+
+# 解析 URL 参数
+URLUtil.get_params("https://example.com?a=1&b=2")
+# {"a": "1", "b": "2"}
 ```

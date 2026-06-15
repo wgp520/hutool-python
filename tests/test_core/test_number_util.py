@@ -252,3 +252,65 @@ class TestNumberUtil:
         for val in [0, 1, 255, 256, 65535, 12345678]:
             length = max(1, (val.bit_length() + 7) // 8)
             assert NumberUtil.bytes_to_int(NumberUtil.int_to_bytes(val, length)) == val
+
+    def test_range_basic(self):
+        assert NumberUtil.range_(0, 5) == [0, 1, 2, 3, 4]
+
+    def test_range_step(self):
+        assert NumberUtil.range_(0, 10, 3) == [0, 3, 6, 9]
+
+    def test_append_range(self):
+        lst = [10, 20]
+        result = NumberUtil.append_range(lst, 0, 3)
+        assert result == [10, 20, 0, 1, 2]
+
+    def test_generate_by_set(self):
+        result = NumberUtil.generate_by_set(3, 1, 10)
+        assert len(result) == 3
+        assert len(set(result)) == 3  # 不重复
+        assert all(1 <= x <= 10 for x in result)
+
+    def test_calculate_basic(self):
+        assert NumberUtil.calculate("1 + 2 * 3") == 7.0
+
+    def test_calculate_parentheses(self):
+        assert NumberUtil.calculate("(1 + 2) * 3") == 9.0
+
+    def test_calculate_unsafe_raises(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            NumberUtil.calculate("import os")
+
+    def test_sqrt(self):
+        result = NumberUtil.sqrt(2, 5)
+        assert abs(float(result) - 1.41421) < 0.0001
+
+    def test_sqrt_perfect(self):
+        assert NumberUtil.sqrt(9) == Decimal("3.0000000000")
+
+    def test_sqrt_negative_raises(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            NumberUtil.sqrt(-1)
+
+    def test_is_integer(self):
+        assert NumberUtil.is_integer("123") is True
+        assert NumberUtil.is_integer("12.3") is False
+
+    def test_is_double(self):
+        assert NumberUtil.is_double("12.3") is True
+        assert NumberUtil.is_double("123") is False
+
+    def test_parse_number_int(self):
+        assert NumberUtil.parse_number("123") == 123
+
+    def test_parse_number_float(self):
+        assert NumberUtil.parse_number("3.14") == 3.14
+
+    def test_parse_long(self):
+        assert NumberUtil.parse_long("123456789") == 123456789
+
+    def test_parse_long_default(self):
+        assert NumberUtil.parse_long("abc", -1) == -1

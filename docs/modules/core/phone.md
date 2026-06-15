@@ -16,6 +16,8 @@ PhoneUtil.is_mobile_tw("0912345678")    # True（台湾）
 PhoneUtil.is_mobile_mo("66123456")      # True（澳门）
 PhoneUtil.is_phone("010-12345678")      # True（座机）
 
+PhoneUtil.is_mobile_simple("10000000000") # True（宽松判断）
+
 # 脱敏
 PhoneUtil.hide_before("13812345678")    # "****5678"
 PhoneUtil.hide_between("13812345678")   # "138****5678"

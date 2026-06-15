@@ -27,6 +27,11 @@ IdcardUtil.convert15to18("110101900101123")  # 转为18位
 
 # 脱敏
 IdcardUtil.hide(idcard)               # "110101****1234"
+
+# 提取出生年/月/日
+IdcardUtil.get_year_by_id_card(idcard)   # 1990
+IdcardUtil.get_month_by_id_card(idcard)  # 1
+IdcardUtil.get_day_by_id_card(idcard)    # 1
 ```
 
 ### 身份证号码结构

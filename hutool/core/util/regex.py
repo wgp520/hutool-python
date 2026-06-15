@@ -229,3 +229,127 @@ class ReUtil:
                 return ""
 
         return re.sub(r"\$\$|\$\d+", _replace_ref, template)
+
+    @staticmethod
+    def find_all(pattern: str, content: str, group_index: int = 0) -> List[str]:
+        """查找所有匹配（与 get_all 相同）。
+
+        :param pattern: 正则表达式
+        :param content: 被匹配的内容
+        :param group_index: 匹配组索引
+        :return: 所有匹配的字符串列表
+        """
+        return ReUtil.get_all(pattern, content, group_index)
+
+    @staticmethod
+    def find_all_group0(pattern: str, content: str) -> List[str]:
+        """查找所有 group(0) 匹配。
+
+        :param pattern: 正则表达式
+        :param content: 被匹配的内容
+        :return: 所有完整匹配的列表
+        """
+        return ReUtil.get_all(pattern, content, group_index=0)
+
+    @staticmethod
+    def find_all_group1(pattern: str, content: str) -> List[str]:
+        """查找所有 group(1) 匹配。
+
+        :param pattern: 正则表达式
+        :param content: 被匹配的内容
+        :return: 所有 group(1) 匹配的列表
+        """
+        return ReUtil.get_all(pattern, content, group_index=1)
+
+    @staticmethod
+    def find_first_number(content: str) -> Optional[str]:
+        """查找第一个数字。
+
+        :param content: 被匹配的内容
+        :return: 第一个数字字符串，无匹配返回 None
+        """
+        return ReUtil.get(r"\d+", content)
+
+    @staticmethod
+    def index_of(pattern: str, content: str) -> int:
+        """第一个匹配的起始位置。
+
+        :param pattern: 正则表达式
+        :param content: 被匹配的内容
+        :return: 起始位置，无匹配返回 -1
+        """
+        match = re.search(pattern, content)
+        return match.start() if match else -1
+
+    @staticmethod
+    def last_index_of(pattern: str, content: str) -> int:
+        """最后一个匹配的起始位置。
+
+        :param pattern: 正则表达式
+        :param content: 被匹配的内容
+        :return: 最后匹配的起始位置，无匹配返回 -1
+        """
+        matches = list(re.finditer(pattern, content))
+        return matches[-1].start() if matches else -1
+
+    @staticmethod
+    def del_first(pattern: str, content: str) -> str:
+        """删除第一个匹配。
+
+        :param pattern: 正则表达式
+        :param content: 被处理的字符串
+        :return: 删除第一个匹配后的字符串
+        """
+        return re.sub(pattern, "", content, count=1)
+
+    @staticmethod
+    def del_last(pattern: str, content: str) -> str:
+        """删除最后一个匹配。
+
+        :param pattern: 正则表达式
+        :param content: 被处理的字符串
+        :return: 删除最后一个匹配后的字符串
+        """
+        matches = list(re.finditer(pattern, content))
+        if not matches:
+            return content
+        last = matches[-1]
+        return content[: last.start()] + content[last.end() :]
+
+    @staticmethod
+    def del_pre(pattern: str, content: str) -> Optional[str]:
+        """删除匹配及其之前的内容。
+
+        :param pattern: 正则表达式
+        :param content: 被处理的字符串
+        :return: 删除匹配前内容后的字符串，无匹配返回 None
+        """
+        match = re.search(pattern, content)
+        if match is None:
+            return None
+        return content[match.end() :]
+
+    @staticmethod
+    def extract_multi_and_del_pre(pattern: str, content: str, group_index: int = 0) -> List[str]:
+        """提取所有匹配并删除匹配前的内容（原地消费）。
+
+        依次匹配，每次匹配后从内容中删除该匹配及其之前的部分，
+        返回所有匹配结果。
+
+        :param pattern: 正则表达式
+        :param content: 被处理的字符串
+        :param group_index: 匹配组索引
+        :return: 所有匹配的列表
+        """
+        results: List[str] = []
+        remaining = content
+        while remaining:
+            match = re.search(pattern, remaining)
+            if match is None:
+                break
+            try:
+                results.append(match.group(group_index))
+            except IndexError:
+                pass
+            remaining = remaining[match.end() :]
+        return results

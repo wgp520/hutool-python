@@ -76,6 +76,20 @@ class PhoneUtil:
         return PhoneUtil.is_mobile(phone) or bool(PhoneUtil._FIXED_PHONE_PATTERN.match(phone))
 
     @staticmethod
+    def is_mobile_simple(phone: str) -> bool:
+        """简单判断是否为手机号（11位数字，1开头）
+
+        相比 :meth:`is_mobile` 规则更宽松，仅检查长度和首位。
+
+        :param phone: 手机号字符串
+        :return: 是否可能是手机号
+        """
+        if not phone:
+            return False
+        phone = phone.strip()
+        return len(phone) == 11 and phone[0] == "1" and phone.isdigit()
+
+    @staticmethod
     def hide_before(phone: str) -> str:
         """隐藏前3位，如 138****1234
 

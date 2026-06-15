@@ -232,3 +232,22 @@ class TestCollUtilSafeMinMax:
     def test_find_duplicates_strings(self):
         """测试字符串查重"""
         assert CollUtil.find_duplicates(["a", "b", "a", "c", "b"]) == ["a", "b"]
+
+    def test_is_sub(self):
+        assert CollUtil.is_sub([1, 2], [1, 2, 3]) is True
+        assert CollUtil.is_sub([1, 4], [1, 2, 3]) is False
+        assert CollUtil.is_sub([], [1, 2, 3]) is True
+        assert CollUtil.is_sub(None, [1, 2]) is True
+        assert CollUtil.is_sub([1], None) is False
+
+    def test_intersection(self):
+        result = CollUtil.intersection([1, 2, 3, 2], [2, 3, 4])
+        assert result == [2, 3]
+        assert CollUtil.intersection([], [1, 2]) == []
+        assert CollUtil.intersection(None, [1, 2]) == []
+        assert CollUtil.intersection([1, 2], None) == []
+
+    def test_disjunction(self):
+        result = sorted(CollUtil.disjunction([1, 2, 3], [2, 3, 4]))
+        assert result == [1, 4]
+        assert CollUtil.disjunction(None, None) == []

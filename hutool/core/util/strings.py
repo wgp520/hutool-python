@@ -2282,6 +2282,724 @@ class CharSequenceUtil:
             start = idx + len(sub)
         return indices
 
+    # ------------------------------------------------------------------
+    # 比较与判断
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def equals_any(string: Optional[str], *candidates: Optional[str]) -> bool:
+        """
+        判断 *string* 是否等于候选中的任一个。
+
+        :param string: 待比较的字符串
+        :param candidates: 候选字符串
+        :return: 匹配任一候选返回 True
+        """
+        if string is None:
+            return any(c is None for c in candidates)
+        return any(string == c for c in candidates)
+
+    @staticmethod
+    def equals_any_ignore_case(string: Optional[str], *candidates: Optional[str]) -> bool:
+        """
+        判断 *string* 是否等于候选中的任一个（忽略大小写）。
+
+        :param string: 待比较的字符串
+        :param candidates: 候选字符串
+        :return: 匹配任一候选返回 True
+        """
+        if string is None:
+            return any(c is None for c in candidates)
+        lower = string.lower()
+        return any(c is not None and lower == c.lower() for c in candidates)
+
+    @staticmethod
+    def equals_char_at(string: Optional[str], index: int, char: str) -> bool:
+        """
+        判断 *string* 的第 *index* 个字符是否为 *char*。
+
+        :param string: 待检查的字符串
+        :param index: 字符索引
+        :param char: 期望的字符
+        :return: 是否匹配
+        """
+        if string is None or index < 0 or index >= len(string):
+            return False
+        return string[index] == char
+
+    @staticmethod
+    def contains_only(string: Optional[str], chars: str) -> bool:
+        """
+        判断 *string* 是否全部由 *chars* 中的字符组成。
+
+        :param string: 待检查的字符串
+        :param chars: 允许的字符集
+        :return: 是否全部由指定字符组成
+        """
+        if CharSequenceUtil.is_empty(string):
+            return False
+        char_set = set(chars)
+        return all(c in char_set for c in string)
+
+    @staticmethod
+    def has_letter(string: Optional[str]) -> bool:
+        """
+        判断 *string* 是否包含至少一个字母。
+
+        :param string: 待检查的字符串
+        :return: 是否包含字母
+        """
+        if string is None:
+            return False
+        return any(c.isalpha() for c in string)
+
+    @staticmethod
+    def is_sub_equals(
+        string: Optional[str],
+        sub: Optional[str],
+        from_index: int = 0,
+        ignore_case: bool = False,
+    ) -> bool:
+        """
+        判断从 *from_index* 开始的子串是否等于 *sub*。
+
+        :param string: 待检查的字符串
+        :param sub: 期望的子串
+        :param from_index: 起始索引
+        :param ignore_case: 是否忽略大小写
+        :return: 是否匹配
+        """
+        if string is None or sub is None:
+            return string is None and sub is None
+        if from_index < 0 or from_index > len(string):
+            return False
+        actual = string[from_index : from_index + len(sub)]
+        if ignore_case:
+            return actual.lower() == sub.lower()
+        return actual == sub
+
+    @staticmethod
+    def is_surround(string: Optional[str], prefix: str, suffix: str) -> bool:
+        """
+        判断 *string* 是否以 *prefix* 开头且以 *suffix* 结尾。
+
+        :param string: 待检查的字符串
+        :param prefix: 前缀
+        :param suffix: 后缀
+        :return: 是否包裹
+        """
+        if string is None:
+            return False
+        return string.startswith(prefix) and string.endswith(suffix)
+
+    @staticmethod
+    def is_wrap(string: Optional[str], wrap: str) -> bool:
+        """
+        判断 *string* 是否被 *wrap* 包裹（前后相同）。
+
+        :param string: 待检查的字符串
+        :param wrap: 包裹字符/串
+        :return: 是否被包裹
+        """
+        if string is None:
+            return False
+        return string.startswith(wrap) and string.endswith(wrap) and len(string) >= len(wrap) * 2
+
+    @staticmethod
+    def is_lower_case(string: Optional[str]) -> bool:
+        """
+        判断 *string* 是否全部为小写（至少一个字母）。
+
+        :param string: 待检查的字符串
+        :return: 是否全小写
+        """
+        if CharSequenceUtil.is_empty(string):
+            return False
+        return string == string.lower() and any(c.isalpha() for c in string)
+
+    @staticmethod
+    def is_upper_case(string: Optional[str]) -> bool:
+        """
+        判断 *string* 是否全部为大写（至少一个字母）。
+
+        :param string: 待检查的字符串
+        :return: 是否全大写
+        """
+        if CharSequenceUtil.is_empty(string):
+            return False
+        return string == string.upper() and any(c.isalpha() for c in string)
+
+    @staticmethod
+    def is_all_char_match(string: Optional[str], match_func: Callable[[str], bool]) -> bool:
+        """
+        判断 *string* 的所有字符是否都满足 *match_func*。
+
+        :param string: 待检查的字符串
+        :param match_func: 匹配函数
+        :return: 是否全部匹配
+        """
+        if CharSequenceUtil.is_empty(string):
+            return False
+        return all(match_func(c) for c in string)
+
+    # ------------------------------------------------------------------
+    # 公共前缀/后缀 & 比较
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def common_prefix(*strings: Optional[str]) -> str:
+        """
+        返回多个字符串的最长公共前缀。
+
+        :param strings: 字符串列表
+        :return: 公共前缀
+        """
+        valid = [s for s in strings if s is not None]
+        if not valid:
+            return ""
+        prefix = valid[0]
+        for s in valid[1:]:
+            while not s.startswith(prefix):
+                prefix = prefix[:-1]
+                if not prefix:
+                    return ""
+        return prefix
+
+    @staticmethod
+    def common_suffix(*strings: Optional[str]) -> str:
+        """
+        返回多个字符串的最长公共后缀。
+
+        :param strings: 字符串列表
+        :return: 公共后缀
+        """
+        valid = [s for s in strings if s is not None]
+        if not valid:
+            return ""
+        suffix = valid[0]
+        for s in valid[1:]:
+            while not s.endswith(suffix):
+                suffix = suffix[1:]
+                if not suffix:
+                    return ""
+        return suffix
+
+    @staticmethod
+    def compare(string1: Optional[str], string2: Optional[str], null_is_greater: bool = False) -> int:
+        """
+        null-safe 的字符串比较。
+
+        :param string1: 字符串1
+        :param string2: 字符串2
+        :param null_is_greater: None 是否视为更大
+        :return: 负数/0/正数
+        """
+        if string1 == string2:
+            return 0
+        if string1 is None:
+            return 1 if null_is_greater else -1
+        if string2 is None:
+            return -1 if null_is_greater else 1
+        return (string1 > string2) - (string1 < string2)
+
+    @staticmethod
+    def compare_ignore_case(string1: Optional[str], string2: Optional[str], null_is_greater: bool = False) -> int:
+        """
+        null-safe 忽略大小写的字符串比较。
+
+        :param string1: 字符串1
+        :param string2: 字符串2
+        :param null_is_greater: None 是否视为更大
+        :return: 负数/0/正数
+        """
+        if string1 == string2:
+            return 0
+        if string1 is None:
+            return 1 if null_is_greater else -1
+        if string2 is None:
+            return -1 if null_is_greater else 1
+        s1 = string1.lower()
+        s2 = string2.lower()
+        return (s1 > s2) - (s1 < s2)
+
+    @staticmethod
+    def concat(*strings: Optional[str]) -> str:
+        """
+        拼接多个字符串，None 视为空串。
+
+        :param strings: 字符串列表
+        :return: 拼接结果
+        """
+        return "".join("" if s is None else s for s in strings)
+
+    # ------------------------------------------------------------------
+    # 截取与格式化
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def brief(string: Optional[str], max_length: int) -> Optional[str]:
+        """
+        截断 *string* 到 *max_length*，超出部分用 ``...`` 替代。
+        总长度不超过 *max_length*。
+
+        :param string: 待截断的字符串
+        :param max_length: 最大总长度（含省略号）
+        :return: 截断后的字符串
+        """
+        if string is None:
+            return None
+        if max_length < 4:
+            return string[:max_length]
+        if len(string) <= max_length:
+            return string
+        return string[: max_length - 3] + "..."
+
+    @staticmethod
+    def max_length(string: Optional[str], max_length: int) -> Optional[str]:
+        """
+        强制截断 *string* 到 *max_length* 长度。
+
+        :param string: 待截断的字符串
+        :param max_length: 最大长度
+        :return: 截断后的字符串
+        """
+        if string is None:
+            return None
+        if len(string) > max_length:
+            return string[:max_length]
+        return string
+
+    @staticmethod
+    def fix_length(string: Optional[str], fixed_length: int, pad_char: str = " ") -> str:
+        """
+        将 *string* 填充或截断到 *fixed_length*。
+
+        - 长度不足时右侧用 *pad_char* 填充
+        - 长度超出时截断
+
+        :param string: 待处理的字符串
+        :param fixed_length: 固定长度
+        :param pad_char: 填充字符
+        :return: 固定长度的字符串
+        """
+        if string is None:
+            return pad_char * fixed_length
+        if len(string) < fixed_length:
+            return string.ljust(fixed_length, pad_char)
+        if len(string) > fixed_length:
+            return string[:fixed_length]
+        return string
+
+    @staticmethod
+    def hide(string: Optional[str], start: int, end: int) -> Optional[str]:
+        """
+        隐藏 *string* 中 *start* 到 *end* 索引的字符，用 ``*`` 替代。
+
+        :param string: 待处理的字符串
+        :param start: 起始索引（含）
+        :param end: 结束索引（不含）
+        :return: 隐藏后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        chars = list(string)
+        for i in range(max(0, start), min(len(chars), end)):
+            chars[i] = "*"
+        return "".join(chars)
+
+    @staticmethod
+    def move(string: Optional[str], start: int, end: int, move_length: int) -> Optional[str]:
+        """
+        移动 *string* 中 *start* 到 *end* 区间的字符 *move_length* 位。
+        正数右移，负数左移。
+
+        :param string: 待处理的字符串
+        :param start: 起始索引（含）
+        :param end: 结束索引（不含）
+        :param move_length: 移动长度
+        :return: 移动后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        if start < 0:
+            start = 0
+        if end > len(string):
+            end = len(string)
+        if start >= end:
+            return string
+        chars = list(string)
+        segment = chars[start:end]
+        remaining = chars[:start] + chars[end:]
+        insert_pos = start + move_length
+        insert_pos = max(0, min(insert_pos, len(remaining)))
+        result = remaining[:insert_pos] + segment + remaining[insert_pos:]
+        return "".join(result)
+
+    @staticmethod
+    def normalize(string: Optional[str]) -> Optional[str]:
+        """
+        合并连续空白为单个空格，并去除首尾空白。
+
+        :param string: 待规范化的字符串
+        :return: 规范化后的字符串
+        """
+        if string is None:
+            return None
+        return " ".join(string.split())
+
+    @staticmethod
+    def total_length(*strings: Optional[str]) -> int:
+        """
+        计算多个字符串的总长度。
+
+        :param strings: 字符串列表
+        :return: 总长度
+        """
+        return sum(len(s) for s in strings if s is not None)
+
+    @staticmethod
+    def indexed_format(template: str, *args: Any) -> str:
+        """
+        使用索引格式化模板，如 ``"{0} + {1} = {2}"``。
+
+        :param template: 模板字符串
+        :param args: 位置参数
+        :return: 格式化后的字符串
+        """
+        result = template
+        for i, arg in enumerate(args):
+            result = result.replace("{" + str(i) + "}", str(arg))
+        return result
+
+    # ------------------------------------------------------------------
+    # 包裹与填充
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def wrap(string: Optional[str], prefix: str, suffix: Optional[str] = None) -> Optional[str]:
+        """
+        包裹 *string*。如果只传一个包裹参数，前后相同。
+
+        :param string: 待包裹的字符串
+        :param prefix: 前缀
+        :param suffix: 后缀（默认同前缀）
+        :return: 包裹后的字符串
+        """
+        if string is None:
+            return None
+        if suffix is None:
+            suffix = prefix
+        return prefix + string + suffix
+
+    @staticmethod
+    def wrap_if_missing(string: Optional[str], prefix: str, suffix: Optional[str] = None) -> Optional[str]:
+        """
+        仅在缺失时包裹 *string*。
+
+        :param string: 待检查的字符串
+        :param prefix: 前缀
+        :param suffix: 后缀（默认同前缀）
+        :return: 包裹后的字符串
+        """
+        if string is None:
+            return None
+        if suffix is None:
+            suffix = prefix
+        result = string
+        if not result.startswith(prefix):
+            result = prefix + result
+        if not result.endswith(suffix):
+            result = result + suffix
+        return result
+
+    @staticmethod
+    def wrap_all(arr: Optional[list], prefix: str, suffix: Optional[str] = None) -> Optional[list]:
+        """
+        包裹列表中每个元素。
+
+        :param arr: 字符串列表
+        :param prefix: 前缀
+        :param suffix: 后缀（默认同前缀）
+        :return: 包裹后的列表
+        """
+        if arr is None:
+            return None
+        if suffix is None:
+            suffix = prefix
+        return [prefix + s + suffix if s is not None else s for s in arr]
+
+    @staticmethod
+    def wrap_all_if_missing(arr: Optional[list], prefix: str, suffix: Optional[str] = None) -> Optional[list]:
+        """
+        仅在缺失时包裹列表中每个元素。
+
+        :param arr: 字符串列表
+        :param prefix: 前缀
+        :param suffix: 后缀（默认同前缀）
+        :return: 包裹后的列表
+        """
+        if arr is None:
+            return None
+        if suffix is None:
+            suffix = prefix
+        return [CharSequenceUtil.wrap_if_missing(s, prefix, suffix) if s is not None else s for s in arr]
+
+    @staticmethod
+    def pad_after(string: Optional[str], length: int, pad_char: str = " ") -> Optional[str]:
+        """
+        右填充 *string* 到 *length*。
+
+        :param string: 待填充的字符串
+        :param length: 目标长度
+        :param pad_char: 填充字符
+        :return: 填充后的字符串
+        """
+        if string is None:
+            return pad_char * length
+        return string.ljust(length, pad_char)
+
+    @staticmethod
+    def pad_pre(string: Optional[str], length: int, pad_char: str = " ") -> Optional[str]:
+        """
+        左填充 *string* 到 *length*。
+
+        :param string: 待填充的字符串
+        :param length: 目标长度
+        :param pad_char: 填充字符
+        :return: 填充后的字符串
+        """
+        if string is None:
+            return pad_char * length
+        return string.rjust(length, pad_char)
+
+    @staticmethod
+    def repeat_by_length(string: Optional[str], length: int) -> Optional[str]:
+        """
+        重复 *string* 直到达到 *length* 长度（截断多余部分）。
+
+        :param string: 待重复的字符串
+        :param length: 目标长度
+        :return: 重复后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        repeat_count = (length + len(string) - 1) // len(string)
+        return (string * repeat_count)[:length]
+
+    # ------------------------------------------------------------------
+    # 替换与移除
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def replace_ignore_case(string: Optional[str], search_str: str, replacement: str) -> Optional[str]:
+        """
+        忽略大小写替换所有匹配。
+
+        :param string: 待处理的字符串
+        :param search_str: 搜索字符串
+        :param replacement: 替换字符串
+        :return: 替换后的字符串
+        """
+        if CharSequenceUtil.is_empty(string) or CharSequenceUtil.is_empty(search_str):
+            return string
+        pattern = re.compile(re.escape(search_str), re.IGNORECASE)
+        return pattern.sub(replacement, string)
+
+    @staticmethod
+    def replace_last(string: Optional[str], regex: str, replacement: str) -> Optional[str]:
+        """
+        替换最后一个正则匹配。
+
+        :param string: 待处理的字符串
+        :param regex: 正则表达式
+        :param replacement: 替换字符串
+        :return: 替换后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        pattern = re.compile(regex)
+        matches = list(pattern.finditer(string))
+        if not matches:
+            return string
+        last = matches[-1]
+        return string[: last.start()] + replacement + string[last.end() :]
+
+    @staticmethod
+    def remove_all_prefix(string: Optional[str], prefix: Optional[str]) -> Optional[str]:
+        """
+        移除所有匹配的前缀（循环移除）。
+
+        :param string: 待处理的字符串
+        :param prefix: 前缀
+        :return: 移除前缀后的字符串
+        """
+        if CharSequenceUtil.is_empty(string) or CharSequenceUtil.is_empty(prefix):
+            return string
+        while string.startswith(prefix):
+            string = string[len(prefix) :]
+        return string
+
+    @staticmethod
+    def remove_all_suffix(string: Optional[str], suffix: Optional[str]) -> Optional[str]:
+        """
+        移除所有匹配的后缀（循环移除）。
+
+        :param string: 待处理的字符串
+        :param suffix: 后缀
+        :return: 移除后缀后的字符串
+        """
+        if CharSequenceUtil.is_empty(string) or CharSequenceUtil.is_empty(suffix):
+            return string
+        while string.endswith(suffix):
+            string = string[: -len(suffix)]
+        return string
+
+    @staticmethod
+    def remove_suf_and_lower_first(string: Optional[str], suffix: Optional[str]) -> Optional[str]:
+        """
+        移除后缀并将首字母转为小写。
+
+        :param string: 待处理的字符串
+        :param suffix: 后缀
+        :return: 处理后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        result = string
+        if suffix and result.endswith(suffix):
+            result = result[: -len(suffix)]
+        return CharSequenceUtil.lower_first(result)
+
+    # ------------------------------------------------------------------
+    # 分割与转换
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def split_trim(string: Optional[str], separator: str = ",") -> List[str]:
+        """
+        按 *separator* 分割 *string* 并 trim 每一部分。
+
+        :param string: 待分割的字符串
+        :param separator: 分隔符
+        :return: 分割并 trim 后的列表
+        """
+        if CharSequenceUtil.is_empty(string):
+            return []
+        return [part.strip() for part in string.split(separator)]
+
+    @staticmethod
+    def strip_all(*strings: Optional[str]) -> List[Optional[str]]:
+        """
+        对多个字符串执行 strip。
+
+        :param strings: 字符串列表
+        :return: strip 后的列表
+        """
+        return [s.strip() if s is not None else None for s in strings]
+
+    @staticmethod
+    def swap_case(string: Optional[str]) -> Optional[str]:
+        """
+        大小写互转。
+
+        :param string: 待转换的字符串
+        :return: 转换后的字符串
+        """
+        if string is None:
+            return None
+        return string.swapcase()
+
+    @staticmethod
+    def to_symbol_case(string: Optional[str], symbol: str = "-") -> Optional[str]:
+        """
+        将驼峰命名转换为符号分隔命名（如 kebab-case）。
+
+        :param string: 待转换的字符串
+        :param symbol: 分隔符号
+        :return: 转换后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        # 先转下划线格式再替换
+        result = re.sub(r"([A-Z])", lambda m: symbol + m.group(1).lower(), string)
+        # 处理可能的前导分隔符
+        result = result.lstrip(symbol)
+        # 统一已有的下划线/连字符
+        result = result.replace("_", symbol).replace("-", symbol)
+        # 移除连续的分隔符
+        while symbol * 2 in result:
+            result = result.replace(symbol * 2, symbol)
+        return result
+
+    @staticmethod
+    def trim_to_null(string: Optional[str]) -> Optional[str]:
+        """
+        trim 后如果为空返回 None。
+
+        :param string: 待处理的字符串
+        :return: trim 后的字符串或 None
+        """
+        if string is None:
+            return None
+        result = string.strip()
+        return result if result else None
+
+    # ------------------------------------------------------------------
+    # 空值处理 & 杂项
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def empty_if_null(string: Optional[str]) -> str:
+        """
+        如果 *string* 为 None，返回空串。与 :meth:`empty_if_none` 相同。
+
+        :param string: 待检查的字符串
+        :return: 非 None 的字符串
+        """
+        return "" if string is None else string
+
+    @staticmethod
+    def desensitized(string: Optional[str], start_len: int, end_len: int) -> Optional[str]:
+        """
+        脱敏：保留前 *start_len* 和后 *end_len* 个字符，中间用 ``*`` 替代。
+
+        :param string: 待脱敏的字符串
+        :param start_len: 前面保留的长度
+        :param end_len: 后面保留的长度
+        :return: 脱敏后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        length = len(string)
+        if start_len + end_len >= length:
+            return "*" * length
+        return string[:start_len] + "*" * (length - start_len - end_len) + string[length - end_len :]
+
+    @staticmethod
+    def compare_version(version1: Optional[str], version2: Optional[str]) -> int:
+        """
+        比较两个版本号字符串（如 "1.2.3" vs "1.2.4"）。
+
+        :param version1: 版本号1
+        :param version2: 版本号2
+        :return: 负数/0/正数
+        """
+        if version1 == version2:
+            return 0
+        if version1 is None:
+            return -1
+        if version2 is None:
+            return 1
+        parts1 = version1.split(".")
+        parts2 = version2.split(".")
+        max_len = max(len(parts1), len(parts2))
+        for i in range(max_len):
+            v1 = int(parts1[i]) if i < len(parts1) else 0
+            v2 = int(parts2[i]) if i < len(parts2) else 0
+            if v1 != v2:
+                return 1 if v1 > v2 else -1
+        return 0
+
 
 # ---------------------------------------------------------------------------
 # StrPool

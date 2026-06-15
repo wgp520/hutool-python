@@ -212,3 +212,82 @@ class BeanUtil:
             except Exception as e:
                 if not ignore_error:
                     raise ValueError(f"设置字段{key}失败: {e}") from e
+
+    @staticmethod
+    def is_bean(obj: Any) -> bool:
+        """判断对象是否为 Bean（有公共属性的对象）。
+
+        :param obj: 待检查的对象
+        :return: 是否为 Bean
+        """
+        if obj is None or isinstance(obj, (int, float, str, bool, bytes, list, tuple, dict)):
+            return False
+        return hasattr(obj, "__dict__") and any(not k.startswith("_") for k in obj.__dict__)
+
+    @staticmethod
+    def is_empty(bean: Any) -> bool:
+        """判断 Bean 的所有公共字段是否都为 None。
+
+        :param bean: Bean 对象
+        :return: 是否所有字段为 None
+        """
+        if bean is None:
+            return True
+        if hasattr(bean, "__dict__"):
+            for key, value in bean.__dict__.items():
+                if not key.startswith("_") and value is not None:
+                    return False
+        return True
+
+    @staticmethod
+    def is_not_empty(bean: Any) -> bool:
+        """判断 Bean 是否有非 None 字段。
+
+        :param bean: Bean 对象
+        :return: 是否有非 None 字段
+        """
+        return not BeanUtil.is_empty(bean)
+
+    @staticmethod
+    def has_null_field(bean: Any) -> bool:
+        """判断 Bean 是否有 None 字段。
+
+        :param bean: Bean 对象
+        :return: 是否有 None 字段
+        """
+        if bean is None:
+            return True
+        if hasattr(bean, "__dict__"):
+            for key, value in bean.__dict__.items():
+                if not key.startswith("_") and value is None:
+                    return True
+        return False
+
+    @staticmethod
+    def desc_for_each(obj: Any, func: callable) -> None:
+        """遍历对象的公共字段并应用函数。
+
+        :param obj: 对象或字典
+        :param func: 接受 (key, value) 参数的函数
+        """
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                func(key, value)
+        elif hasattr(obj, "__dict__"):
+            for key, value in obj.__dict__.items():
+                if not key.startswith("_"):
+                    func(key, value)
+
+    @staticmethod
+    def fill_bean(obj: Any, supplier: callable) -> None:
+        """用默认值填充 Bean 中为 None 的字段。
+
+        :param obj: Bean 对象
+        :param supplier: 接受字段名返回默认值的函数
+        """
+        if obj is None:
+            return
+        if hasattr(obj, "__dict__"):
+            for key in list(obj.__dict__.keys()):
+                if not key.startswith("_") and getattr(obj, key) is None:
+                    setattr(obj, key, supplier(key))

@@ -160,6 +160,150 @@ StrUtil.de_umlaut("München")  # "Muenchen"
 StrUtil.levenshtein_distance("kitten", "sitting")  # 3
 ```
 
+### 比较与判断
+
+```python
+# equalsAny / equalsAnyIgnoreCase
+StrUtil.equals_any("hello", "hi", "hello", "hey")           # True
+StrUtil.equals_any_ignore_case("Hello", "hi", "HELLO")     # True
+
+# equalsCharAt
+StrUtil.equals_char_at("hello", 0, "h")  # True
+
+# containsOnly
+StrUtil.contains_only("abc", "abcdef")  # True
+StrUtil.contains_only("abc", "ab")       # False
+
+# hasLetter
+StrUtil.has_letter("hello123")  # True
+StrUtil.has_letter("12345")     # False
+
+# isSubEquals
+StrUtil.is_sub_equals("hello world", "world", 6)  # True
+
+# isSurround / isWrap
+StrUtil.is_surround("[hello]", "[", "]")  # True
+StrUtil.is_wrap("***hello***", "***")     # True
+
+# isLowerCase / isUpperCase
+StrUtil.is_lower_case("hello")  # True
+StrUtil.is_upper_case("HELLO")  # True
+
+# isAllCharMatch
+StrUtil.is_all_char_match("123", str.isdigit)  # True
+```
+
+### 公共前缀/后缀与比较
+
+```python
+StrUtil.common_prefix("flower", "flow", "flight")  # "fl"
+StrUtil.common_suffix("testing", "running", "ing")  # "ing"
+
+# null-safe 比较
+StrUtil.compare("abc", "abd")           # -1
+StrUtil.compare_ignore_case("ABC", "abc")  # 0
+
+# 拼接（None 视为空串）
+StrUtil.concat("a", None, "b", "c")  # "abc"
+```
+
+### 截取与格式化
+
+```python
+# brief — 截断并加省略号（总长度不超过 max_length）
+StrUtil.brief("hello world", 8)  # "hello..."
+
+# maxLength — 强制截断
+StrUtil.max_length("hello world", 5)  # "hello"
+
+# fixLength — 填充或截断到固定长度
+StrUtil.fix_length("hi", 5)       # "hi   "
+StrUtil.fix_length("hello", 3)    # "hel"
+
+# hide — 隐藏区间字符
+StrUtil.hide("13812345678", 3, 7)  # "138****5678"
+
+# normalize — 合并连续空白
+StrUtil.normalize("  hello   world  ")  # "hello world"
+
+# totalLength — 多字符串总长度
+StrUtil.total_length("abc", None, "de")  # 5
+
+# indexedFormat — 索引格式化
+StrUtil.indexed_format("{0} + {1} = {2}", 1, 2, 3)  # "1 + 2 = 3"
+```
+
+### 包裹与填充
+
+```python
+# wrap / wrapIfMissing
+StrUtil.wrap("hello", "***")             # "***hello***"
+StrUtil.wrap_if_missing("***hello***", "***")  # "***hello***"
+StrUtil.wrap_if_missing("hello", "***")        # "***hello***"
+
+# wrapAll / wrapAllIfMissing
+StrUtil.wrap_all(["a", "b"], "[", "]")  # ["[a]", "[b]"]
+
+# padAfter / padPre
+StrUtil.pad_after("hi", 5)  # "hi   "
+StrUtil.pad_pre("hi", 5)    # "   hi"
+
+# repeatByLength
+StrUtil.repeat_by_length("abc", 7)  # "abcabca"
+```
+
+### 高级替换与移除
+
+```python
+# replaceIgnoreCase
+StrUtil.replace_ignore_case("Hello HELLO", "hello", "hi")  # "hi hi"
+
+# replaceLast
+StrUtil.replace_last("a.b.c", "\\.", "-")  # "a.b-c"
+
+# removeAllPrefix / removeAllSuffix
+StrUtil.remove_all_prefix("///path", "/")  # "path"
+StrUtil.remove_all_suffix("path///", "/")  # "path"
+
+# removeSufAndLowerFirst
+StrUtil.remove_suf_and_lower_first("UserNameDTO", "DTO")  # "userName"
+```
+
+### 分割与转换
+
+```python
+# splitTrim — 分割后 trim
+StrUtil.split_trim(" a , b , c ")  # ["a", "b", "c"]
+
+# stripAll
+StrUtil.strip_all(" a ", " b ", None)  # ["a", "b", None]
+
+# swapCase
+StrUtil.swap_case("Hello World")  # "hELLO wORLD"
+
+# toSymbolCase — 驼峰转符号分隔
+StrUtil.to_symbol_case("helloWorld", "-")  # "hello-world"
+
+# trimToNull
+StrUtil.trim_to_null("  hello  ")  # "hello"
+StrUtil.trim_to_null("   ")         # None
+```
+
+### 空值处理与杂项
+
+```python
+# emptyIfNull
+StrUtil.empty_if_null(None)     # ""
+StrUtil.empty_if_null("hello")  # "hello"
+
+# desensitized — 脱敏
+StrUtil.desensitized("13812345678", 3, 4)  # "138****5678"
+
+# compareVersion — 版本号比较
+StrUtil.compare_version("1.2.3", "1.2.4")  # -1
+StrUtil.compare_version("2.0", "1.9.9")    # 1
+```
+
 ---
 
 ```{note}

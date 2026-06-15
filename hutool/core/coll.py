@@ -625,6 +625,60 @@ class CollUtil:
             return default if default is not None else []
         return coll
 
+    # ── 集合运算 ──────────────────────────────────────────────
+
+    @staticmethod
+    def is_sub(list1: list, list2: list) -> bool:
+        """判断 list1 是否为 list2 的子集
+
+        :param list1: 候选子集
+        :param list2: 候选超集
+        :return: 是否为子集
+        """
+        if list1 is None:
+            return True
+        if list2 is None:
+            return False
+        set2 = set(list2)
+        return all(item in set2 for item in list1)
+
+    @staticmethod
+    def intersection(coll1: Iterable, coll2: Iterable) -> list:
+        """求两个集合的交集，保持元素首次出现顺序
+
+        :param coll1: 第一个集合
+        :param coll2: 第二个集合
+        :return: 交集列表
+        """
+        if coll1 is None or coll2 is None:
+            return []
+        set2 = set(coll2)
+        seen: set = set()
+        result: list = []
+        for item in coll1:
+            if item in set2 and item not in seen:
+                seen.add(item)
+                result.append(item)
+        return result
+
+    @staticmethod
+    def disjunction(coll1: Iterable, coll2: Iterable) -> list:
+        """求两个集合的对称差集（在 coll1 或 coll2 中但不同时在两者中的元素）
+
+        :param coll1: 第一个集合
+        :param coll2: 第二个集合
+        :return: 对称差集列表
+        """
+        if coll1 is None and coll2 is None:
+            return []
+        if coll1 is None:
+            return list(coll2)
+        if coll2 is None:
+            return list(coll1)
+        set1 = set(coll1)
+        set2 = set(coll2)
+        return list(set1.symmetric_difference(set2))
+
 
 class ListUtil:
     """列表工具类"""

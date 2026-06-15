@@ -286,3 +286,90 @@ class NetUtil:
             return True
         except (socket.timeout, OSError):
             return False
+
+    @staticmethod
+    def is_inner_ip(ip: str) -> bool:
+        """判断是否为内网 IP（与 is_inner 相同）。
+
+        :param ip: IP 地址字符串
+        :return: 是否为内网 IP
+        """
+        return NetUtil.is_inner(ip)
+
+    @staticmethod
+    def is_in_range(ip: str, cidr: str) -> bool:
+        """判断 IP 是否在 CIDR 范围内。
+
+        :param ip: IP 地址字符串
+        :param cidr: CIDR 格式字符串，如 "192.168.1.0/24"
+        :return: 是否在范围内
+        """
+        try:
+            return ipaddress.ip_address(ip) in ipaddress.ip_network(cidr, strict=False)
+        except ValueError:
+            return False
+
+    @staticmethod
+    def hide_ip_part(ip: str) -> str:
+        """遮蔽 IP 地址，将最后一段替换为 ``*``。
+
+        :param ip: IP 地址
+        :return: 遮蔽后的 IP，如 "192.168.1.*"
+        """
+        if not ip:
+            return ip
+        parts = ip.split(".")
+        if len(parts) == 4:
+            parts[-1] = "*"
+            return ".".join(parts)
+        return ip
+
+    @staticmethod
+    def local_ipv4s() -> list:
+        """获取本机所有 IPv4 地址列表。
+
+        :return: IPv4 地址列表
+        """
+        ips = []
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None, AF_INET):
+                ip = info[4][0]
+                if ip not in ips:
+                    ips.append(ip)
+        except socket.gaierror:
+            pass
+        if NetUtil.LOCAL_IP not in ips:
+            ips.insert(0, NetUtil.LOCAL_IP)
+        return ips
+
+    @staticmethod
+    def get_local_host_name() -> str:
+        """获取本机主机名（与 get_localhost 相同）。
+
+        :return: 主机名
+        """
+        return NetUtil.get_localhost()
+
+    @staticmethod
+    def get_ip_by_host(hostname: str) -> str:
+        """解析主机名获取 IP 地址。
+
+        :param hostname: 主机名
+        :return: IP 地址，解析失败返回空字符串
+        """
+        try:
+            return socket.gethostbyname(hostname)
+        except socket.gaierror:
+            return ""
+
+    @staticmethod
+    def to_absolute_url(base: str, relative: str) -> str:
+        """将相对 URL 补全为绝对 URL。
+
+        :param base: 基础 URL
+        :param relative: 相对 URL
+        :return: 绝对 URL
+        """
+        from urllib.parse import urljoin
+
+        return urljoin(base, relative)

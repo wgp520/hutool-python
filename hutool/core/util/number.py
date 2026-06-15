@@ -878,3 +878,131 @@ class NumberUtil:
                 raise ValueError(f"非法 base62 字符: {c!r}")
             n = n * base + reverse[c]
         return n
+
+    @staticmethod
+    def range_(start: int, end: int, step: int = 1) -> List[int]:
+        """
+        生成数字范围列表（含 start，不含 end）。
+
+        :param start: 起始值（含）
+        :param end: 结束值（不含）
+        :param step: 步长，默认 1
+        :return: 数字列表
+        """
+        return list(range(start, end, step))
+
+    @staticmethod
+    def append_range(collection: List[int], start: int, end: int, step: int = 1) -> List[int]:
+        """
+        追加数字范围到列表。
+
+        :param collection: 目标列表
+        :param start: 起始值（含）
+        :param end: 结束值（不含）
+        :param step: 步长，默认 1
+        :return: 追加后的列表
+        """
+        collection.extend(range(start, end, step))
+        return collection
+
+    @staticmethod
+    def generate_by_set(count: int, min_val: int, max_val: int) -> List[int]:
+        """
+        生成 count 个 [min_val, max_val] 范围内的不重复随机数。
+
+        :param count: 个数
+        :param min_val: 最小值（含）
+        :param max_val: 最大值（含）
+        :return: 不重复随机数列表
+        :raises ValueError: 范围不足时
+        """
+        population = max_val - min_val + 1
+        if count > population:
+            raise ValueError(f"范围 [{min_val}, {max_val}] 不足以生成 {count} 个不重复随机数")
+        return random.sample(range(min_val, max_val + 1), count)
+
+    @staticmethod
+    def calculate(expression: str) -> float:
+        """
+        计算数学表达式（仅支持安全的数字和运算符）。
+
+        支持: ``+``, ``-``, ``*``, ``/``, ``//``, ``%``, ``**``, 括号。
+
+        :param expression: 数学表达式字符串
+        :return: 计算结果
+        :raises ValueError: 表达式不安全时
+        """
+        # 仅允许数字、运算符、括号、空格和小数点
+        safe_pattern = r"^[\d\s\+\-\*\/\%\.\(\)\*\*]+$"
+        if not re.match(safe_pattern, expression):
+            raise ValueError(f"不安全的表达式: {expression}")
+        try:
+            result = eval(expression)
+        except Exception as e:
+            raise ValueError(f"表达式计算失败: {expression}") from e
+        return float(result)
+
+    @staticmethod
+    def sqrt(x: Union[int, float, str, Decimal], scale: int = 10) -> Decimal:
+        """
+        精确平方根。
+
+        :param x: 待开方的数值
+        :param scale: 小数位数
+        :return: 平方根
+        """
+        x_dec = NumberUtil.to_decimal(x)
+        if x_dec < 0:
+            raise ValueError(f"无法对负数开平方: {x}")
+        ctx = decimal.Context(prec=scale + 10)
+        result = x_dec.sqrt(ctx)
+        return NumberUtil.round(result, scale)
+
+    @staticmethod
+    def is_integer(s: Union[str, None]) -> bool:
+        """
+        判断字符串是否为整数（与 is_int 相同）。
+
+        :param s: 字符串
+        :return: 是否为整数
+        """
+        return NumberUtil.is_int(s)
+
+    @staticmethod
+    def is_double(s: str) -> bool:
+        """
+        判断字符串是否为浮点数（与 is_float 相同）。
+
+        :param s: 字符串
+        :return: 是否为浮点数
+        """
+        return NumberUtil.is_float(s)
+
+    @staticmethod
+    def parse_number(s: str) -> Union[int, float]:
+        """
+        解析字符串为数字，整数返回 int，小数返回 float。
+
+        :param s: 数字字符串
+        :return: int 或 float
+        :raises ValueError: 解析失败时
+        """
+        if StrUtil.is_blank(s):
+            raise ValueError("空字符串无法解析为数字")
+        if "." in s or "e" in s.lower():
+            return float(s)
+        return int(s)
+
+    @staticmethod
+    def parse_long(number_str: str, default_value: int = 0) -> int:
+        """
+        解析字符串为长整数（Python int）。
+
+        :param number_str: 数字字符串
+        :param default_value: 解析失败时的默认值
+        :return: 长整数
+        """
+        try:
+            return int(number_str)
+        except (ValueError, TypeError):
+            return default_value

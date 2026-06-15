@@ -42,3 +42,29 @@ class TestURLUtil:
         encoded = URLUtil.encode(original)
         decoded = URLUtil.decode(encoded)
         assert decoded == original
+
+    def test_build_query_encoded(self):
+        result = URLUtil.build_query({"key": "hello world", "num": "1"})
+        assert "key=hello+world" in result or "key=hello%20world" in result
+        assert "num=1" in result
+
+    def test_build_query_not_encoded(self):
+        result = URLUtil.build_query({"key": "val"}, is_encode=False)
+        assert result == "key=val"
+
+    def test_build_query_empty(self):
+        assert URLUtil.build_query({}) == ""
+
+    def test_encode_blank(self):
+        assert URLUtil.encode_blank("hello world") == "hello%20world"
+
+    def test_encode_blank_none(self):
+        assert URLUtil.encode_blank("") == ""
+
+    def test_complete_url(self):
+        result = URLUtil.complete_url("http://example.com/a/b", "../c")
+        assert result == "http://example.com/c"
+
+    def test_get_params(self):
+        result = URLUtil.get_params("http://example.com?a=1&b=2")
+        assert result == {"a": "1", "b": "2"}

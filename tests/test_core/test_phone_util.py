@@ -43,3 +43,12 @@ class TestPhoneUtil:
     def test_sub_after(self):
         result = PhoneUtil.sub_after("13800138000")
         assert result == "8000"
+
+    def test_is_mobile_simple(self):
+        assert PhoneUtil.is_mobile_simple("13800138000") is True
+        assert PhoneUtil.is_mobile_simple("10000000000") is True
+        assert PhoneUtil.is_mobile_simple("23800138000") is False  # 不是1开头
+        assert PhoneUtil.is_mobile_simple("1380013800") is False  # 10位
+        assert PhoneUtil.is_mobile_simple("138001380001") is False  # 12位
+        assert PhoneUtil.is_mobile_simple("") is False
+        assert PhoneUtil.is_mobile_simple(None) is False

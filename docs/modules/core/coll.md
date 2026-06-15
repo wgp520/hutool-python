@@ -89,6 +89,20 @@ CollUtil.safe_max([3, 1])   # 3
 CollUtil.find_duplicates([1, 2, 2, 3, 3, 3])  # [2, 3]
 ```
 
+### 集合运算
+
+```python
+# 判断子集
+CollUtil.is_sub([1, 2], [1, 2, 3])   # True
+CollUtil.is_sub([1, 4], [1, 2, 3])   # False
+
+# 交集
+CollUtil.intersection([1, 2, 3], [2, 3, 4])  # [2, 3]
+
+# 对称差集
+CollUtil.disjunction([1, 2, 3], [2, 3, 4])  # [1, 4]
+```
+
 ## ListUtil
 
 `ListUtil` 提供列表特有的操作：

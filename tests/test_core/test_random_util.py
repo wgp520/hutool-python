@@ -87,3 +87,62 @@ class TestRandomUtil:
         pairs = [(1, "x"), (2, "y"), (3, "z")]
         for _ in range(100):
             assert RandomUtil.weighted_choice(pairs) in ("x", "y", "z")
+
+    def test_random_chinese(self):
+        result = RandomUtil.random_chinese(5)
+        assert len(result) == 5
+        for ch in result:
+            assert 0x4E00 <= ord(ch) <= 0x9FFF
+
+    def test_random_char(self):
+        result = RandomUtil.random_char("abc")
+        assert result in ("a", "b", "c")
+
+    def test_random_char_empty_raises(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            RandomUtil.random_char("")
+
+    def test_random_day(self):
+        from datetime import datetime
+
+        start = datetime(2024, 1, 1)
+        end = datetime(2024, 12, 31)
+        day = RandomUtil.random_day(start, end)
+        assert start <= day < end
+
+    def test_random_ints(self):
+        result = RandomUtil.random_ints(5, 1, 10)
+        assert len(result) == 5
+        assert all(1 <= x < 10 for x in result)
+
+    def test_random_string_without_str(self):
+        exclude = "aeiou"
+        result = RandomUtil.random_string_without_str(20, exclude)
+        assert len(result) == 20
+        for ch in result:
+            assert ch not in exclude
+
+    def test_random_string_lower_without_str(self):
+        exclude = "xyz"
+        result = RandomUtil.random_string_lower_without_str(20, exclude)
+        assert len(result) == 20
+        for ch in result:
+            assert ch not in exclude
+
+    def test_random_element_weighted(self):
+        """测试别名方法"""
+        pairs = [(1, "a"), (9, "b")]
+        results = {RandomUtil.random_element_weighted(pairs) for _ in range(50)}
+        assert "b" in results
+
+    def test_random_ele_with_condition(self):
+        data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        result = RandomUtil.random_ele_with_condition(data, lambda x: x > 5, 3)
+        assert len(result) == 3
+        assert all(x > 5 for x in result)
+
+    def test_random_ele_with_condition_empty(self):
+        result = RandomUtil.random_ele_with_condition([1, 2], lambda x: x > 10)
+        assert result == []

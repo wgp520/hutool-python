@@ -94,3 +94,16 @@ class CharsetUtil:
         if content and content[0] == "﻿":
             return content[1:]
         return content
+
+    @staticmethod
+    def clean_invalid(content: str) -> str:
+        """
+        清除字符串中的无效控制字符（ASCII 0x00~0x1F 中除 \\t、\\n、\\r 以外的字符）。
+
+        :param content: 待清理的字符串
+        :return: 清除无效字符后的字符串
+        """
+        if not content:
+            return content or ""
+        # 保留 \t(0x09) \n(0x0A) \r(0x0D)，清除其余 0x00~0x1F 控制字符
+        return "".join(ch for ch in content if ord(ch) >= 0x20 or ch in ("\t", "\n", "\r"))

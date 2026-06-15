@@ -203,3 +203,66 @@ DateUtil.time_ago(time.time() - 86400*3) # "3天前"
 # ISO 时间戳
 DateUtil.iso_timestamp()  # "2024-01-01T12:00:00.000Z"
 ```
+
+### 判断
+
+```python
+from datetime import date
+
+# 是否月末最后一天
+DateUtil.is_last_day_of_month(date(2024, 2, 29))  # True（闰年）
+DateUtil.is_last_day_of_month(date(2024, 3, 15))  # False
+
+# 是否在有效期外
+DateUtil.is_expired(date(2025, 1, 1), date(2024, 1, 1), date(2024, 12, 31))  # True
+
+# 两个时间段是否重叠
+DateUtil.is_overlap(date(2024, 1, 1), date(2024, 6, 30),
+                    date(2024, 3, 1), date(2024, 12, 31))  # True
+
+# 日期是否在范围内
+DateUtil.is_between(date(2024, 3, 15), date(2024, 1, 1), date(2024, 12, 31))  # True
+```
+
+### 日期属性
+
+```python
+from datetime import date
+
+# 年内第几天
+DateUtil.day_of_year(date(2024, 3, 1))   # 61
+
+# 当月天数
+DateUtil.length_of_month(date(2024, 2, 1))  # 29（闰年）
+DateUtil.length_of_month(date(2023, 2, 1))  # 28
+
+# 当年天数
+DateUtil.length_of_year(date(2024, 1, 1))   # 366（闰年）
+
+# 毫秒部分
+DateUtil.millisecond(DateUtil.parse("2024-01-01 12:00:00.123"))  # 123
+
+# 星座
+DateUtil.get_zodiac(3, 21)   # "白羊座"
+
+# 生肖
+DateUtil.get_chinese_zodiac(2024)  # "龙"
+```
+
+### 日期比较与时区
+
+```python
+from datetime import date
+
+# null-safe 日期比较
+DateUtil.compare(date(2024, 1, 1), date(2024, 1, 2))   # -1
+DateUtil.compare(date(2024, 1, 2), date(2024, 1, 1))   #  1
+DateUtil.compare(None, date(2024, 1, 1))                # -1
+
+# 时区转换
+dt = DateUtil.parse("2024-03-15 12:00:00")
+DateUtil.convert_timezone(dt, "Asia/Shanghai", "America/New_York")
+
+# 中文日期格式
+DateUtil.format_chinese_date(date(2024, 3, 15))  # "2024年03月15日"
+```

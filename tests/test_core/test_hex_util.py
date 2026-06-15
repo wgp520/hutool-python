@@ -39,3 +39,15 @@ class TestHexUtil:
         hex_str = HexUtil.encode_hex_str(original)
         decoded = HexUtil.decode_hex(hex_str)
         assert decoded == original
+
+    def test_is_hex_number_true(self):
+        assert HexUtil.is_hex_number("1A2B3C") is True
+        assert HexUtil.is_hex_number("0xFF") is True
+
+    def test_is_hex_number_false(self):
+        assert HexUtil.is_hex_number("xyz") is False
+        assert HexUtil.is_hex_number("") is False
+
+    def test_to_unicode_hex(self):
+        assert HexUtil.to_unicode_hex("中") == "\\u4e2d"
+        assert HexUtil.to_unicode_hex("A") == "\\u0041"
