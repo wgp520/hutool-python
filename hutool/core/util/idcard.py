@@ -332,6 +332,172 @@ class IdcardUtil:
             return -1
 
     @staticmethod
+    def convert_18_to_15(idcard18: str) -> str:
+        """18位身份证转15位（去掉年份前两位和校验码）
+
+        :param idcard18: 18位身份证号
+        :return: 15位身份证号，无效输入返回空字符串
+        """
+        if not idcard18:
+            return ""
+        idcard18 = idcard18.strip().upper()
+        if len(idcard18) != 18:
+            return ""
+        if not IdcardUtil.is_valid_card18(idcard18):
+            return ""
+        return idcard18[:6] + idcard18[8:17]
+
+    @staticmethod
+    def is_valid_tw_card(idcard: str) -> bool:
+        """校验台湾身份证号
+
+        台湾身份证号格式：1位字母 + 9位数字
+        校验规则：字母对应数字 + 9位数字加权求和，末位为校验码
+
+        :param idcard: 台湾身份证号
+        :return: 是否有效
+        """
+        if not idcard:
+            return False
+        idcard = idcard.strip().upper()
+        if len(idcard) != 10:
+            return False
+        if not idcard[0].isalpha() or not idcard[1:].isdigit():
+            return False
+
+        # 字母对应值：A=10, B=11, ..., Z=35
+        letter_val = ord(idcard[0]) - ord("A") + 10
+        # 拆分为两位数字
+        n1 = letter_val // 10
+        n2 = letter_val % 10
+
+        # 加权因子：1, 9, 8, 7, 6, 5, 4, 3, 2, 1（含首位拆分的两位）
+        weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+        digits = [n1, n2] + [int(c) for c in idcard[1:]]
+        total = sum(d * w for d, w in zip(digits, weights))
+        return total % 10 == 0
+
+    @staticmethod
+    def is_valid_hk_card(idcard: str) -> bool:
+        """校验香港身份证号
+
+        香港身份证号格式：1-2位字母 + 6位数字 + 1位校验码（括号内数字或字母）
+
+        :param idcard: 香港身份证号
+        :return: 是否有效
+        """
+        import re as _re
+
+        if not idcard:
+            return False
+        idcard = idcard.strip().upper()
+        # 格式：字母(1-2位) + 数字(6位) + (校验码)
+        m = _re.match(r"^([A-Z]{1,2})(\d{6})\((\d|[A-Z])\)$", idcard)
+        if not m:
+            return False
+
+        prefix = m.group(1)
+        digits_str = m.group(2)
+        check_char = m.group(3)
+
+        # 计算加权和
+        # 前缀字母: A=1, B=2, ..., Z=26
+        chars = prefix + digits_str
+        total = 0
+        weight = len(chars) + 1  # 权重从 (长度+1) 递减到 2
+        for ch in chars:
+            if ch.isalpha():
+                val = ord(ch) - ord("A") + 1
+            else:
+                val = int(ch)
+            total += val * weight
+            weight -= 1
+
+        remainder = total % 11
+        if remainder == 0:
+            expected = "0"
+        elif remainder == 1:
+            expected = "A"
+        else:
+            expected = str(11 - remainder)
+
+        return check_char == expected
+
+    @staticmethod
+    def get_birth_date(idcard: str) -> date:
+        """获取出生日期对象
+
+        :param idcard: 身份证号
+        :return: 出生日期，无效输入返回 None
+        """
+        if not idcard:
+            return None
+        idcard = idcard.strip()
+        birth_str = IdcardUtil.get_birth(idcard)
+        if not birth_str or len(birth_str) != 8:
+            return None
+        try:
+            return date(int(birth_str[:4]), int(birth_str[4:6]), int(birth_str[6:8]))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_city_code(idcard: str) -> str:
+        """获取身份证号中的城市编码（地址码后4位）
+
+        :param idcard: 身份证号
+        :return: 城市编码，无效输入返回空字符串
+        """
+        if not idcard:
+            return ""
+        idcard = idcard.strip()
+        if len(idcard) not in (15, 18):
+            return ""
+        return idcard[4:6]
+
+    @staticmethod
+    def get_district_code(idcard: str) -> str:
+        """获取身份证号中的区县编码（地址码后2位）
+
+        :param idcard: 身份证号
+        :return: 区县编码，无效输入返回空字符串
+        """
+        if not idcard:
+            return ""
+        idcard = idcard.strip()
+        if len(idcard) not in (15, 18):
+            return ""
+        return idcard[:6]
+
+    @staticmethod
+    def get_idcard_info(idcard: str) -> dict:
+        """获取身份证号的完整信息
+
+        :param idcard: 身份证号
+        :return: 信息字典，包含 province, city_code, gender, birth_date, age, is_valid
+        """
+        if not idcard:
+            return {}
+        idcard = idcard.strip()
+        is_valid = IdcardUtil.is_valid_idcard(idcard)
+        province = IdcardUtil.get_province(idcard)
+        city_code = IdcardUtil.get_city_code(idcard)
+        district_code = IdcardUtil.get_district_code(idcard)
+        gender = IdcardUtil.get_gender(idcard)
+        birth_date = IdcardUtil.get_birth_date(idcard)
+        age = IdcardUtil.get_age(idcard)
+        return {
+            "idcard": idcard,
+            "is_valid": is_valid,
+            "province": province,
+            "city_code": city_code,
+            "district_code": district_code,
+            "gender": gender,
+            "birth_date": str(birth_date) if birth_date else "",
+            "age": age,
+        }
+
+    @staticmethod
     def hide(idcard: str) -> str:
         """隐藏身份证号中间部分
 

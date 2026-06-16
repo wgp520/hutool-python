@@ -43,3 +43,36 @@ class YamlUtil:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(result)
         return result
+
+    @staticmethod
+    def dump_to(data, stream) -> None:
+        """将数据序列化为YAML并写入流
+
+        :param data: Python对象
+        :param stream: 文件对象
+        """
+        yaml.dump(data, stream, allow_unicode=True, default_flow_style=False, sort_keys=False)
+
+    @staticmethod
+    def load_as_dict(path: str) -> dict:
+        """加载YAML为字典
+
+        :param path: YAML文件路径
+        :return: 字典
+        """
+        result = YamlUtil.load(path)
+        if not isinstance(result, dict):
+            raise TypeError(f"YAML文件内容不是字典类型，实际类型: {type(result).__name__}")
+        return result
+
+    @staticmethod
+    def load_as_list(path: str) -> list:
+        """加载YAML为列表
+
+        :param path: YAML文件路径
+        :return: 列表
+        """
+        result = YamlUtil.load(path)
+        if not isinstance(result, list):
+            raise TypeError(f"YAML文件内容不是列表类型，实际类型: {type(result).__name__}")
+        return result

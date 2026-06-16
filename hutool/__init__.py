@@ -18,8 +18,8 @@ __version__ = "1.1.0"
 
 # 核心工具类 - 顶层快捷导入
 # 其他模块
-from .cache import CacheUtil, FIFOCache, LFUCache, LRUCache, TimedCache
-from .captcha import ArithmeticCaptcha, CaptchaUtil, LineCaptcha
+from .cache import CacheUtil, FIFOCache, LFUCache, LRUCache, TimedCache, WeakCache
+from .captcha import ArithmeticCaptcha, CaptchaUtil, CircleCaptcha, LineCaptcha
 from .core.bank import BankUtil
 from .core.bean import BeanUtil
 from .core.codec import Base32, Base64
@@ -46,6 +46,8 @@ from .core.text.unicode import UnicodeUtil
 from .core.timing import TimingUtil, timethis
 from .core.tree import TreeNode, TreeUtil
 from .core.util.array import ArrayUtil
+from .core.util.base32_util import Base32Util
+from .core.util.base64_util import Base64Util
 from .core.util.boolean import BooleanUtil
 from .core.util.charset import CharsetUtil
 from .core.util.check import CheckUtil
@@ -95,7 +97,9 @@ __all__ = [
     # core 其他
     "BankUtil",
     "Base32",
+    "Base32Util",
     "Base64",
+    "Base64Util",
     "BeanUtil",
     "BiMap",
     "BitStatusUtil",
@@ -107,6 +111,7 @@ __all__ = [
     "CharUtil",
     "CharsetUtil",
     "CheckUtil",
+    "CircleCaptcha",
     "ClassUtil",
     "CollUtil",
     "ColorUtil",
@@ -195,6 +200,7 @@ __all__ = [
     "UnicodeUtil",
     "UserAgentUtil",
     "VersionUtil",
+    "WeakCache",
     "WorkdayUtil",
     "XmlUtil",
     "YamlUtil",

@@ -24,3 +24,33 @@ class TestSignUtil:
         result1 = SignUtil.sign_params(params, "secret1", algorithm="md5")
         result2 = SignUtil.sign_params(params, "secret2", algorithm="md5")
         assert result1 != result2
+
+    def test_sign_params_md5(self):
+        params = {"a": "1", "b": "2"}
+        result = SignUtil.sign_params_md5(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "md5")
+
+    def test_sign_params_sha1(self):
+        params = {"a": "1"}
+        result = SignUtil.sign_params_sha1(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "sha1")
+
+    def test_sign_params_sha256(self):
+        params = {"a": "1"}
+        result = SignUtil.sign_params_sha256(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "sha256")
+
+    def test_sign_params_hmac_md5(self):
+        params = {"a": "1"}
+        result = SignUtil.sign_params_hmac_md5(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "hmac_md5")
+
+    def test_sign_params_hmac_sha1(self):
+        params = {"a": "1"}
+        result = SignUtil.sign_params_hmac_sha1(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "hmac_sha1")
+
+    def test_sign_params_hmac_sha256(self):
+        params = {"a": "1"}
+        result = SignUtil.sign_params_hmac_sha256(params, "secret")
+        assert result == SignUtil.sign_params(params, "secret", "hmac_sha256")

@@ -838,6 +838,97 @@ class MapUtil:
             return []
         return [m[k] for k in keys if k in m]
 
+    @staticmethod
+    def new_tree_map() -> OrderedDict:
+        """创建有序字典（TreeMap 等价）。
+
+        :return: OrderedDict 实例
+        """
+        return OrderedDict()
+
+    @staticmethod
+    def new_identity_map() -> dict:
+        """创建 IdentityMap（使用 id() 做键的字典）。
+
+        注意：返回普通 dict，调用方需使用 ``id(obj)`` 做键。
+
+        :return: 空字典
+        """
+        return {}
+
+    @staticmethod
+    def new_concurrent_hash_map() -> dict:
+        """创建线程安全字典。
+
+        Python 的 dict 本身在 CPython 中是线程安全的（GIL 保护）。
+        此方法返回普通 dict，如需严格线程安全请使用 threading.Lock。
+
+        :return: 空字典
+        """
+        return {}
+
+    @staticmethod
+    def wrap(m: dict) -> dict:
+        """包装字典为不可修改视图。
+
+        :param m: 原字典
+        :return: 包装后的字典（types.MappingProxyType）
+        """
+        from types import MappingProxyType
+
+        return MappingProxyType(m) if m is not None else {}
+
+    @staticmethod
+    def unmodifiable(m: dict) -> dict:
+        """返回不可修改的字典视图。
+
+        :param m: 原字典
+        :return: 不可修改的映射
+        """
+        from types import MappingProxyType
+
+        return MappingProxyType(m) if m is not None else {}
+
+    @staticmethod
+    def get_short(m: dict, key: str, default: int = 0) -> int:
+        """获取 short 值（Python 中等同于 int）。
+
+        :param m: 字典
+        :param key: 键
+        :param default: 默认值
+        :return: int 值
+        """
+        if m is None:
+            return default
+        value = m.get(key, default)
+        if value is None:
+            return default
+        return int(value)
+
+    @staticmethod
+    def get_char(m: dict, key: str, default: str = "") -> str:
+        """获取 char 值（Python 中为单字符字符串）。
+
+        :param m: 字典
+        :param key: 键
+        :param default: 默认值
+        :return: 单字符字符串
+        """
+        if m is None:
+            return default
+        value = m.get(key, default)
+        if value is None:
+            return default
+        return str(value)
+
+    @staticmethod
+    def empty() -> dict:
+        """返回空字典。
+
+        :return: 空字典
+        """
+        return {}
+
 
 # ====================================================================
 # MapWrapper

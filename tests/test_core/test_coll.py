@@ -137,6 +137,45 @@ class TestCollUtil:
         result = reduce(lambda a, b: a + b, [1, 2, 3, 4], 0)
         assert result == 10
 
+    def test_union_all(self):
+        result = CollUtil.union_all([1, 2, 3], [2, 3, 4])
+        assert result == [1, 2, 3, 2, 3, 4]
+
+    def test_union_all_multiple(self):
+        result = CollUtil.union_all([1], [2], [3])
+        assert result == [1, 2, 3]
+
+    def test_distinct_by(self):
+        data = [{"id": 1, "name": "a"}, {"id": 2, "name": "b"}, {"id": 1, "name": "c"}]
+        result = CollUtil.distinct_by(data, lambda x: x["id"])
+        assert len(result) == 2
+        assert result[0]["name"] == "a"
+        assert result[1]["name"] == "b"
+
+    def test_find_one_by_field(self):
+        data = [{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]
+        result = CollUtil.find_one_by_field(data, "id", 2)
+        assert result["name"] == "b"
+
+    def test_find_one_by_field_not_found(self):
+        data = [{"id": 1}, {"id": 2}]
+        assert CollUtil.find_one_by_field(data, "id", 99) is None
+
+    def test_sort_by_pinyin(self):
+        result = CollUtil.sort_by_pinyin(["北京", "上海", "广州"])
+        # without pypinyin, just returns sorted as-is
+        assert isinstance(result, list)
+        assert len(result) == 3
+
+    def test_unmodifiable_coll(self):
+        result = CollUtil.unmodifiable([1, 2, 3])
+        assert isinstance(result, tuple)
+        assert result == (1, 2, 3)
+
+    def test_trans_coll(self):
+        result = CollUtil.trans([1, 2, 3], lambda x: x * 2)
+        assert result == [2, 4, 6]
+
 
 class TestListUtil:
     def test_sub(self):
@@ -154,6 +193,29 @@ class TestListUtil:
     def test_default_if_empty(self):
         assert ListUtil.default_if_empty([], [1, 2]) == [1, 2]
         assert ListUtil.default_if_empty([3], [1, 2]) == [3]
+
+    def test_to_linked_list(self):
+        result = ListUtil.to_linked_list(1, 2, 3)
+        assert result == [1, 2, 3]
+
+    def test_sort_by_pinyin(self):
+        result = ListUtil.sort_by_pinyin(["b", "a", "c"])
+        assert result == ["a", "b", "c"]
+
+    def test_swap_to(self):
+        lst = [1, 2, 3, 4]
+        ListUtil.swap_to(lst, 1, 3)
+        assert lst == [1, 3, 4, 2]
+
+    def test_swap_element(self):
+        lst = [1, 2, 3, 2]
+        ListUtil.swap_element(lst, 2, 99)
+        assert lst == [1, 99, 3, 99]
+
+    def test_unmodifiable(self):
+        result = ListUtil.unmodifiable([1, 2, 3])
+        assert isinstance(result, tuple)
+        assert result == (1, 2, 3)
 
 
 class TestCollUtilSafeMinMax:

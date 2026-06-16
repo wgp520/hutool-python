@@ -85,6 +85,44 @@ class TestMapUtil:
         assert MapUtil.get_bool(m, "key") is True
         assert MapUtil.get_bool(m, "missing") is False
 
+    def test_new_tree_map(self):
+        m = MapUtil.new_tree_map()
+        assert isinstance(m, dict)
+
+    def test_new_identity_map(self):
+        m = MapUtil.new_identity_map()
+        assert isinstance(m, dict)
+
+    def test_new_concurrent_hash_map(self):
+        m = MapUtil.new_concurrent_hash_map()
+        assert isinstance(m, dict)
+
+    def test_wrap(self):
+        m = {"a": 1, "b": 2}
+        wrapped = MapUtil.wrap(m)
+        assert wrapped["a"] == 1
+        assert wrapped["b"] == 2
+
+    def test_unmodifiable(self):
+        m = {"a": 1}
+        result = MapUtil.unmodifiable(m)
+        assert result["a"] == 1
+
+    def test_get_short(self):
+        m = {"x": 100}
+        assert MapUtil.get_short(m, "x") == 100
+        assert MapUtil.get_short(m, "y", 0) == 0
+
+    def test_get_char(self):
+        m = {"c": "A"}
+        assert MapUtil.get_char(m, "c") == "A"
+        assert MapUtil.get_char(m, "d", "?") == "?"
+
+    def test_empty(self):
+        m = MapUtil.empty()
+        assert isinstance(m, dict)
+        assert len(m) == 0
+
 
 class TestBiMap:
     def test_put_and_get(self):

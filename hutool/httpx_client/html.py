@@ -86,3 +86,84 @@ class HtmlUtil:
         # 将换行符替换为 <br> 标签
         escaped = escaped.replace("\n", "<br>")
         return f"<p>{escaped}</p>"
+
+    @staticmethod
+    def clean_empty_tag(html_str: str) -> str:
+        """清除空HTML标签
+
+        移除没有内容的HTML标签，如 <p></p>、<span>  </span> 等。
+
+        :param html_str: HTML字符串
+        :return: 清除空标签后的HTML
+        """
+        if html_str is None:
+            return ""
+        # 移除自闭合空标签 <tag /> 或 <tag></tag>（含可选空白）
+        result = re.sub(r"<(\w+)(\s[^>]*)?>\s*</\1>", "", html_str, flags=re.DOTALL)
+        # 再次处理嵌套的空标签
+        while re.search(r"<(\w+)(\s[^>]*)?>\s*</\1>", result, flags=re.DOTALL):
+            result = re.sub(r"<(\w+)(\s[^>]*)?>\s*</\1>", "", result, flags=re.DOTALL)
+        return result
+
+    @staticmethod
+    def remove_html_tag_by_name(html_str: str, *tag_names) -> str:
+        """移除指定名称的HTML标签（包括内容）
+
+        :param html_str: HTML字符串
+        :param tag_names: 要移除的标签名列表
+        :return: 移除指定标签后的HTML
+        """
+        if html_str is None:
+            return ""
+        result = html_str
+        for tag_name in tag_names:
+            pattern = r"<{tag}(\s[^>]*)?>.*?</{tag}>".format(tag=re.escape(tag_name))
+            result = re.sub(pattern, "", result, flags=re.DOTALL | re.IGNORECASE)
+        return result
+
+    @staticmethod
+    def unwrap_html_tag(html_str: str, tag_name: str) -> str:
+        """解开HTML标签保留内容
+
+        :param html_str: HTML字符串
+        :param tag_name: 标签名
+        :return: 解开标签后的HTML
+        """
+        if html_str is None:
+            return ""
+        escaped_tag = re.escape(tag_name)
+        # 移除开始标签
+        result = re.sub(rf"<{escaped_tag}(\s[^>]*)?>", "", html_str, flags=re.IGNORECASE)
+        # 移除结束标签
+        result = re.sub(rf"</{escaped_tag}>", "", result, flags=re.IGNORECASE)
+        return result
+
+    @staticmethod
+    def remove_html_attr(html_str: str, *attr_names) -> str:
+        """移除HTML标签中的指定属性
+
+        :param html_str: HTML字符串
+        :param attr_names: 要移除的属性名列表
+        :return: 移除属性后的HTML
+        """
+        if html_str is None:
+            return ""
+        result = html_str
+        for attr_name in attr_names:
+            # 匹配 属性名="值" 或 属性名='值' 或 属性名=值（无引号）
+            pattern = r'\s+{attr}=["\'][^"\']*["\']|\s+{attr}=\S+|\s+{attr}(?=[\s/>])'.format(attr=re.escape(attr_name))
+            result = re.sub(pattern, "", result, flags=re.IGNORECASE)
+        return result
+
+    @staticmethod
+    def remove_all_html_attr(html_str: str) -> str:
+        """移除HTML标签中的所有属性
+
+        :param html_str: HTML字符串
+        :return: 只保留标签名的HTML
+        """
+        if html_str is None:
+            return ""
+        # 将 <tag attr1="v1" attr2="v2"> 替换为 <tag>
+        result = re.sub(r"<(\w+)\s+[^>]*?>", r"<\1>", html_str)
+        return result

@@ -1051,6 +1051,259 @@ class CollUtil:
             return False
         return all(a == b for a, b in zip(list1, list2))
 
+    @staticmethod
+    def union_all(*colls: Iterable) -> list:
+        """不去重并集。
+
+        :param colls: 多个集合
+        :return: 合并后的列表（不去重）
+        """
+        result = []
+        for coll in colls:
+            if coll is not None:
+                result.extend(coll)
+        return result
+
+    @staticmethod
+    def subtract_to_list(coll1: Iterable, coll2: Iterable) -> list:
+        """差集，返回列表。
+
+        :param coll1: 集合1
+        :param coll2: 集合2
+        :return: 属于 coll1 但不属于 coll2 的元素列表
+        """
+        return CollUtil.subtract(coll1, coll2)
+
+    @staticmethod
+    def new_linked_hash_set(*args) -> dict:
+        """创建有序集合（Python 中用 dict 实现保序去重）。
+
+        :param args: 初始元素
+        :return: 有序集合（字典键）
+        """
+        return dict.fromkeys(args)
+
+    @staticmethod
+    def list(*args) -> list:
+        """创建列表。
+
+        :param args: 初始元素
+        :return: 列表
+        """
+        return list(args)
+
+    @staticmethod
+    def new_linked_list(*args) -> list:
+        """创建列表（LinkedList 等价）。
+
+        :param args: 初始元素
+        :return: 列表
+        """
+        return list(args)
+
+    @staticmethod
+    def create(coll_type, *args):
+        """按类型创建集合并填充元素。
+
+        :param coll_type: 集合类型（list, set, tuple 等）
+        :param args: 初始元素
+        :return: 指定类型的集合
+        """
+        return coll_type(args)
+
+    @staticmethod
+    def distinct_by(coll: Iterable, key_func: Callable) -> list:
+        """按 key 函数去重。
+
+        :param coll: 可迭代对象
+        :param key_func: 提取去重键的函数
+        :return: 去重后的列表
+        """
+        seen = set()
+        result = []
+        for item in coll:
+            key = key_func(item)
+            if key not in seen:
+                seen.add(key)
+                result.append(item)
+        return result
+
+    @staticmethod
+    def remove_any(coll: list, *elements) -> list:
+        """移除列表中的指定元素。
+
+        :param coll: 列表
+        :param elements: 待移除的元素
+        :return: 移除后的列表
+        """
+        result = list(coll)
+        for ele in elements:
+            while ele in result:
+                result.remove(ele)
+        return result
+
+    @staticmethod
+    def remove_empty(coll: list) -> list:
+        """移除列表中的空字符串和 None。
+
+        :param coll: 列表
+        :return: 移除后的列表
+        """
+        return [x for x in coll if x is not None and x != ""]
+
+    @staticmethod
+    def remove_blank(coll: list) -> list:
+        """移除列表中的空白字符串和 None。
+
+        :param coll: 列表
+        :return: 移除后的列表
+        """
+        return [x for x in coll if x is not None and (not isinstance(x, str) or x.strip())]
+
+    @staticmethod
+    def field_value_as_map(coll: Iterable, key_field: str, value_field: str) -> dict:
+        """提取字段值构建 Map（同 field_value_map 别名）。
+
+        :param coll: 可迭代对象
+        :param key_field: 键字段名
+        :param value_field: 值字段名
+        :return: 字段值映射
+        """
+        return CollUtil.field_value_map(coll, key_field, value_field)
+
+    @staticmethod
+    def find_one_by_field(coll: Iterable, field: str, value: Any):
+        """按字段查找单个元素。
+
+        :param coll: 可迭代对象
+        :param field: 字段名
+        :param value: 期望的字段值
+        :return: 匹配的元素，未找到返回 None
+        """
+        for item in coll:
+            if (hasattr(item, field) and getattr(item, field) == value) or (
+                isinstance(item, dict) and item.get(field) == value
+            ):
+                return item
+        return None
+
+    @staticmethod
+    def last_index_of(coll: Sequence, element: Any) -> int:
+        """查找元素最后出现的索引。
+
+        :param coll: 序列
+        :param element: 待查找元素
+        :return: 最后出现的索引，未找到返回 -1
+        """
+        for i in range(len(coll) - 1, -1, -1):
+            if coll[i] == element:
+                return i
+        return -1
+
+    @staticmethod
+    def to_tree_set(coll: Iterable, key_func: Optional[Callable] = None) -> list:
+        """排序后去重。
+
+        :param coll: 可迭代对象
+        :param key_func: 排序键函数，可选
+        :return: 排序去重后的列表
+        """
+        if key_func:
+            unique = list({key_func(x): x for x in coll}.values())
+            return sorted(unique, key=key_func)
+        return sorted(set(coll))
+
+    @staticmethod
+    def add_all_if_not_contains(lst: list, *elements) -> list:
+        """仅当元素不在列表中时才添加。
+
+        :param lst: 列表
+        :param elements: 待添加的元素
+        :return: 添加后的列表
+        """
+        for ele in elements:
+            if ele not in lst:
+                lst.append(ele)
+        return lst
+
+    @staticmethod
+    def get_element_type(coll: Iterable) -> Optional[type]:
+        """获取集合中第一个非 None 元素的类型。
+
+        :param coll: 可迭代对象
+        :return: 元素类型，空集合返回 None
+        """
+        for item in coll:
+            if item is not None:
+                return type(item)
+        return None
+
+    @staticmethod
+    def sort_by_pinyin(coll: list) -> list:
+        """按拼音排序（适用于中文字符串列表）。
+
+        :param coll: 字符串列表
+        :return: 排序后的新列表
+        """
+        try:
+            from pypinyin import lazy_pinyin
+
+            return sorted(coll, key=lambda x: lazy_pinyin(str(x)))
+        except ImportError:
+            return sorted(coll, key=str)
+
+    @staticmethod
+    def reverse_new(coll: list) -> list:
+        """反转列表，返回新列表（不修改原列表）。
+
+        :param coll: 列表
+        :return: 反转后的新列表
+        """
+        return list(reversed(coll))
+
+    @staticmethod
+    def key_set(coll_of_pairs: Iterable) -> list:
+        """获取键值对集合的键列表。
+
+        :param coll_of_pairs: 键值对可迭代对象（字典列表或 tuple 列表）
+        :return: 键列表
+        """
+        result = []
+        for item in coll_of_pairs:
+            if isinstance(item, dict):
+                result.extend(item.keys())
+            elif isinstance(item, (list, tuple)) and len(item) >= 1:
+                result.append(item[0])
+        return result
+
+    @staticmethod
+    def unmodifiable(coll):
+        """返回不可修改的列表视图（使用 tuple 包装）。
+
+        :param coll: 集合
+        :return: 不可修改的 tuple
+        """
+        return tuple(coll) if coll is not None else ()
+
+    @staticmethod
+    def clear(lst: list) -> None:
+        """清空列表。
+
+        :param lst: 列表
+        """
+        if lst is not None:
+            lst.clear()
+
+    @staticmethod
+    def trans(coll: Iterable, func: Callable) -> list:
+        """集合类型转换。
+
+        :param coll: 可迭代对象
+        :param func: 转换函数
+        :return: 转换后的列表
+        """
+        return [func(item) for item in coll]
+
 
 class ListUtil:
     """列表工具类"""
@@ -1297,3 +1550,64 @@ class ListUtil:
             return [[] for _ in range(limit)]
         size = (n + limit - 1) // limit  # 向上取整
         return [lst[i : i + size] for i in range(0, n, size)][:limit]
+
+    @staticmethod
+    def to_linked_list(*elements) -> list:
+        """创建列表。
+
+        :param elements: 初始元素
+        :return: 列表
+        """
+        return list(elements)
+
+    @staticmethod
+    def sort_by_pinyin(lst: list) -> list:
+        """按拼音排序。
+
+        :param lst: 字符串列表
+        :return: 排序后的新列表
+        """
+        try:
+            from pypinyin import lazy_pinyin
+
+            return sorted(lst, key=lambda x: lazy_pinyin(str(x)))
+        except ImportError:
+            return sorted(lst, key=str)
+
+    @staticmethod
+    def swap_to(lst: list, src_index: int, dest_index: int) -> list:
+        """将元素从源位置移动到目标位置。
+
+        :param lst: 列表
+        :param src_index: 源索引
+        :param dest_index: 目标索引
+        :return: 修改后的列表
+        """
+        if not lst or src_index == dest_index:
+            return lst
+        element = lst.pop(src_index)
+        lst.insert(dest_index, element)
+        return lst
+
+    @staticmethod
+    def swap_element(lst: list, old_element, new_element) -> list:
+        """替换列表中的所有指定元素。
+
+        :param lst: 列表
+        :param old_element: 旧元素
+        :param new_element: 新元素
+        :return: 修改后的列表
+        """
+        for i, item in enumerate(lst):
+            if item == old_element:
+                lst[i] = new_element
+        return lst
+
+    @staticmethod
+    def unmodifiable(lst) -> list:
+        """返回不可修改的列表（使用 tuple 包装）。
+
+        :param lst: 列表
+        :return: 不可修改的 tuple
+        """
+        return tuple(lst) if lst is not None else ()

@@ -23,6 +23,42 @@ class CoordinateUtil:
     _EE = 0.00669342162296594  # 偏心率平方
 
     @staticmethod
+    def out_of_china(lng: float, lat: float) -> bool:
+        """判断是否在中国范围外（公开方法）
+
+        :param lng: 经度
+        :param lat: 纬度
+        :return: 是否在中国范围外
+        """
+        return not (72.004 <= lng <= 137.8347 and 0.8293 <= lat <= 55.8271)
+
+    @staticmethod
+    def wgs84_to_mercator(lng: float, lat: float) -> Coordinate:
+        """WGS84 转 Web Mercator 投影坐标
+
+        :param lng: WGS84 经度
+        :param lat: WGS84 纬度
+        :return: Web Mercator 坐标 (x, y)，单位为米
+        """
+        x = lng * 20037508.34 / 180.0
+        y = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / (math.pi / 180.0)
+        y = y * 20037508.34 / 180.0
+        return Coordinate(x, y)
+
+    @staticmethod
+    def mercator_to_wgs84(x: float, y: float) -> Coordinate:
+        """Web Mercator 投影坐标转 WGS84
+
+        :param x: Mercator X 坐标（米）
+        :param y: Mercator Y 坐标（米）
+        :return: WGS84 坐标 (经度, 纬度)
+        """
+        lng = x / 20037508.34 * 180.0
+        lat = y / 20037508.34 * 180.0
+        lat = 180.0 / math.pi * (2.0 * math.atan(math.exp(lat * math.pi / 180.0)) - math.pi / 2.0)
+        return Coordinate(lng, lat)
+
+    @staticmethod
     def _out_of_china(lng: float, lat: float) -> bool:
         """判断是否在中国范围外
 

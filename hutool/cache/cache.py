@@ -2,6 +2,7 @@ from .fifo_cache import FIFOCache
 from .lfu_cache import LFUCache
 from .lru_cache import LRUCache
 from .timed_cache import TimedCache
+from .weak_cache import WeakCache
 
 
 class CacheUtil:
@@ -45,3 +46,14 @@ class CacheUtil:
         :return: TimedCache实例
         """
         return TimedCache(timeout)
+
+    @staticmethod
+    def new_weak_cache(capacity: int = 16) -> WeakCache:
+        """创建弱引用缓存
+
+        使用WeakValueDictionary实现。
+
+        :param capacity: 缓存最大容量
+        :return: WeakCache实例
+        """
+        return WeakCache(capacity)

@@ -77,3 +77,38 @@ class PropsUtil:
         """
         result = value.replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\")
         return result
+
+    @staticmethod
+    def create() -> dict:
+        """创建空属性字典
+
+        :return: 空字典
+        """
+        return {}
+
+    @staticmethod
+    def store(props: dict, path: str, charset: str = "utf-8", comment: str = "") -> None:
+        """将属性字典持久化到.properties文件
+
+        :param props: 属性字典
+        :param path: 文件路径
+        :param charset: 文件编码
+        :param comment: 文件头部注释
+        """
+        path = os.path.abspath(path)
+        with open(path, "w", encoding=charset) as f:
+            if comment:
+                f.write(f"# {comment}\n")
+            for key, value in props.items():
+                # 转义特殊字符
+                escaped_value = str(value).replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t")
+                f.write(f"{key}={escaped_value}\n")
+
+    @staticmethod
+    def to_dict(props: dict) -> dict:
+        """转为普通字典
+
+        :param props: 属性字典
+        :return: 字典副本
+        """
+        return dict(props)

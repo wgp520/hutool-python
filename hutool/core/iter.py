@@ -526,3 +526,56 @@ class IterUtil:
         if len(list1) != len(list2):
             return False
         return all(a == b for a, b in zip(list1, list2))
+
+    @staticmethod
+    def to_list_map(iterable: Iterable, key_func: Callable, value_func: Optional[Callable] = None) -> dict:
+        """将可迭代对象转为 {key: [values]} 字典。
+
+        :param iterable: 可迭代对象
+        :param key_func: 提取键的函数
+        :param value_func: 提取值的函数，为 None 时使用元素本身
+        :return: 分组字典
+        """
+        result = {}
+        for item in iterable:
+            key = key_func(item)
+            value = value_func(item) if value_func else item
+            result.setdefault(key, []).append(value)
+        return result
+
+    @staticmethod
+    def filtered(iterable: Iterable, predicate: Callable[[Any], bool]) -> Iterable:
+        """返回惰性过滤后的迭代器。
+
+        :param iterable: 可迭代对象
+        :param predicate: 过滤条件函数
+        :return: 过滤后的迭代器
+        """
+        return filter(predicate, iterable)
+
+    @staticmethod
+    def empty():
+        """返回空迭代器。
+
+        :return: 空迭代器
+        """
+        return iter([])
+
+    @staticmethod
+    def trans(iterable: Iterable, func: Callable) -> list:
+        """迭代器类型转换。
+
+        :param iterable: 可迭代对象
+        :param func: 转换函数
+        :return: 转换后的列表
+        """
+        return [func(item) for item in iterable]
+
+    @staticmethod
+    def clear(lst: list) -> None:
+        """清空列表。
+
+        :param lst: 列表
+        """
+        if lst is not None:
+            lst.clear()

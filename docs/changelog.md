@@ -1,6 +1,6 @@
 # 更新日志
 
-## v1.1.0 (2026-06-15)
+## v1.1.0 (2026-06-16)
 
 ### 新增
 
@@ -19,6 +19,70 @@
 - **`ColorUtil`** - 颜色工具类（hex↔rgb 转换，支持 #RGB/#RRGGBB 格式）
 - **`ImageUtil`** - 图片工具类（通过魔数检测图片格式：JPEG/PNG/GIF/BMP/TIFF/WebP）
 - **`UserAgentUtil`** - UserAgent 生成器（Chrome/Firefox/Safari/Opera/IE/Edge 浏览器 UA 随机生成）
+- **`Base64Util`** - Base64 编解码工具（URL Safe、无填充、文件/流编码）
+- **`Base32Util`** - Base32 编解码工具（含 Extended Hex 字母表）
+- **`WeakCache`** - 弱引用缓存（支持弱引用自动清理，不支持弱引用的类型回退到强引用）
+- **`CircleCaptcha`** - 圆干扰验证码（在图片上绘制随机圆圈干扰）
+
+#### 核心模块补漏
+
+- **`Ipv4Util`**：
+  - IP/Long 互转：`ipv4_to_long`、`long_to_ipv4`（含完整校验）
+  - CIDR 操作：`get_begin_ip_str/long`、`get_end_ip_str/long`、`list`（列出范围内 IP）
+  - 子网掩码：`count_by_mask_bit`、`get_mask_by_mask_bit`、`is_mask_valid`、`is_mask_bit_valid`、`get_mask_bit`
+  - IP 匹配：`is_inner_ip`（含 127.x 回环）、`matches`（通配符匹配）、`format_ip_block`
+- **`NetUtil`**：
+  - IPv6：`ipv6_to_big_integer`、`big_integer_to_ipv6`、`local_ipv6s`
+  - 端口：`get_usable_local_ports`
+  - IP 操作：`hide_ip_part_from_long`、`to_ip_list`（CIDR/范围/单 IP）、`local_ips`
+  - 工具：`get_localhost_str`、`idn_to_ascii`、`is_unknown`、`ping`、`parse_cookies`、`get_dns_info`、`net_cat`
+- **`BeanUtil`**：
+  - 字段检测：`has_setter`、`has_getter`、`has_public_field`
+  - 动态 Bean：`create_dyna_bean`、`get_bean_desc`
+  - 属性操作：`get_property`、`set_property`
+  - 映射：`map_to_bean_ignore_case`、`to_bean_ignore_error`、`to_bean_ignore_case`
+  - 高级：`bean_to_map_enhanced`（驼峰/下划线+忽略 null）、`copy_properties_with_options`
+  - 比较：`is_match_name`、`is_common_fields_equal`、`has_null_field_with_ignore`、`get_field_names`、`edit`
+- **`CollUtil`**：`union_all`、`distinct_by`、`find_one_by_field`、`sort_by_pinyin`、`unmodifiable`、`trans`
+- **`ListUtil`**：`to_linked_list`、`sort_by_pinyin`、`swap_to`、`swap_element`、`unmodifiable`
+- **`IterUtil`**：`to_list_map`、`filtered`、`empty`、`trans`、`clear`
+- **`MapUtil`**：`new_tree_map`、`new_identity_map`、`new_concurrent_hash_map`、`wrap`、`unmodifiable`、`get_short`、`get_char`、`empty`
+- **`EnumUtil`**：`clear_cache`、`to_string`、`get_enum_at`、`like_value_of`、`get_field_by`、`not_contains`、`equals_ignore_case`
+- **`IdcardUtil`**：`convert_18_to_15`、`is_valid_tw_card`、`is_valid_hk_card`、`get_birth_date`、`get_city_code`、`get_district_code`、`get_idcard_info`
+- **`CoordinateUtil`**：`out_of_china`、`wgs84_to_mercator`、`mercator_to_wgs84`
+- **`XmlUtil`**：`element_text`、`clean_comment`、`append_child`、`append_text`、`is_element`、`to_str`（增强版）、`to_file`、`write`、`create_document`
+- **`UnicodeUtil`**：`to_string`、`to_unicode_string`
+
+#### 外部模块补全
+
+- **`DigestUtil`**：
+  - 文件摘要：`md5_from_file`、`sha256_from_file`
+  - 工厂方法：`digest`、`digest_hex`、`hmac`、`hmac_hex`
+  - 其他：`md5_hex_to_16`、`bcrypt`、`bcrypt_check`
+- **`SecureUtil`**：
+  - 密钥生成：`generate_key`（对称）、`desede`（TripleDES）
+  - 便捷摘要：`md5`、`sha1`、`sha256`
+  - 便捷 HMAC：`hmac_md5`、`hmac_sha1`、`hmac_sha256`
+  - 其他：`pbkdf2`、`decode`（自动 Hex/Base64 检测）、`sign_params`
+- **`SignUtil`**：`sign_params_md5`、`sign_params_sha1`、`sign_params_sha256`、`sign_params_hmac_md5`、`sign_params_hmac_sha1`、`sign_params_hmac_sha256`
+- **`HttpUtil`**：`download`、`encode_params`、`get_mime_type`、`build_basic_auth`、`normalize_params`
+- **`HttpRequest`**：
+  - HTTP 方法工厂：`head`、`put`、`patch`、`delete`、`trace`、`options`
+  - 链式设置：`content_type`、`keep_alive`、`basic_auth`、`bearer_auth`、`body_bytes`、`params`、`form_file`
+- **`HttpResponse`**：`content_encoding`、`is_gzip`、`is_deflate`、`is_chunked`、`get_cookie_str`、`get_cookies`、`get_cookie_value`、`body_bytes`、`write_body`、`get_filename_from_disposition`
+- **`HtmlUtil`**：`clean_empty_tag`、`remove_html_tag_by_name`、`unwrap_html_tag`、`remove_html_attr`、`remove_all_html_attr`
+- **`JSONUtil`**：`quote`、`escape`、`is_null`、`xml_to_json`、`to_json_bytes`、`wrap`、`get_str`、`get_int`、`get_float`、`get_bool`、`get_list`
+- **`WeakCache`**：`get`、`put`、`remove`、`clear`、`size`、`is_empty`、`get_hit_count`、`get_miss_count`、`key_set`
+- **`CaptchaUtil`**：新增 `create_circle_captcha` 工厂方法；`LineCaptcha`/`ArithmeticCaptcha` 新增 `get_image_base64`、`write`
+- **`SensitiveUtil`**：`is_inited`、`set_char_filter`、`contains_sensitive`（支持 str/list/dict）、`get_found_first_sensitive`、`get_found_all_sensitive`、`init_from_delimited`
+- **`PinyinUtil`**：`get_pinyin_char`、`get_first_letter`、`is_chinese`、`get_pinyin_with_tone`
+- **`EmojiUtil`**：`is_emoji`、`extract_emojis`、`to_alias`、`to_html`
+- **`QrCodeUtil`**：`generate_as_base64`、`generate_as_svg`、`decode`
+- **`CronUtil`**：`schedule_with_id`、`remove`、`get_task_count`、`clear`、`matched_dates`
+- **`JWTUtil`**：`create_token_with_expire`、`parse_header`、`is_expired`、`get_claim`、`generate_key`、`create_token_with_claims`
+- **`SettingUtil`**：`store`、`to_dict`、`create`、`set_value`、`get_group`
+- **`PropsUtil`**：`create`、`store`、`to_dict`
+- **`YamlUtil`**：`dump_to`、`load_as_dict`、`load_as_list`
 
 #### 现有工具类扩展
 

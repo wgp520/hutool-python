@@ -1,4 +1,7 @@
-from hutool import ArithmeticCaptcha, CaptchaUtil, LineCaptcha
+import os
+import tempfile
+
+from hutool import ArithmeticCaptcha, CaptchaUtil, CircleCaptcha, LineCaptcha
 
 
 class TestLineCaptcha:
@@ -21,6 +24,24 @@ class TestLineCaptcha:
         assert isinstance(img_bytes, bytes)
         assert len(img_bytes) > 0
 
+    def test_line_captcha_base64(self):
+        cap = LineCaptcha()
+        cap.create_code()
+        b64 = cap.get_image_base64()
+        assert isinstance(b64, str)
+        assert len(b64) > 0
+
+    def test_line_captcha_write(self):
+        cap = LineCaptcha()
+        cap.create_code()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f:
+            path = f.name
+        try:
+            cap.write(path)
+            assert os.path.getsize(path) > 0
+        finally:
+            os.unlink(path)
+
 
 class TestArithmeticCaptcha:
     def test_create_code(self):
@@ -42,6 +63,31 @@ class TestArithmeticCaptcha:
         assert isinstance(img_bytes, bytes)
         assert len(img_bytes) > 0
 
+    def test_arithmetic_captcha_base64(self):
+        cap = ArithmeticCaptcha()
+        cap.create_code()
+        b64 = cap.get_image_base64()
+        assert isinstance(b64, str)
+
+
+class TestCircleCaptcha:
+    def test_circle_captcha(self):
+        cap = CircleCaptcha()
+        code = cap.create_code()
+        assert isinstance(code, str)
+        assert len(code) == 4
+        assert cap.verify(code) is True
+        assert cap.verify("wrong") is False
+        img = cap.get_image_bytes()
+        assert isinstance(img, bytes)
+        assert len(img) > 0
+
+    def test_circle_captcha_base64(self):
+        cap = CircleCaptcha()
+        cap.create_code()
+        b64 = cap.get_image_base64()
+        assert isinstance(b64, str)
+
 
 class TestCaptchaUtil:
     def test_create_line_captcha(self):
@@ -51,3 +97,7 @@ class TestCaptchaUtil:
     def test_create_arithmetic_captcha(self):
         captcha = CaptchaUtil.create_arithmetic_captcha(100, 35)
         assert isinstance(captcha, ArithmeticCaptcha)
+
+    def test_captcha_util_create_circle(self):
+        cap = CaptchaUtil.create_circle_captcha()
+        assert isinstance(cap, CircleCaptcha)

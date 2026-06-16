@@ -1,3 +1,6 @@
+import base64
+import hashlib
+import hmac as hmac_mod
 import os
 from typing import Optional, Tuple, Union
 
@@ -368,3 +371,211 @@ class SecureUtil:
         :return: 明文
         """
         return SecureUtil.caesar_encode(message, -offset)
+
+    # ------------------------------------------------------------------ #
+    #  对称密钥生成
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def generate_key(algorithm: str = "AES", key_size: int = 128) -> bytes:
+        """生成对称加密密钥
+
+        :param algorithm: 算法名称，支持 'AES', 'DES', 'DESede'
+        :param key_size: 密钥位数
+        :return: 随机密钥 bytes
+        """
+        algo_upper = algorithm.upper()
+        if algo_upper == "AES":
+            if key_size not in (128, 192, 256):
+                raise ValueError("AES密钥长度必须为128、192或256位")
+            return os.urandom(key_size // 8)
+        elif algo_upper == "DES":
+            return os.urandom(8)
+        elif algo_upper in ("DESEDE", "3DES", "TRIPLEDES"):
+            return os.urandom(24)
+        else:
+            raise ValueError(f"不支持的算法: {algorithm}")
+
+    @staticmethod
+    def desede(key: bytes, mode: str = "CBC") -> Tuple:
+        """TripleDES加密解密快捷方法
+
+        返回一个元组 ``(encrypt_func, decrypt_func)``，每个函数接受
+        ``data: bytes`` 和可选 ``iv: bytes`` 参数。
+
+        :param key: TripleDES密钥（24字节）
+        :param mode: 加密模式
+        :return: (encrypt_func, decrypt_func) 元组
+        """
+        if len(key) != 24:
+            raise ValueError("TripleDES密钥长度必须为24字节")
+
+        def _encrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.encrypt_aes(data, key, mode=mode, iv=iv)
+
+        def _decrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.decrypt_aes(data, key, mode=mode, iv=iv)
+
+        return _encrypt, _decrypt
+
+    # ------------------------------------------------------------------ #
+    #  摘要便捷方法
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def md5(data: Union[str, bytes]) -> str:
+        """MD5摘要便捷方法（返回十六进制）
+
+        :param data: 输入数据
+        :return: MD5十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        return hashlib.md5(data).hexdigest()
+
+    @staticmethod
+    def sha1(data: Union[str, bytes]) -> str:
+        """SHA-1摘要便捷方法
+
+        :param data: 输入数据
+        :return: SHA-1十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        return hashlib.sha1(data).hexdigest()
+
+    @staticmethod
+    def sha256(data: Union[str, bytes]) -> str:
+        """SHA-256摘要便捷方法
+
+        :param data: 输入数据
+        :return: SHA-256十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        return hashlib.sha256(data).hexdigest()
+
+    # ------------------------------------------------------------------ #
+    #  HMAC便捷方法
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def hmac_md5(data: Union[str, bytes], key: Union[str, bytes]) -> str:
+        """HMAC-MD5便捷方法
+
+        :param data: 输入数据
+        :param key: HMAC密钥
+        :return: HMAC-MD5十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        return hmac_mod.new(key, data, "md5").hexdigest()
+
+    @staticmethod
+    def hmac_sha1(data: Union[str, bytes], key: Union[str, bytes]) -> str:
+        """HMAC-SHA1便捷方法
+
+        :param data: 输入数据
+        :param key: HMAC密钥
+        :return: HMAC-SHA1十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        return hmac_mod.new(key, data, "sha1").hexdigest()
+
+    @staticmethod
+    def hmac_sha256(data: Union[str, bytes], key: Union[str, bytes]) -> str:
+        """HMAC-SHA256便捷方法
+
+        :param data: 输入数据
+        :param key: HMAC密钥
+        :return: HMAC-SHA256十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        return hmac_mod.new(key, data, "sha256").hexdigest()
+
+    # ------------------------------------------------------------------ #
+    #  密钥派生
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def pbkdf2(
+        password: Union[str, bytes], salt: Union[str, bytes], iterations: int = 10000, key_length: int = 32
+    ) -> bytes:
+        """PBKDF2密钥派生
+
+        :param password: 密码
+        :param salt: 盐值
+        :param iterations: 迭代次数
+        :param key_length: 输出密钥长度
+        :return: 派生密钥 bytes
+        """
+        if isinstance(password, str):
+            password = password.encode("utf-8")
+        if isinstance(salt, str):
+            salt = salt.encode("utf-8")
+        return hashlib.pbkdf2_hmac("sha256", password, salt, iterations, dklen=key_length)
+
+    # ------------------------------------------------------------------ #
+    #  编码检测与解码
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def decode(data: Union[str, bytes]) -> bytes:
+        """自动检测并解码（Hex或Base64）
+
+        先尝试Hex解码，失败则尝试Base64解码。
+
+        :param data: Hex或Base64编码的数据
+        :return: 解码后的 bytes
+        """
+        if isinstance(data, bytes):
+            data = data.decode("utf-8")
+        # 尝试Hex解码
+        try:
+            return bytes.fromhex(data)
+        except ValueError:
+            pass
+        # 尝试Base64解码
+        return base64.b64decode(data)
+
+    # ------------------------------------------------------------------ #
+    #  参数签名
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def sign_params(params: dict, secret: str, algorithm: str = "sha256") -> str:
+        """参数签名
+
+        将参数按键名排序拼接后，使用指定算法与密钥进行签名。
+
+        :param params: 参数字典
+        :param secret: 密钥
+        :param algorithm: 签名算法
+        :return: 签名字符串
+        """
+        sorted_keys = sorted(params.keys())
+        parts = []
+        for k in sorted_keys:
+            v = params[k]
+            if v is not None:
+                parts.append(f"{k}={v}")
+        sign_str = "&".join(parts) + "&secret=" + secret
+
+        algo = algorithm.lower()
+        if algo.startswith("hmac_"):
+            hash_name = algo[5:]
+            if isinstance(sign_str, str):
+                sign_str = sign_str.encode("utf-8")
+            if isinstance(secret, str):
+                secret = secret.encode("utf-8")
+            return hmac_mod.new(secret, sign_str, hash_name).hexdigest()
+        else:
+            return getattr(hashlib, algo)(sign_str.encode("utf-8")).hexdigest()

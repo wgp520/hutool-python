@@ -1,6 +1,36 @@
 from hutool import IterUtil
 
 
+class TestIterUtil:
+    def test_to_list_map(self):
+        data = [{"type": "a", "val": 1}, {"type": "b", "val": 2}, {"type": "a", "val": 3}]
+        result = IterUtil.to_list_map(data, lambda x: x["type"])
+        assert len(result["a"]) == 2
+        assert len(result["b"]) == 1
+
+    def test_to_list_map_with_value_func(self):
+        data = [{"k": "a", "v": 1}, {"k": "a", "v": 2}]
+        result = IterUtil.to_list_map(data, lambda x: x["k"], lambda x: x["v"])
+        assert result["a"] == [1, 2]
+
+    def test_filtered(self):
+        result = IterUtil.filtered([1, 2, 3, 4], lambda x: x % 2 == 0)
+        assert list(result) == [2, 4]
+
+    def test_empty(self):
+        result = IterUtil.empty()
+        assert list(result) == []
+
+    def test_trans(self):
+        result = IterUtil.trans([1, 2, 3], lambda x: str(x))
+        assert result == ["1", "2", "3"]
+
+    def test_clear(self):
+        lst = [1, 2, 3]
+        IterUtil.clear(lst)
+        assert lst == []
+
+
 class TestIterUtilTake:
     """测试 take 方法"""
 

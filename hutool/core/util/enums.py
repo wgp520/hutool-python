@@ -175,3 +175,97 @@ class EnumUtil:
         :return: 名称到属性值的字典
         """
         return {member.name: getattr(member, field, None) for member in enum_class}
+
+    @staticmethod
+    def clear_cache(enum_class: Type[Enum]) -> None:
+        """清除枚举缓存。
+
+        Python 枚举无缓存概念，此方法为空操作。
+
+        :param enum_class: 枚举类
+        """
+        pass
+
+    @staticmethod
+    def to_string(enum_member: Optional[Enum], null_str: str = "null") -> str:
+        """将枚举成员转为字符串。
+
+        :param enum_member: 枚举成员
+        :param null_str: 成员为 None 时返回的字符串，默认 ``"null"``
+        :return: 枚举名称或 null_str
+        """
+        if enum_member is None:
+            return null_str
+        return enum_member.name
+
+    @staticmethod
+    def get_enum_at(enum_class: Type[Enum], index: int) -> Optional[Enum]:
+        """按索引获取枚举成员。
+
+        :param enum_class: 枚举类
+        :param index: 索引（从 0 开始）
+        :return: 对应索引的枚举成员，越界返回 None
+        """
+        try:
+            members = list(enum_class)
+            return members[index]
+        except (IndexError, TypeError):
+            return None
+
+    @staticmethod
+    def like_value_of(enum_class: Type[Enum], name: str) -> Optional[Enum]:
+        """模糊匹配枚举名（包含匹配）。
+
+        遍历所有成员，返回第一个名称中包含 ``name``（忽略大小写）的成员。
+
+        :param enum_class: 枚举类
+        :param name: 待匹配的名称片段
+        :return: 匹配的枚举成员，未找到返回 None
+        """
+        if not name:
+            return None
+        name_lower = name.lower()
+        for member in enum_class:
+            if name_lower in member.name.lower():
+                return member
+        return None
+
+    @staticmethod
+    def get_field_by(enum_class: Type[Enum], field: str, value: Any) -> Optional[Enum]:
+        """按字段值查找枚举成员。
+
+        遍历所有成员，返回第一个指定字段等于 ``value`` 的成员。
+
+        :param enum_class: 枚举类
+        :param field: 属性名称
+        :param value: 期望的属性值
+        :return: 匹配的枚举成员，未找到返回 None
+        """
+        for member in enum_class:
+            if getattr(member, field, None) == value:
+                return member
+        return None
+
+    @staticmethod
+    def not_contains(enum_class: Type[Enum], value: Any) -> bool:
+        """是否不包含指定值。
+
+        :param enum_class: 枚举类
+        :param value: 待检查的值
+        :return: 不包含该值返回 True
+        """
+        return not EnumUtil.contains(enum_class, value)
+
+    @staticmethod
+    def equals_ignore_case(member1: Optional[Enum], member2: Optional[Enum]) -> bool:
+        """忽略大小写比较两个枚举成员的名称。
+
+        :param member1: 第一个枚举成员
+        :param member2: 第二个枚举成员
+        :return: 名称（忽略大小写）相等返回 True
+        """
+        if member1 is None and member2 is None:
+            return True
+        if member1 is None or member2 is None:
+            return False
+        return member1.name.upper() == member2.name.upper()

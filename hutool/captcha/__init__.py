@@ -1,3 +1,3 @@
-from .captcha import ArithmeticCaptcha, CaptchaUtil, LineCaptcha
+from .captcha import ArithmeticCaptcha, CaptchaUtil, CircleCaptcha, LineCaptcha
 
-__all__ = ["ArithmeticCaptcha", "CaptchaUtil", "LineCaptcha"]
+__all__ = ["ArithmeticCaptcha", "CaptchaUtil", "CircleCaptcha", "LineCaptcha"]

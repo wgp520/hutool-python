@@ -964,7 +964,7 @@ class TestDateTime:
         assert dt1.is_before(dt2) is True
         assert dt2.is_after(dt1) is True
 
-    def test_is_between(self):
+    def test_is_between_v2(self):
         dt = DateTime.of_date(2024, 6, 15)
         start = DateTime.of_date(2024, 1, 1)
         end = DateTime.of_date(2024, 12, 31)
@@ -982,13 +982,13 @@ class TestDateTime:
         dt2 = DateTime.of_date(2024, 2, 28)
         assert dt2.is_last_day_of_month() is False
 
-    def test_length_of_month(self):
+    def test_length_of_month_v2(self):
         dt = DateTime.of_date(2024, 2, 1)
         assert dt.length_of_month() == 29
         dt2 = DateTime.of_date(2024, 1, 1)
         assert dt2.length_of_month() == 31
 
-    def test_length_of_year(self):
+    def test_length_of_year_v2(self):
         dt = DateTime.of_date(2024, 1, 1)
         assert dt.length_of_year() == 366
         dt2 = DateTime.of_date(2023, 1, 1)
@@ -1001,33 +1001,33 @@ class TestDateTime:
         assert dt.offset_month(1).month() == 2
         assert dt.offset_year(1).year() == 2025
 
-    def test_begin_of_second(self):
+    def test_begin_of_second_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.begin_of_second()
         assert result.second() == 45
 
-    def test_end_of_second(self):
+    def test_end_of_second_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.end_of_second()
         assert result.second() == 45
 
-    def test_begin_of_hour(self):
+    def test_begin_of_hour_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.begin_of_hour()
         assert result.minute() == 0
         assert result.second() == 0
 
-    def test_end_of_hour(self):
+    def test_end_of_hour_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.end_of_hour()
         assert result.minute() == 59
 
-    def test_begin_of_minute(self):
+    def test_begin_of_minute_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.begin_of_minute()
         assert result.second() == 0
 
-    def test_end_of_minute(self):
+    def test_end_of_minute_v2(self):
         dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
         result = dt.end_of_minute()
         assert result.second() == 59

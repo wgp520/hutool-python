@@ -1,3 +1,5 @@
+import pytest
+
 from hutool import JSONUtil
 
 
@@ -128,3 +130,53 @@ class TestJSONUtil:
         camel = JSONUtil.convert_keys_to_camel(original)
         back = JSONUtil.convert_keys_to_snake(camel)
         assert back == original
+
+    def test_quote(self):
+        result = JSONUtil.quote("hello")
+        assert result == '"hello"'
+
+    def test_escape(self):
+        result = JSONUtil.escape('hello\nworld\t"test"')
+        assert "\\n" in result
+        assert "\\t" in result
+        assert '\\"' in result
+
+    def test_is_null(self):
+        assert JSONUtil.is_null("null") is True
+        assert JSONUtil.is_null("") is True
+        assert JSONUtil.is_null("123") is False
+
+    def test_xml_to_json(self):
+        xml = "<root><name>test</name><value>123</value></root>"
+        result = JSONUtil.xml_to_json(xml)
+        assert isinstance(result, dict)
+
+    def test_to_json_bytes(self):
+        result = JSONUtil.to_json_bytes({"a": 1})
+        assert isinstance(result, bytes)
+        assert b'"a"' in result
+
+    def test_wrap(self):
+        result = JSONUtil.wrap({"a": 1})
+        assert isinstance(result, str)
+        assert '"a"' in result
+
+    def test_get_str(self):
+        assert JSONUtil.get_str({"name": "test"}, "name") == "test"
+        assert JSONUtil.get_str({"name": "test"}, "missing", "default") == "default"
+
+    def test_get_int(self):
+        assert JSONUtil.get_int({"count": 5}, "count") == 5
+        assert JSONUtil.get_int({}, "missing", 0) == 0
+
+    def test_get_float(self):
+        assert JSONUtil.get_float({"pi": 3.14}, "pi") == pytest.approx(3.14)
+        assert JSONUtil.get_float({}, "missing", 0.0) == 0.0
+
+    def test_get_bool(self):
+        assert JSONUtil.get_bool({"flag": True}, "flag") is True
+        assert JSONUtil.get_bool({}, "missing", False) is False
+
+    def test_get_list(self):
+        assert JSONUtil.get_list({"items": [1, 2]}, "items") == [1, 2]
+        assert JSONUtil.get_list({}, "missing", []) == []

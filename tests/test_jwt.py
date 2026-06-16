@@ -2,6 +2,8 @@ from hutool import JWTUtil
 
 
 class TestJWTUtil:
+    SECRET = "test_secret_key"
+
     def test_create_token(self):
         payload = {"user_id": 1, "username": "test"}
         token = JWTUtil.create_token(payload, "secret_key")
@@ -48,3 +50,54 @@ class TestJWTUtil:
         assert JWTUtil.verify(token, "secret_key") is True
         time.sleep(2)
         assert JWTUtil.verify(token, "secret_key") is False
+
+    def test_create_token_with_expire(self):
+        token = JWTUtil.create_token_with_expire({"user": "test"}, self.SECRET, 3600)
+        assert isinstance(token, str)
+        payload = JWTUtil.parse_token(token, self.SECRET)
+        assert payload["user"] == "test"
+        assert "exp" in payload
+
+    def test_parse_header(self):
+        token = JWTUtil.create_token({"user": "test"}, self.SECRET)
+        header = JWTUtil.parse_header(token)
+        assert isinstance(header, dict)
+        assert "alg" in header
+
+    def test_is_expired_not(self):
+        token = JWTUtil.create_token_with_expire({"user": "test"}, self.SECRET, 3600)
+        assert JWTUtil.is_expired(token) is False
+
+    def test_is_expired_yes(self):
+        token = JWTUtil.create_token_with_expire({"user": "test"}, self.SECRET, -1)
+        assert JWTUtil.is_expired(token) is True
+
+    def test_get_claim(self):
+        token = JWTUtil.create_token({"user": "test", "role": "admin"}, self.SECRET)
+        assert JWTUtil.get_claim(token, "user") == "test"
+        assert JWTUtil.get_claim(token, "role") == "admin"
+        assert JWTUtil.get_claim(token, "nonexistent") is None
+
+    def test_generate_key(self):
+        key = JWTUtil.generate_key("HS256")
+        assert isinstance(key, bytes)
+        assert len(key) == 32
+
+    def test_generate_key_384(self):
+        key = JWTUtil.generate_key("HS384")
+        assert len(key) == 48
+
+    def test_create_token_with_claims(self):
+        token = JWTUtil.create_token_with_claims(
+            self.SECRET,
+            issuer="test_iss",
+            subject="test_sub",
+            expire_seconds=3600,
+            custom_field="value",
+        )
+        payload = JWTUtil.get_payload(token)
+        assert payload["iss"] == "test_iss"
+        assert payload["sub"] == "test_sub"
+        assert payload["custom_field"] == "value"
+        assert "exp" in payload
+        assert "iat" in payload

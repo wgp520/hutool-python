@@ -31,6 +31,8 @@ class HttpRequest:
         self._charset: str = "utf-8"
         self._follow_redirects: bool = True
         self._params: Optional[Dict[str, str]] = None
+        self._body_bytes: Optional[bytes] = None
+        self._files: Optional[Dict[str, Any]] = None
 
     @classmethod
     def get(cls, url: str) -> "HttpRequest":
@@ -177,12 +179,141 @@ class HttpRequest:
 
         if self._json_data is not None:
             kwargs["json"] = self._json_data
+        elif self._body_bytes is not None:
+            kwargs["content"] = self._body_bytes
         elif self._body is not None:
             kwargs["content"] = self._body.encode(self._charset)
         elif self._form:
             kwargs["data"] = self._form
 
+        if self._files:
+            kwargs["files"] = self._files
+
         with httpx.Client() as client:
             response = client.request(**kwargs)
 
         return HttpResponse(response, charset=self._charset)
+
+    @classmethod
+    def head(cls, url: str) -> "HttpRequest":
+        """创建HEAD请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "HEAD")
+
+    @classmethod
+    def put(cls, url: str) -> "HttpRequest":
+        """创建PUT请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "PUT")
+
+    @classmethod
+    def patch(cls, url: str) -> "HttpRequest":
+        """创建PATCH请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "PATCH")
+
+    @classmethod
+    def delete(cls, url: str) -> "HttpRequest":
+        """创建DELETE请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "DELETE")
+
+    @classmethod
+    def trace(cls, url: str) -> "HttpRequest":
+        """创建TRACE请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "TRACE")
+
+    @classmethod
+    def options(cls, url: str) -> "HttpRequest":
+        """创建OPTIONS请求
+
+        :param url: 请求URL
+        :return: HttpRequest实例
+        """
+        return cls(url, "OPTIONS")
+
+    def content_type(self, ct: str) -> "HttpRequest":
+        """设置Content-Type头
+
+        :param ct: Content-Type值
+        :return: 当前实例，支持链式调用
+        """
+        self._headers["Content-Type"] = ct
+        return self
+
+    def keep_alive(self, keep: bool) -> "HttpRequest":
+        """设置Connection头
+
+        :param keep: 是否保持连接
+        :return: 当前实例，支持链式调用
+        """
+        self._headers["Connection"] = "keep-alive" if keep else "close"
+        return self
+
+    def basic_auth(self, username: str, password: str) -> "HttpRequest":
+        """设置Basic认证
+
+        :param username: 用户名
+        :param password: 密码
+        :return: 当前实例，支持链式调用
+        """
+        from .http_client import HttpUtil
+
+        self._headers["Authorization"] = HttpUtil.build_basic_auth(username, password)
+        return self
+
+    def bearer_auth(self, token: str) -> "HttpRequest":
+        """设置Bearer Token认证
+
+        :param token: Bearer Token
+        :return: 当前实例，支持链式调用
+        """
+        self._headers["Authorization"] = f"Bearer {token}"
+        return self
+
+    def body_bytes(self, data: bytes) -> "HttpRequest":
+        """设置字节请求体
+
+        :param data: 字节数据
+        :return: 当前实例，支持链式调用
+        """
+        self._body_bytes = data
+        return self
+
+    def params(self, params: dict) -> "HttpRequest":
+        """设置URL查询参数
+
+        :param params: 参数字典
+        :return: 当前实例，支持链式调用
+        """
+        self._params = params
+        return self
+
+    def form_file(self, name: str, file_bytes: bytes, filename: str = "file") -> "HttpRequest":
+        """添加文件上传字段（记录信息供execute使用）
+
+        :param name: 字段名
+        :param file_bytes: 文件字节数据
+        :param filename: 文件名
+        :return: 当前实例，支持链式调用
+        """
+        if self._files is None:
+            self._files = {}
+        self._files[name] = (filename, file_bytes)
+        return self

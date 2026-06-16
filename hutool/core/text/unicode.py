@@ -56,3 +56,27 @@ class UnicodeUtil:
             return chr(int(match.group(1), 16))
 
         return re.sub(r"\\u([0-9a-fA-F]{4,})", _replace, content)
+
+    @staticmethod
+    def to_string(unicode_str: str) -> str:
+        """Unicode 转义字符串还原为中文等字符。
+
+        将 ``\\uXXXX`` 格式的序列转为实际字符。
+        与 :meth:`unescape` 功能相同。
+
+        :param unicode_str: Unicode 转义字符串
+        :return: 还原后的字符串
+        """
+        return UnicodeUtil.unescape(unicode_str)
+
+    @staticmethod
+    def to_unicode_string(s: str) -> str:
+        """将字符串转为 Unicode 转义格式。
+
+        非 ASCII 字符转为 ``\\uXXXX``，ASCII 字符保持不变。
+        与 :meth:`escape` 功能相同。
+
+        :param s: 原始字符串
+        :return: Unicode 转义后的字符串
+        """
+        return UnicodeUtil.escape(s)

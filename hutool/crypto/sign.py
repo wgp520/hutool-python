@@ -72,3 +72,67 @@ class SignUtil:
         :return: 签名后的十六进制字符串
         """
         return SignUtil.sign_params(params, secret, algorithm)
+
+    # ------------------------------------------------------------------ #
+    #  算法特定签名便捷方法
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def sign_params_md5(params: Dict[str, str], secret: str) -> str:
+        """MD5签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: MD5签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "md5")
+
+    @staticmethod
+    def sign_params_sha1(params: Dict[str, str], secret: str) -> str:
+        """SHA-1签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: SHA-1签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "sha1")
+
+    @staticmethod
+    def sign_params_sha256(params: Dict[str, str], secret: str) -> str:
+        """SHA-256签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: SHA-256签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "sha256")
+
+    @staticmethod
+    def sign_params_hmac_md5(params: Dict[str, str], secret: str) -> str:
+        """HMAC-MD5签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: HMAC-MD5签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "hmac_md5")
+
+    @staticmethod
+    def sign_params_hmac_sha1(params: Dict[str, str], secret: str) -> str:
+        """HMAC-SHA1签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: HMAC-SHA1签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "hmac_sha1")
+
+    @staticmethod
+    def sign_params_hmac_sha256(params: Dict[str, str], secret: str) -> str:
+        """HMAC-SHA256签名
+
+        :param params: 待签名参数
+        :param secret: 密钥
+        :return: HMAC-SHA256签名字符串
+        """
+        return SignUtil.sign_params(params, secret, "hmac_sha256")

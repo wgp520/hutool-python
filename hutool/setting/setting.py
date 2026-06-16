@@ -78,3 +78,65 @@ class SettingUtil:
         except ValueError:
             pass
         return value
+
+    @staticmethod
+    def store(props: dict, path: str, charset: str = "utf-8", comment: str = "") -> None:
+        """将配置字典持久化到文件
+
+        :param props: 配置字典
+        :param path: 文件路径
+        :param charset: 文件编码
+        :param comment: 文件头部注释
+        """
+        path = os.path.abspath(path)
+        with open(path, "w", encoding=charset) as f:
+            if comment:
+                f.write(f"# {comment}\n")
+            for key, value in props.items():
+                f.write(f"{key}={value}\n")
+
+    @staticmethod
+    def to_dict(props: dict) -> dict:
+        """将配置字典转为普通字典（别名，直接返回副本）
+
+        :param props: 配置字典
+        :return: 字典副本
+        """
+        return dict(props)
+
+    @staticmethod
+    def create() -> dict:
+        """创建空配置字典
+
+        :return: 空字典
+        """
+        return {}
+
+    @staticmethod
+    def set_value(props: dict, key: str, value) -> None:
+        """设置配置值
+
+        :param props: 配置字典
+        :param key: 键名
+        :param value: 值
+        """
+        props[key] = value
+
+    @staticmethod
+    def get_group(props: dict, prefix: str) -> dict:
+        """获取指定前缀的配置组
+
+        :param props: 配置字典
+        :param prefix: 组前缀
+        :return: 过滤后的字典
+        """
+        result = {}
+        dot_prefix = prefix if prefix.endswith(".") else prefix + "."
+        for key, value in props.items():
+            if key.startswith(dot_prefix):
+                # 去掉前缀，保留剩余部分作为新键名
+                new_key = key[len(dot_prefix) :]
+                result[new_key] = value
+            elif key == prefix:
+                result[key] = value
+        return result

@@ -1,6 +1,6 @@
 import time
 
-from hutool import CacheUtil, FIFOCache, LFUCache, LRUCache, TimedCache
+from hutool import CacheUtil, FIFOCache, LFUCache, LRUCache, TimedCache, WeakCache
 
 
 class TestFIFOCache:
@@ -125,6 +125,64 @@ class TestTimedCache:
         assert cache.size() == 0
 
 
+class TestWeakCache:
+    def test_basic_ops(self):
+        cache = WeakCache(10)
+        cache.put("key1", "value1")
+        assert cache.get("key1") == "value1"
+        assert cache.size() == 1
+
+    def test_get_miss(self):
+        cache = WeakCache()
+        assert cache.get("missing", "default") == "default"
+
+    def test_remove(self):
+        cache = WeakCache()
+        cache.put("k", "v")
+        cache.remove("k")
+        assert cache.get("k") is None
+
+    def test_clear(self):
+        cache = WeakCache()
+        cache.put("a", 1)
+        cache.put("b", 2)
+        cache.clear()
+        assert cache.size() == 0
+
+    def test_is_empty(self):
+        cache = WeakCache()
+        assert cache.is_empty() is True
+        cache.put("x", 1)
+        assert cache.is_empty() is False
+
+    def test_hit_miss_count(self):
+        cache = WeakCache()
+        cache.put("a", 1)
+        cache.get("a")
+        cache.get("b")
+        assert cache.get_hit_count() == 1
+        assert cache.get_miss_count() == 1
+
+    def test_key_set(self):
+        cache = WeakCache()
+        cache.put("x", 1)
+        cache.put("y", 2)
+        keys = cache.key_set()
+        assert "x" in keys
+        assert "y" in keys
+
+    def test_contains(self):
+        cache = WeakCache()
+        cache.put("k", "v")
+        assert "k" in cache
+        assert "m" not in cache
+
+    def test_len(self):
+        cache = WeakCache()
+        cache.put("a", 1)
+        assert len(cache) == 1
+
+
 class TestCacheUtil:
     def test_new_fifo_cache(self):
         cache = CacheUtil.new_fifo_cache(10)
@@ -141,3 +199,7 @@ class TestCacheUtil:
     def test_new_timed_cache(self):
         cache = CacheUtil.new_timed_cache(60)
         assert isinstance(cache, TimedCache)
+
+    def test_new_weak_cache(self):
+        cache = CacheUtil.new_weak_cache(10)
+        assert isinstance(cache, WeakCache)

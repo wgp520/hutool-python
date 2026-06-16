@@ -137,3 +137,90 @@ class HttpResponse:
         :return: 包含状态码和URL的字符串
         """
         return self.__str__()
+
+    @property
+    def content_encoding(self) -> str:
+        """获取内容编码
+
+        :return: Content-Encoding头值
+        """
+        return self._response.headers.get("content-encoding", "")
+
+    def is_gzip(self) -> bool:
+        """是否为gzip压缩
+
+        :return: 是否gzip
+        """
+        return "gzip" in self.content_encoding.lower()
+
+    def is_deflate(self) -> bool:
+        """是否为deflate压缩
+
+        :return: 是否deflate
+        """
+        return "deflate" in self.content_encoding.lower()
+
+    def is_chunked(self) -> bool:
+        """是否为分块传输
+
+        :return: 是否chunked
+        """
+        transfer_encoding = self._response.headers.get("transfer-encoding", "")
+        return "chunked" in transfer_encoding.lower()
+
+    def get_cookie_str(self) -> str:
+        """获取Set-Cookie头值
+
+        :return: Cookie字符串
+        """
+        return self._response.headers.get("set-cookie", "")
+
+    def get_cookies(self) -> dict:
+        """获取所有Cookie
+
+        :return: Cookie字典
+        """
+        return dict(self._response.cookies)
+
+    def get_cookie_value(self, name: str) -> Optional[str]:
+        """获取指定Cookie值（cookie方法的别名）
+
+        :param name: Cookie名称
+        :return: Cookie值
+        """
+        return self.cookie(name)
+
+    def body_bytes(self) -> bytes:
+        """获取响应体字节数组（to_bytes别名）
+
+        :return: 响应体字节数据
+        """
+        return self.to_bytes()
+
+    def write_body(self, dest) -> int:
+        """将响应体写入文件
+
+        :param dest: 文件路径或文件对象
+        :return: 写入的字节数
+        """
+        data = self._response.content
+        if isinstance(dest, str):
+            with open(dest, "wb") as f:
+                return f.write(data)
+        else:
+            return dest.write(data)
+
+    def get_filename_from_disposition(self) -> Optional[str]:
+        """从Content-Disposition头获取文件名
+
+        :return: 文件名，不存在时返回None
+        """
+        disposition = self._response.headers.get("content-disposition", "")
+        if not disposition:
+            return None
+        import re
+
+        match = re.search(r'filename\*?=["\']?(?:UTF-8\'\')?([^"\';\s]+)', disposition, re.IGNORECASE)
+        if match:
+            return match.group(1)
+        return None

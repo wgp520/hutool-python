@@ -30,6 +30,39 @@ class TestEnumUtil:
         result = EnumUtil.of(Color, "RED")
         assert result == Color.RED
 
+    def test_clear_cache(self):
+        EnumUtil.clear_cache(Color)  # no-op, should not raise
+
+    def test_to_string(self):
+        assert EnumUtil.to_string(Color.RED) == "RED"
+        assert EnumUtil.to_string(None) == "null"
+        assert EnumUtil.to_string(None, "空") == "空"
+
+    def test_get_enum_at(self):
+        members = list(Color)
+        assert EnumUtil.get_enum_at(Color, 0) == members[0]
+        assert EnumUtil.get_enum_at(Color, 2) == members[2]
+        assert EnumUtil.get_enum_at(Color, 99) is None
+
+    def test_like_value_of(self):
+        result = EnumUtil.like_value_of(Color, "re")
+        assert result == Color.RED
+
+    def test_like_value_of_not_found(self):
+        assert EnumUtil.like_value_of(Color, "xyz") is None
+
+    def test_get_field_by(self):
+        assert EnumUtil.get_field_by(Color, "value", 1) == Color.RED
+        assert EnumUtil.get_field_by(Color, "value", 99) is None
+
+    def test_not_contains(self):
+        assert EnumUtil.not_contains(Color, 99) is True
+        assert EnumUtil.not_contains(Color, 1) is False
+
+    def test_equals_ignore_case(self):
+        assert EnumUtil.equals_ignore_case(Color.RED, Color.RED) is True
+        assert EnumUtil.equals_ignore_case(Color.RED, Color.BLUE) is False
+
 
 class TestClassUtil:
     def test_get_class_name(self):

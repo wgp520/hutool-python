@@ -2,8 +2,8 @@
 
 import threading
 import time
-from datetime import datetime
-from typing import Callable, List, Optional
+from datetime import datetime, timedelta
+from typing import Callable, Dict, List, Optional
 
 from .cron_pattern import CronPattern
 
@@ -30,6 +30,7 @@ class CronUtil:
 
     _tasks: List[_CronTask] = []
     _fixed_tasks: List[_FixedRateTask] = []
+    _task_ids: Dict[str, int] = {}
     _running: bool = False
     _thread: Optional[threading.Thread] = None
     _lock = threading.Lock()
@@ -116,3 +117,77 @@ class CronUtil:
             now = datetime.now()
             seconds_until_next_minute = 60 - now.second
             time.sleep(max(1, seconds_until_next_minute))
+
+    @classmethod
+    def schedule_with_id(cls, task_id: str, cron_pattern: str, func: Callable) -> None:
+        """添加带ID的定时任务
+
+        :param task_id: 任务ID
+        :param cron_pattern: cron表达式
+        :param func: 执行函数
+        """
+        pattern = CronPattern(cron_pattern)
+        with cls._lock:
+            index = len(cls._tasks)
+            cls._tasks.append(_CronTask(pattern, func))
+            cls._task_ids[task_id] = index
+
+    @classmethod
+    def remove(cls, task_id: str) -> bool:
+        """移除指定ID的任务
+
+        :param task_id: 任务ID
+        :return: 是否成功移除
+        """
+        with cls._lock:
+            if task_id in cls._task_ids:
+                index = cls._task_ids[task_id]
+                if 0 <= index < len(cls._tasks):
+                    cls._tasks.pop(index)
+                del cls._task_ids[task_id]
+                # 重建索引
+                new_ids: Dict[str, int] = {}
+                for k, v in cls._task_ids.items():
+                    if v > index:
+                        new_ids[k] = v - 1
+                    else:
+                        new_ids[k] = v
+                cls._task_ids = new_ids
+                return True
+            return False
+
+    @classmethod
+    def get_task_count(cls) -> int:
+        """获取任务数量
+
+        :return: 任务总数
+        """
+        with cls._lock:
+            return len(cls._tasks) + len(cls._fixed_tasks)
+
+    @classmethod
+    def clear(cls) -> None:
+        """清空所有任务"""
+        with cls._lock:
+            cls._tasks.clear()
+            cls._fixed_tasks.clear()
+            cls._task_ids.clear()
+
+    @classmethod
+    def matched_dates(cls, cron_pattern: str, start, end) -> list:
+        """获取指定时间范围内匹配cron表达式的日期列表
+
+        :param cron_pattern: cron表达式
+        :param start: 开始时间（datetime）
+        :param end: 结束时间（datetime）
+        :return: 匹配的datetime列表
+        """
+        pattern = CronPattern(cron_pattern)
+        result = []
+        # 从start开始，逐分钟遍历到end
+        current = start.replace(second=0, microsecond=0)
+        while current <= end:
+            if pattern.match(current):
+                result.append(current)
+            current += timedelta(minutes=1)
+        return result

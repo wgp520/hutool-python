@@ -1,4 +1,6 @@
-from hutool import CronPattern
+from datetime import datetime
+
+from hutool import CronPattern, CronUtil
 
 
 class TestCronPattern:
@@ -53,3 +55,38 @@ class TestCronPattern:
         # Monday = 0 in Python, but cron uses 1=Mon, 7=Sun
         # This test depends on implementation
         assert cp is not None
+
+
+class TestCronUtil:
+    def setup_method(self):
+        CronUtil.clear()
+
+    def test_schedule_with_id(self):
+        CronUtil.schedule_with_id("task1", "*/5 * * * *", lambda: None)
+        assert CronUtil.get_task_count() >= 1
+
+    def test_remove(self):
+        CronUtil.schedule_with_id("task1", "*/5 * * * *", lambda: None)
+        result = CronUtil.remove("task1")
+        assert result is True
+
+    def test_remove_nonexistent(self):
+        result = CronUtil.remove("no_such_task")
+        assert result is False
+
+    def test_get_task_count(self):
+        assert CronUtil.get_task_count() == 0
+        CronUtil.schedule_with_id("t1", "*/5 * * * *", lambda: None)
+        assert CronUtil.get_task_count() == 1
+
+    def test_clear(self):
+        CronUtil.schedule_with_id("t1", "*/5 * * * *", lambda: None)
+        CronUtil.clear()
+        assert CronUtil.get_task_count() == 0
+
+    def test_matched_dates(self):
+        start = datetime(2026, 1, 1, 0, 0)
+        end = datetime(2026, 1, 1, 0, 5)
+        dates = CronUtil.matched_dates("* * * * *", start, end)
+        assert isinstance(dates, list)
+        assert len(dates) > 0

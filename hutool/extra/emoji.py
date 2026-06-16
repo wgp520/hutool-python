@@ -88,3 +88,52 @@ class EmojiUtil:
         :return: 移除emoji后的字符串
         """
         return _EMOJI_PATTERN.sub("", str_val)
+
+    @staticmethod
+    def is_emoji(char: str) -> bool:
+        """判断单个字符是否为emoji
+
+        :param char: 单个字符
+        :return: 是否为emoji
+        """
+        return bool(_EMOJI_PATTERN.fullmatch(char))
+
+    @staticmethod
+    def extract_emojis(str_val: str) -> list:
+        """提取字符串中的所有emoji
+
+        :param str_val: 输入字符串
+        :return: emoji列表
+        """
+        return _EMOJI_PATTERN.findall(str_val)
+
+    @staticmethod
+    def to_alias(emoji: str) -> str:
+        """将emoji转换为别名格式
+
+        :param emoji: emoji字符串
+        :return: 别名字符串（如 :smile:）
+        """
+        try:
+            import emoji as emoji_lib
+
+            return emoji_lib.demojize(emoji, language="en")
+        except ImportError:
+            # 回退方案：返回Unicode编码的别名格式
+            code_points = []
+            for char in emoji:
+                code_points.append(f"U+{ord(char):04X}")
+            return ":" + "_".join(code_points) + ":"
+
+    @staticmethod
+    def to_html(emoji: str) -> str:
+        """将emoji转换为HTML实体
+
+        :param emoji: emoji字符串
+        :return: HTML实体字符串
+        """
+        result = []
+        for char in emoji:
+            code_point = ord(char)
+            result.append(f"&#x{code_point:X};")
+        return "".join(result)

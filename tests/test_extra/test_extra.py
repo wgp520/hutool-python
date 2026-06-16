@@ -1,7 +1,9 @@
+import base64
+
 import jinja2
 import pytest
 
-from hutool import EmojiUtil, PinyinUtil, TemplateUtil
+from hutool import EmojiUtil, PinyinUtil, QrCodeUtil, TemplateUtil
 
 
 class TestEmojiUtil:
@@ -22,6 +24,23 @@ class TestEmojiUtil:
     def test_unicode_to_emoji(self):
         result = EmojiUtil.unicode_to_emoji("\\U0001F600")
         assert isinstance(result, str)
+
+    def test_is_emoji(self):
+        assert EmojiUtil.is_emoji("😀") is True
+        assert EmojiUtil.is_emoji("a") is False
+
+    def test_extract_emojis(self):
+        result = EmojiUtil.extract_emojis("hello 😀 world 🎉")
+        assert "😀" in result
+        assert "🎉" in result
+
+    def test_extract_emojis_none(self):
+        result = EmojiUtil.extract_emojis("no emojis")
+        assert result == []
+
+    def test_to_html(self):
+        result = EmojiUtil.to_html("A")
+        assert "A" in result or "&#x" in result
 
 
 class TestPinyinUtil:
@@ -46,6 +65,26 @@ class TestPinyinUtil:
         result = PinyinUtil.get_full_pinyin("中文测试")
         assert isinstance(result, str)
 
+    def test_get_pinyin_char(self):
+        result = PinyinUtil.get_pinyin_char("你")
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_get_first_letter(self):
+        result = PinyinUtil.get_first_letter("北京")
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_is_chinese(self):
+        assert PinyinUtil.is_chinese("你") is True
+        assert PinyinUtil.is_chinese("a") is False
+        assert PinyinUtil.is_chinese("1") is False
+
+    def test_get_pinyin_with_tone(self):
+        result = PinyinUtil.get_pinyin_with_tone("北京")
+        assert isinstance(result, str)
+        assert len(result) > 0
+
 
 class TestTemplateUtil:
     def test_render(self):
@@ -62,3 +101,17 @@ class TestTemplateUtil:
     def test_render_missing_key(self):
         with pytest.raises(jinja2.exceptions.UndefinedError):
             TemplateUtil.render("{{ missing }}", {})
+
+
+class TestQrCodeUtil:
+    def test_generate_as_base64(self):
+        result = QrCodeUtil.generate_as_base64("test content")
+        assert isinstance(result, str)
+        # Verify it's valid base64
+        decoded = base64.b64decode(result)
+        assert len(decoded) > 0
+
+    def test_generate_as_svg(self):
+        result = QrCodeUtil.generate_as_svg("test content")
+        assert isinstance(result, str)
+        assert "svg" in result.lower() or "SVG" in result

@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 from hutool import DigestUtil
 
 
@@ -79,3 +82,66 @@ class TestDigestUtil:
     def test_bytes_input(self):
         result = DigestUtil.md5_hex(b"hello")
         assert result == "5d41402abc4b2a76b9719d911017c592"
+
+    def test_md5_from_file(self):
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".txt") as f:
+            f.write(b"Hello World")
+            path = f.name
+        try:
+            result = DigestUtil.md5_from_file(path)
+            assert isinstance(result, str)
+            assert len(result) == 32
+            # Verify against known MD5
+            import hashlib
+
+            expected = hashlib.md5(b"Hello World").hexdigest()
+            assert result == expected
+        finally:
+            os.unlink(path)
+
+    def test_sha256_from_file(self):
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".txt") as f:
+            f.write(b"test data")
+            path = f.name
+        try:
+            result = DigestUtil.sha256_from_file(path)
+            assert isinstance(result, str)
+            assert len(result) == 64
+        finally:
+            os.unlink(path)
+
+    def test_md5_hex_to_16(self):
+        full = DigestUtil.md5_hex("Hello")
+        result = DigestUtil.md5_hex_to_16(full)
+        assert len(result) == 16
+        assert result == DigestUtil.md5_hex16("Hello")
+
+    def test_md5_hex_to_16_invalid(self):
+        assert DigestUtil.md5_hex_to_16("") == ""
+        assert DigestUtil.md5_hex_to_16("abc") == "abc"
+
+    def test_hmac_factory(self):
+        result = DigestUtil.hmac(b"data", b"key", "sha256")
+        assert isinstance(result, bytes)
+        assert result == DigestUtil.hmac_sha256(b"data", b"key")
+
+    def test_hmac_hex_factory(self):
+        result = DigestUtil.hmac_hex(b"data", b"key", "md5")
+        assert isinstance(result, str)
+        assert result == DigestUtil.hmac_md5_hex(b"data", b"key")
+
+    def test_digest_factory(self):
+        result = DigestUtil.digest("Hello", "sha256")
+        assert isinstance(result, bytes)
+        assert result == DigestUtil.sha256("Hello")
+
+    def test_digest_hex_factory(self):
+        result = DigestUtil.digest_hex("Hello", "md5")
+        assert isinstance(result, str)
+        assert result == DigestUtil.md5_hex("Hello")
+
+    def test_bcrypt(self):
+        hashed = DigestUtil.bcrypt("password123")
+        assert isinstance(hashed, str)
+        assert DigestUtil.bcrypt_check("password123", hashed) is True
+        assert DigestUtil.bcrypt_check("wrong", hashed) is False

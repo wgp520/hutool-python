@@ -34,3 +34,19 @@ class TestCoordinateUtil:
     def test_bd09_to_wgs84(self):
         result = CoordinateUtil.bd09_to_wgs84(116.404, 39.915)
         assert result is not None
+
+    def test_out_of_china(self):
+        assert CoordinateUtil.out_of_china(116.397128, 39.916527) is False
+        assert CoordinateUtil.out_of_china(0.0, 0.0) is True
+
+    def test_wgs84_to_mercator(self):
+        x, y = CoordinateUtil.wgs84_to_mercator(0.0, 0.0)
+        assert abs(x) < 1
+        assert abs(y) < 1
+
+    def test_wgs84_to_mercator_roundtrip(self):
+        lng, lat = 116.397128, 39.916527
+        x, y = CoordinateUtil.wgs84_to_mercator(lng, lat)
+        lng2, lat2 = CoordinateUtil.mercator_to_wgs84(x, y)
+        assert abs(lng - lng2) < 0.001
+        assert abs(lat - lat2) < 0.001

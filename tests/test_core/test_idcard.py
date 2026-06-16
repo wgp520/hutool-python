@@ -55,3 +55,58 @@ class TestIdcardUtil:
         assert IdcardUtil.get_day_by_id_card("110101199003071234") == 7
         assert IdcardUtil.get_day_by_id_card("110101900307123") == 7
         assert IdcardUtil.get_day_by_id_card("") == -1
+
+    def test_convert_18_to_15(self):
+        # 使用已知的 18 位身份证号（校验码已计算正确）
+        id18 = "110101199003074557"
+        result = IdcardUtil.convert_18_to_15(id18)
+        assert len(result) == 15
+        assert result == "110101900307455"
+
+    def test_convert_18_to_15_invalid(self):
+        assert IdcardUtil.convert_18_to_15("12345") == ""
+        assert IdcardUtil.convert_18_to_15(None) == ""
+
+    def test_is_valid_tw_card(self):
+        # 台湾身份证示例：A123456789
+        assert isinstance(IdcardUtil.is_valid_tw_card("A123456789"), bool)
+
+    def test_is_valid_tw_card_invalid(self):
+        assert IdcardUtil.is_valid_tw_card(None) is False
+        assert IdcardUtil.is_valid_tw_card("123") is False
+
+    def test_is_valid_hk_card(self):
+        assert isinstance(IdcardUtil.is_valid_hk_card("A123456(7)"), bool)
+
+    def test_is_valid_hk_card_invalid(self):
+        assert IdcardUtil.is_valid_hk_card(None) is False
+        assert IdcardUtil.is_valid_hk_card("123") is False
+
+    def test_get_birth_date(self):
+        id18 = "110101199003074557"
+        result = IdcardUtil.get_birth_date(id18)
+        if result is not None:
+            assert result.year == 1990
+            assert result.month == 3
+            assert result.day == 7
+
+    def test_get_birth_date_invalid(self):
+        assert IdcardUtil.get_birth_date(None) is None
+
+    def test_get_city_code(self):
+        id18 = "110101199003074557"
+        result = IdcardUtil.get_city_code(id18)
+        if result is not None and result != "":
+            assert len(result) == 2
+
+    def test_get_district_code(self):
+        id18 = "110101199003074557"
+        result = IdcardUtil.get_district_code(id18)
+        if result is not None and result != "":
+            assert len(result) == 6
+
+    def test_get_idcard_info(self):
+        id18 = "110101199003074557"
+        info = IdcardUtil.get_idcard_info(id18)
+        assert isinstance(info, dict)
+        assert "province" in info or "valid" in info

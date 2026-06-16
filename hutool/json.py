@@ -1,5 +1,6 @@
 import json
 import re
+import xml.etree.ElementTree as ET
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 
@@ -438,3 +439,220 @@ class JSONUtil:
             return _camel_pattern.sub("_", key).lower()
 
         return JSONUtil.map_dict_keys(_to_snake, obj)
+
+    # ------------------------------------------------------------------ #
+    #  转义 / 引号
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def quote(s: str) -> str:
+        """用双引号包裹字符串并进行JSON转义
+
+        :param s: 原始字符串
+        :return: JSON引号包裹的字符串
+        """
+        return json.dumps(s)
+
+    @staticmethod
+    def escape(s: str) -> str:
+        """JSON字符串转义
+
+        将特殊字符转为JSON转义序列。
+
+        :param s: 原始字符串
+        :return: 转义后的字符串
+        """
+        result = []
+        for ch in s:
+            if ch == '"':
+                result.append('\\"')
+            elif ch == "\\":
+                result.append("\\\\")
+            elif ch == "\b":
+                result.append("\\b")
+            elif ch == "\f":
+                result.append("\\f")
+            elif ch == "\n":
+                result.append("\\n")
+            elif ch == "\r":
+                result.append("\\r")
+            elif ch == "\t":
+                result.append("\\t")
+            elif ord(ch) < 0x20:
+                result.append(f"\\u{ord(ch):04x}")
+            else:
+                result.append(ch)
+        return "".join(result)
+
+    # ------------------------------------------------------------------ #
+    #  判空
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def is_null(json_str: str) -> bool:
+        """判断JSON字符串是否为null
+
+        :param json_str: JSON字符串
+        :return: 是否为null
+        """
+        if json_str is None:
+            return True
+        stripped = json_str.strip()
+        return stripped == "null" or stripped == ""
+
+    # ------------------------------------------------------------------ #
+    #  XML 转换
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def xml_to_json(xml_str: str) -> dict:
+        """XML字符串转JSON字典
+
+        简单的XML到字典转换。
+
+        :param xml_str: XML字符串
+        :return: 转换后的字典
+        """
+
+        def _element_to_dict(element):
+            # type: (ET.Element) -> dict
+            result = {}
+            # 处理属性
+            if element.attrib:
+                for k, v in element.attrib.items():
+                    result[f"@{k}"] = v
+            # 处理子元素
+            children = list(element)
+            if children:
+                child_map = {}
+                for child in children:
+                    child_dict = _element_to_dict(child)
+                    tag = child.tag
+                    if tag in child_map:
+                        if not isinstance(child_map[tag], list):
+                            child_map[tag] = [child_map[tag]]
+                        child_map[tag].append(child_dict)
+                    else:
+                        child_map[tag] = child_dict
+                result.update(child_map)
+            # 处理文本
+            if element.text and element.text.strip():
+                if result:
+                    result["#text"] = element.text.strip()
+                else:
+                    return element.text.strip()
+            return result
+
+        root = ET.fromstring(xml_str)
+        return {root.tag: _element_to_dict(root)}
+
+    # ------------------------------------------------------------------ #
+    #  字节序列化
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def to_json_bytes(obj: Any, charset: str = "utf-8") -> bytes:
+        """对象转JSON字节数组
+
+        :param obj: 待序列化对象
+        :param charset: 字符集
+        :return: JSON字节数组
+        """
+        return json.dumps(obj, ensure_ascii=False).encode(charset)
+
+    # ------------------------------------------------------------------ #
+    #  便捷方法
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def wrap(obj: Any) -> str:
+        """将对象包装为JSON字符串（to_json_str别名）
+
+        :param obj: 对象
+        :return: JSON字符串
+        """
+        return JSONUtil.to_json_str(obj)
+
+    @staticmethod
+    def get_str(json_data: dict, key: str, default: str = "") -> str:
+        """从JSON对象获取字符串值
+
+        :param json_data: JSON字典
+        :param key: 键名
+        :param default: 默认值
+        :return: 字符串值
+        """
+        value = json_data.get(key, default)
+        if value is None:
+            return default
+        return str(value)
+
+    @staticmethod
+    def get_int(json_data: dict, key: str, default: int = 0) -> int:
+        """从JSON对象获取整数值
+
+        :param json_data: JSON字典
+        :param key: 键名
+        :param default: 默认值
+        :return: 整数值
+        """
+        value = json_data.get(key)
+        if value is None:
+            return default
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def get_float(json_data: dict, key: str, default: float = 0.0) -> float:
+        """从JSON对象获取浮点值
+
+        :param json_data: JSON字典
+        :param key: 键名
+        :param default: 默认值
+        :return: 浮点值
+        """
+        value = json_data.get(key)
+        if value is None:
+            return default
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def get_bool(json_data: dict, key: str, default: bool = False) -> bool:
+        """从JSON对象获取布尔值
+
+        :param json_data: JSON字典
+        :param key: 键名
+        :param default: 默认值
+        :return: 布尔值
+        """
+        value = json_data.get(key)
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ("true", "1", "yes")
+        return bool(value)
+
+    @staticmethod
+    def get_list(json_data: dict, key: str, default: Optional[list] = None) -> list:
+        """从JSON对象获取列表值
+
+        :param json_data: JSON字典
+        :param key: 键名
+        :param default: 默认值
+        :return: 列表值
+        """
+        if default is None:
+            default = []
+        value = json_data.get(key)
+        if value is None:
+            return default
+        if isinstance(value, list):
+            return value
+        return default

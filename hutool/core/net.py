@@ -4,8 +4,8 @@ import ipaddress
 import random
 import socket
 import uuid
-from socket import AF_INET, SO_REUSEADDR, SOCK_DGRAM, SOCK_STREAM, SOL_SOCKET
-from typing import Final, Optional
+from socket import AF_INET, AF_INET6, SO_REUSEADDR, SOCK_DGRAM, SOCK_STREAM, SOL_SOCKET
+from typing import Final, List, Optional
 
 __all__ = ("Ipv4Util", "MaskBit", "NetUtil")
 
@@ -85,20 +85,240 @@ class Ipv4Util:
     IP_MASK_MAX: Final[int] = 32
 
     @staticmethod
-    def format_ip_block(ip: str, mask: str) -> str:
+    def ipv4_to_long(ip: str) -> int:
+        """IPv4 地址转 long 值。
+
+        :param ip: IPv4 地址，如 ``"192.168.1.1"``
+        :return: long 值
+        :raises ValueError: IP 地址格式非法
         """
-        格式化IP段
+        parts = ip.strip().split(".")
+        if len(parts) != 4:
+            raise ValueError("无效的 IPv4 地址: " + ip)
+        return (int(parts[0]) << 24) + (int(parts[1]) << 16) + (int(parts[2]) << 8) + int(parts[3])
+
+    @staticmethod
+    def long_to_ipv4(long_ip: int) -> str:
+        """long 值转 IPv4 地址。
+
+        :param long_ip: long 值
+        :return: IPv4 地址字符串
+        :raises ValueError: 数值不在合法范围内
+        """
+        if long_ip < 0 or long_ip > 0xFFFFFFFF:
+            raise ValueError(f"非法的 long 型 IP 值: {long_ip}")
+        long_ip = long_ip & 0xFFFFFFFF
+        return ".".join(
+            [
+                str((long_ip >> 24) & 0xFF),
+                str((long_ip >> 16) & 0xFF),
+                str((long_ip >> 8) & 0xFF),
+                str(long_ip & 0xFF),
+            ]
+        )
+
+    @staticmethod
+    def get_begin_ip_str(cidr: str) -> str:
+        """获取 CIDR 表示的网段起始 IP 地址。
+
+        :param cidr: CIDR 格式，如 ``"192.168.1.0/24"``
+        :return: 起始 IP 地址字符串
+        """
+        ip_str, mask_bit = cidr.strip().split("/")
+        mask_bit = int(mask_bit)
+        ip_long = Ipv4Util.ipv4_to_long(ip_str)
+        mask = Ipv4Util._mask_bit_to_long(mask_bit)
+        begin_ip = ip_long & mask
+        return Ipv4Util.long_to_ipv4(begin_ip)
+
+    @staticmethod
+    def get_begin_ip_long(cidr: str) -> int:
+        """获取 CIDR 表示的网段起始 IP 的 long 值。
+
+        :param cidr: CIDR 格式
+        :return: 起始 IP 的 long 值
+        """
+        return Ipv4Util.ipv4_to_long(Ipv4Util.get_begin_ip_str(cidr))
+
+    @staticmethod
+    def get_end_ip_str(cidr: str) -> str:
+        """获取 CIDR 表示的网段结束 IP 地址。
+
+        :param cidr: CIDR 格式，如 ``"192.168.1.0/24"``
+        :return: 结束 IP 地址字符串
+        """
+        ip_str, mask_bit = cidr.strip().split("/")
+        mask_bit = int(mask_bit)
+        ip_long = Ipv4Util.ipv4_to_long(ip_str)
+        mask = Ipv4Util._mask_bit_to_long(mask_bit)
+        end_ip = (ip_long & mask) | (~mask & 0xFFFFFFFF)
+        return Ipv4Util.long_to_ipv4(end_ip)
+
+    @staticmethod
+    def get_end_ip_long(cidr: str) -> int:
+        """获取 CIDR 表示的网段结束 IP 的 long 值。
+
+        :param cidr: CIDR 格式
+        :return: 结束 IP 的 long 值
+        """
+        return Ipv4Util.ipv4_to_long(Ipv4Util.get_end_ip_str(cidr))
+
+    @staticmethod
+    def count_by_mask_bit(mask_bit: int) -> int:
+        """根据掩码位数计算 IP 数量。
+
+        :param mask_bit: 掩码位数（0-32）
+        :return: IP 数量
+        """
+        if mask_bit < 0 or mask_bit > 32:
+            raise ValueError("掩码位数必须在 0-32 之间")
+        return 1 << (32 - mask_bit)
+
+    @staticmethod
+    def get_mask_by_mask_bit(mask_bit: int) -> str:
+        """根据掩码位数获取子网掩码。
+
+        :param mask_bit: 掩码位数（0-32）
+        :return: 子网掩码字符串
+        """
+        if mask_bit < 0 or mask_bit > 32:
+            raise ValueError("掩码位数必须在 0-32 之间")
+        mask = Ipv4Util._mask_bit_to_long(mask_bit)
+        return Ipv4Util.long_to_ipv4(mask)
+
+    @staticmethod
+    def get_mask_by_ip_range(begin_ip: str, end_ip: str) -> str:
+        """根据 IP 范围获取子网掩码。
+
+        :param begin_ip: 起始 IP
+        :param end_ip: 结束 IP
+        :return: 子网掩码字符串
+        """
+        begin_long = Ipv4Util.ipv4_to_long(begin_ip)
+        end_long = Ipv4Util.ipv4_to_long(end_ip)
+        diff = begin_long ^ end_long
+        mask_bit = 32
+        while diff > 0:
+            diff >>= 1
+            mask_bit -= 1
+        return Ipv4Util.get_mask_by_mask_bit(mask_bit)
+
+    @staticmethod
+    def count_by_ip_range(begin_ip: str, end_ip: str) -> int:
+        """计算两个 IP 之间的 IP 数量。
+
+        :param begin_ip: 起始 IP
+        :param end_ip: 结束 IP
+        :return: IP 数量
+        """
+        begin_long = Ipv4Util.ipv4_to_long(begin_ip)
+        end_long = Ipv4Util.ipv4_to_long(end_ip)
+        return abs(end_long - begin_long) + 1
+
+    @staticmethod
+    def is_mask_valid(mask: str) -> bool:
+        """检查子网掩码是否有效。
+
+        有效掩码的二进制表示为连续的 1 后跟连续的 0。
+
+        :param mask: 子网掩码字符串
+        :return: 是否有效
+        """
+        try:
+            mask_long = Ipv4Util.ipv4_to_long(mask)
+        except (ValueError, IndexError):
+            return False
+        inverted = (~mask_long) & 0xFFFFFFFF
+        if inverted == 0:
+            return True
+        return (inverted + 1) & inverted == 0
+
+    @staticmethod
+    def is_mask_bit_valid(mask_bit: int) -> bool:
+        """检查掩码位数是否有效。
+
+        :param mask_bit: 掩码位数
+        :return: 是否有效（0-32）
+        """
+        return 0 <= mask_bit <= 32
+
+    @staticmethod
+    def is_inner_ip(ip: str) -> bool:
+        """判断是否为内网 IP。
+
+        内网 IP 范围：
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 127.0.0.0/8（本地回环）
+
+        :param ip: IPv4 地址
+        :return: 是否为内网 IP
+        """
+        try:
+            ip_long = Ipv4Util.ipv4_to_long(ip)
+        except (ValueError, IndexError):
+            return False
+        if (ip_long >> 24) == 10:
+            return True
+        if (ip_long >> 24) == 127:
+            return True
+        if (ip_long >> 20) == 0xAC1:
+            return True
+        return (ip_long >> 16) == 0xC0A8
+
+    @staticmethod
+    def matches(ip: str, pattern: str) -> bool:
+        """通配符 IP 匹配。
+
+        支持 ``*`` 通配符，如 ``"192.168.1.*"``。
+
+        :param ip: IPv4 地址
+        :param pattern: 通配符模式
+        :return: 是否匹配
+        """
+        ip_parts = ip.strip().split(".")
+        pattern_parts = pattern.strip().split(".")
+        if len(ip_parts) != 4 or len(pattern_parts) != 4:
+            return False
+        for ip_part, pat_part in zip(ip_parts, pattern_parts):
+            if pat_part == "*":
+                continue
+            if ip_part != pat_part:
+                return False
+        return True
+
+    @staticmethod
+    def list(ip_range: str) -> list:
+        """列出 CIDR 网段中的所有 IP 地址（不含网络和广播地址）。
+
+        :param ip_range: CIDR 格式，如 ``"192.168.1.0/30"``
+        :return: IP 地址列表
+        """
+        begin = Ipv4Util.get_begin_ip_long(ip_range)
+        end = Ipv4Util.get_end_ip_long(ip_range)
+        if end - begin > 65536:
+            raise ValueError("IP 范围过大，最多支持 65536 个地址")
+        # 排除网络地址和广播地址
+        if end - begin > 1:
+            return [Ipv4Util.long_to_ipv4(ip) for ip in range(begin + 1, end)]
+        return [Ipv4Util.long_to_ipv4(ip) for ip in range(begin, end + 1)]
+
+    @staticmethod
+    def format_ip_block(ip: str, mask: str) -> str:
+        """格式化IP段
 
         :param ip: IP地址
         :param mask: 掩码
         :return: 返回xxx.xxx.xxx.xxx/mask的格式
         """
-        return ip + Ipv4Util.IP_MASK_SPLIT_MARK + str(Ipv4Util.get_mask_bit_by_mask(mask))
+        mask_bit = Ipv4Util.get_mask_bit(mask)
+        begin = Ipv4Util.get_begin_ip_str(ip + "/" + str(mask_bit))
+        return begin + "/" + str(mask_bit)
 
     @staticmethod
     def get_mask_bit_by_mask(mask: str) -> int:
-        """
-        根据子网掩码转换为掩码位
+        """根据子网掩码转换为掩码位
 
         :param mask: 掩码的点分十进制表示，例如"255.255.255.0"
         :return: 掩码位，例如24
@@ -108,6 +328,30 @@ class Ipv4Util:
         if mask_bit is None:
             raise ValueError("Invalid netmask: " + mask)
         return mask_bit
+
+    @staticmethod
+    def get_mask_bit(mask: str) -> Optional[int]:
+        """获取子网掩码的位数。
+
+        :param mask: 子网掩码字符串
+        :return: 掩码位数，无效掩码返回 None
+        """
+        try:
+            mask_long = Ipv4Util.ipv4_to_long(mask)
+        except (ValueError, IndexError):
+            return None
+        mask_bit = 0
+        while mask_long & 0x80000000:
+            mask_bit += 1
+            mask_long = (mask_long << 1) & 0xFFFFFFFF
+        return mask_bit
+
+    @staticmethod
+    def _mask_bit_to_long(mask_bit: int) -> int:
+        """掩码位数转 long 值。"""
+        if mask_bit == 0:
+            return 0
+        return (0xFFFFFFFF << (32 - mask_bit)) & 0xFFFFFFFF
 
 
 class NetUtil:
@@ -373,3 +617,263 @@ class NetUtil:
         from urllib.parse import urljoin
 
         return urljoin(base, relative)
+
+    @staticmethod
+    def ipv6_to_big_integer(ipv6: str) -> int:
+        """将 IPv6 地址转为大整数。
+
+        :param ipv6: IPv6 地址字符串
+        :return: 对应的大整数
+        :raises ValueError: IPv6 地址格式非法
+        """
+        try:
+            return int(ipaddress.IPv6Address(ipv6))
+        except ipaddress.AddressValueError as e:
+            raise ValueError(f"非法的 IPv6 地址: {ipv6}") from e
+
+    @staticmethod
+    def big_integer_to_ipv6(n: int) -> str:
+        """将大整数转为 IPv6 地址。
+
+        :param n: 大整数
+        :return: IPv6 地址字符串
+        :raises ValueError: 数值不在合法范围内
+        """
+        if n < 0 or n > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:
+            raise ValueError(f"非法的 long 型 IPv6 值: {n}")
+        return str(ipaddress.IPv6Address(n))
+
+    @staticmethod
+    def get_usable_local_ports(
+        count: int,
+        min_port: int = 1024,
+        max_port: int = 0xFFFF,
+    ) -> List[int]:
+        """批量获取可用的本地端口。
+
+        :param count: 需要的端口数量
+        :param min_port: 最小端口
+        :param max_port: 最大端口
+        :return: 可用端口列表
+        :raises RuntimeError: 无法获取足够数量的可用端口
+        """
+        ports = []
+        attempts = 0
+        max_attempts = count * 10
+        while len(ports) < count and attempts < max_attempts:
+            port = random.randint(min_port, max_port)
+            if port not in ports and NetUtil.is_usable_local_port(port):
+                ports.append(port)
+            attempts += 1
+        if len(ports) < count:
+            raise RuntimeError(f"无法获取 {count} 个可用端口，仅获取到 {len(ports)} 个")
+        return ports
+
+    @staticmethod
+    def hide_ip_part_from_long(long_ip: int) -> str:
+        """从 long 型 IP 遐藏最后一段。
+
+        :param long_ip: long 型 IP 值
+        :return: 遮蔽后的 IP 字符串
+        """
+        try:
+            ip_str = NetUtil.long_to_ipv4(long_ip)
+            return NetUtil.hide_ip_part(ip_str)
+        except ValueError:
+            return str(long_ip)
+
+    @staticmethod
+    def local_ipv6s() -> List[str]:
+        """获取本机所有 IPv6 地址列表。
+
+        :return: IPv6 地址列表
+        """
+        ips = []
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None, AF_INET6):
+                ip = info[4][0]
+                if ip not in ips:
+                    ips.append(ip)
+        except socket.gaierror:
+            pass
+        return ips
+
+    @staticmethod
+    def to_ip_list(ip_range: str) -> List[str]:
+        """将 IP 范围字符串转为 IP 列表。
+
+        支持 CIDR 格式（如 ``192.168.1.0/30``）和短横线范围
+        （如 ``192.168.1.1-192.168.1.5``）。
+
+        :param ip_range: IP 范围字符串
+        :return: IP 地址列表
+        """
+        ip_range = ip_range.strip()
+        if "/" in ip_range:
+            try:
+                network = ipaddress.ip_network(ip_range, strict=False)
+                return [str(ip) for ip in network.hosts()]
+            except ValueError:
+                return []
+        elif "-" in ip_range:
+            parts = ip_range.split("-", 1)
+            try:
+                start = int(ipaddress.IPv4Address(parts[0].strip()))
+                end = int(ipaddress.IPv4Address(parts[1].strip()))
+                if start > end:
+                    start, end = end, start
+                count = end - start + 1
+                if count > 65536:
+                    return []
+                return [str(ipaddress.IPv4Address(ip)) for ip in range(start, end + 1)]
+            except (ValueError, ipaddress.AddressValueError):
+                return []
+        else:
+            return [ip_range]
+
+    @staticmethod
+    def local_ips() -> List[str]:
+        """获取所有本地 IP 地址（IPv4 + IPv6）。
+
+        :return: IP 地址列表
+        """
+        ips = []
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None):
+                ip = info[4][0]
+                if ip not in ips:
+                    ips.append(ip)
+        except socket.gaierror:
+            pass
+        return ips
+
+    @staticmethod
+    def get_localhost_str() -> str:
+        """获取 localhost 字符串表示。
+
+        :return: "localhost" 字符串
+        """
+        return "localhost"
+
+    @staticmethod
+    def idn_to_ascii(domain: str) -> str:
+        """将国际化域名 (IDN) 转为 ASCII 形式。
+
+        :param domain: 域名
+        :return: ASCII 编码的域名
+        """
+        if domain is None:
+            return ""
+        try:
+            return domain.encode("idna").decode("ascii")
+        except (UnicodeError, UnicodeDecodeError):
+            return domain
+
+    @staticmethod
+    def is_unknown(ip: str) -> bool:
+        """判断是否为未知 IP 地址。
+
+        未知 IP 包括 None、空字符串和 "unknown"（不区分大小写）。
+
+        :param ip: IP 地址
+        :return: 是否为未知 IP
+        """
+        if ip is None:
+            return True
+        ip = ip.strip()
+        return ip == "" or ip.lower() == "unknown"
+
+    @staticmethod
+    def ping(host: str, timeout: int = 3000) -> bool:
+        """Ping 测试主机是否可达。
+
+        通过尝试建立 TCP 连接到端口 80 来检测。
+
+        :param host: 主机地址
+        :param timeout: 超时时间，单位毫秒
+        :return: 是否可达
+        """
+        if host is None:
+            return False
+        try:
+            with socket.socket(AF_INET, SOCK_STREAM) as s:
+                s.settimeout(timeout / 1000.0)
+                s.connect((host, 80))
+            return True
+        except (socket.timeout, OSError):
+            return host in ("localhost", "127.0.0.1", "::1")
+
+    @staticmethod
+    def parse_cookies(cookie_str: str) -> dict:
+        """解析 Cookie 字符串为字典。
+
+        :param cookie_str: Cookie 字符串，如 ``"name=value; name2=value2"``
+        :return: Cookie 字典
+        """
+        result = {}
+        if not cookie_str:
+            return result
+        for pair in cookie_str.split(";"):
+            pair = pair.strip()
+            if "=" in pair:
+                key, value = pair.split("=", 1)
+                result[key.strip()] = value.strip()
+            elif pair:
+                result[pair] = ""
+        return result
+
+    @staticmethod
+    def get_dns_info(hostname: str) -> dict:
+        """获取主机名的 DNS 信息。
+
+        :param hostname: 主机名
+        :return: DNS 信息字典，包含 ip、aliases、family 等
+        """
+        result = {"hostname": hostname, "ips": [], "aliases": [], "canonical": ""}
+        if not hostname:
+            return result
+        try:
+            infos = socket.getaddrinfo(hostname, None)
+            ips = []
+            for info in infos:
+                ip = info[4][0]
+                if ip not in ips:
+                    ips.append(ip)
+            result["ips"] = ips
+        except socket.gaierror:
+            pass
+        try:
+            canonical, aliases, _ = socket.gethostbyname_ex(hostname)
+            result["canonical"] = canonical
+            result["aliases"] = aliases
+        except socket.gaierror:
+            pass
+        return result
+
+    @staticmethod
+    def net_cat(host: str, port: int, data: str, timeout: int = 5000) -> str:
+        """网络连接发送数据并接收响应（类似 nc/netcat）。
+
+        :param host: 主机地址
+        :param port: 端口号
+        :param data: 要发送的数据
+        :param timeout: 超时时间，单位毫秒
+        :return: 接收到的响应数据
+        :raises ConnectionRefusedError: 连接被拒绝
+        :raises socket.timeout: 连接超时
+        """
+        with socket.socket(AF_INET, SOCK_STREAM) as s:
+            s.settimeout(timeout / 1000.0)
+            s.connect((host, port))
+            s.sendall(data.encode("utf-8"))
+            s.shutdown(socket.SHUT_WR)
+            chunks = []
+            while True:
+                try:
+                    chunk = s.recv(4096)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                except socket.timeout:
+                    break
+            return b"".join(chunks).decode("utf-8", errors="replace")

@@ -287,3 +287,135 @@ class DigestUtil:
         :return: 十六进制HMAC-SHA256字符串
         """
         return DigestUtil._hmac_hex_digest(data, key, "sha256")
+
+    # ------------------------------------------------------------------ #
+    #  文件摘要
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def md5_from_file(file_path: str) -> str:
+        """计算文件的MD5摘要（32位十六进制）
+
+        以8192字节为单位分块读取文件，适用于大文件。
+
+        :param file_path: 文件路径
+        :return: 32位十六进制MD5字符串
+        """
+        h = hashlib.new("md5")
+        with open(file_path, "rb") as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk:
+                    break
+                h.update(chunk)
+        return h.hexdigest()
+
+    @staticmethod
+    def sha256_from_file(file_path: str) -> str:
+        """计算文件的SHA-256摘要
+
+        以8192字节为单位分块读取文件，适用于大文件。
+
+        :param file_path: 文件路径
+        :return: 十六进制SHA-256字符串
+        """
+        h = hashlib.new("sha256")
+        with open(file_path, "rb") as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk:
+                    break
+                h.update(chunk)
+        return h.hexdigest()
+
+    # ------------------------------------------------------------------ #
+    #  通用摘要工厂
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def md5_hex_to_16(md5_hex32: str) -> str:
+        """将32位MD5转换为16位MD5（取中间16位）
+
+        :param md5_hex32: 32位MD5十六进制字符串
+        :return: 16位MD5十六进制字符串
+        """
+        if md5_hex32 and len(md5_hex32) >= 32:
+            return md5_hex32[8:24]
+        return md5_hex32 or ""
+
+    @staticmethod
+    def hmac(data: Union[str, bytes], key: Union[str, bytes], algorithm: str = "sha256") -> bytes:
+        """通用HMAC计算工厂方法
+
+        :param data: 输入数据
+        :param key: HMAC密钥
+        :param algorithm: 摘要算法名称，如 'md5', 'sha1', 'sha256'
+        :return: HMAC摘要字节数据
+        """
+        return DigestUtil._hmac_digest(data, key, algorithm)
+
+    @staticmethod
+    def hmac_hex(data: Union[str, bytes], key: Union[str, bytes], algorithm: str = "sha256") -> str:
+        """通用HMAC计算工厂方法（返回十六进制）
+
+        :param data: 输入数据
+        :param key: HMAC密钥
+        :param algorithm: 摘要算法名称
+        :return: 十六进制HMAC摘要字符串
+        """
+        return DigestUtil._hmac_hex_digest(data, key, algorithm)
+
+    @staticmethod
+    def digest(data: Union[str, bytes], algorithm: str = "sha256") -> bytes:
+        """通用摘要计算工厂方法
+
+        :param data: 输入数据
+        :param algorithm: 摘要算法名称，如 'md5', 'sha1', 'sha256', 'sha384', 'sha512'
+        :return: 摘要字节数据
+        """
+        return DigestUtil._digest(data, algorithm)
+
+    @staticmethod
+    def digest_hex(data: Union[str, bytes], algorithm: str = "sha256") -> str:
+        """通用摘要计算工厂方法（返回十六进制）
+
+        :param data: 输入数据
+        :param algorithm: 摘要算法名称
+        :return: 十六进制摘要字符串
+        """
+        return DigestUtil._hex_digest(data, algorithm)
+
+    # ------------------------------------------------------------------ #
+    #  bcrypt
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def bcrypt(password: Union[str, bytes]) -> str:
+        """使用bcrypt算法加密密码
+
+        :param password: 明文密码
+        :return: bcrypt哈希字符串
+        :raises ImportError: 未安装bcrypt库时抛出
+        """
+        try:
+            import bcrypt as _bcrypt
+        except ImportError:
+            raise ImportError("需要安装 bcrypt 库: pip install bcrypt")
+        pwd = DigestUtil._to_bytes(password)
+        return _bcrypt.hashpw(pwd, _bcrypt.gensalt()).decode("utf-8")
+
+    @staticmethod
+    def bcrypt_check(password: Union[str, bytes], hashed: str) -> bool:
+        """校验密码是否与bcrypt哈希匹配
+
+        :param password: 明文密码
+        :param hashed: bcrypt哈希字符串
+        :return: 是否匹配
+        :raises ImportError: 未安装bcrypt库时抛出
+        """
+        try:
+            import bcrypt as _bcrypt
+        except ImportError:
+            raise ImportError("需要安装 bcrypt 库: pip install bcrypt")
+        pwd = DigestUtil._to_bytes(password)
+        return _bcrypt.checkpw(pwd, hashed.encode("utf-8"))

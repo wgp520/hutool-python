@@ -661,7 +661,7 @@ class TestStrUtil:
 
     # ── 分割与转换 ──────────────────────────────────────────────
 
-    def test_split_trim(self):
+    def test_split_trim_v2(self):
         assert StrUtil.split_trim(" a , b , c ") == ["a", "b", "c"]
 
     def test_split_trim_semicolon(self):

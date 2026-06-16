@@ -194,3 +194,108 @@ class XmlUtil:
         :return: 匹配的元素，未找到返回 None
         """
         return element.find(tag)
+
+    @staticmethod
+    def element_text(element: ET.Element, tag: str) -> Optional[str]:
+        """获取子元素的文本内容。
+
+        :param element: 父元素
+        :param tag: 子元素标签名
+        :return: 子元素文本，未找到返回 None
+        """
+        child = element.find(tag)
+        if child is None:
+            return None
+        return child.text
+
+    @staticmethod
+    def clean_comment(xml_str: str) -> str:
+        """清除 XML 注释。
+
+        :param xml_str: XML 字符串
+        :return: 清除注释后的 XML 字符串
+        """
+        return re.sub(r"<!--.*?-->", "", xml_str, flags=re.DOTALL)
+
+    @staticmethod
+    def append_child(parent: ET.Element, tag: str, text: Optional[str] = None) -> ET.Element:
+        """为父元素添加子元素。
+
+        :param parent: 父元素
+        :param tag: 子元素标签名
+        :param text: 子元素文本内容，可选
+        :return: 新创建的子元素
+        """
+        child = ET.SubElement(parent, tag)
+        if text is not None:
+            child.text = text
+        return child
+
+    @staticmethod
+    def append_text(element: ET.Element, text: str) -> None:
+        """为元素添加/追加文本内容。
+
+        :param element: XML 元素
+        :param text: 文本内容
+        """
+        if element.text:
+            element.text += text
+        else:
+            element.text = text
+
+    @staticmethod
+    def is_element(obj: Any) -> bool:
+        """判断对象是否为 XML Element。
+
+        :param obj: 对象
+        :return: 是否为 Element
+        """
+        return isinstance(obj, ET.Element)
+
+    @staticmethod
+    def to_str(element: ET.Element, pretty: bool = False, charset: str = "utf-8") -> str:
+        """将 XML 元素序列化为字符串。
+
+        :param element: XML 元素
+        :param pretty: 是否格式化输出
+        :param charset: 字符集
+        :return: XML 字符串
+        """
+        xml_bytes = ET.tostring(element, encoding=charset, xml_declaration=True)
+        result = xml_bytes.decode(charset)
+        if pretty:
+            result = XmlUtil.format_xml(result)
+        return result
+
+    @staticmethod
+    def to_file(element: ET.Element, file_path: str, charset: str = "utf-8") -> None:
+        """将 XML 元素写入文件。
+
+        :param element: XML 元素
+        :param file_path: 文件路径
+        :param charset: 字符集
+        """
+        tree = ET.ElementTree(element)
+        tree.write(file_path, encoding=charset, xml_declaration=True)
+
+    @staticmethod
+    def write(element: ET.Element, stream, charset: str = "utf-8") -> None:
+        """将 XML 元素写入流。
+
+        :param element: XML 元素
+        :param stream: 可写流
+        :param charset: 字符集
+        """
+        xml_bytes = ET.tostring(element, encoding=charset, xml_declaration=True)
+        if hasattr(stream, "mode") and "b" in getattr(stream, "mode", ""):
+            stream.write(xml_bytes)
+        else:
+            stream.write(xml_bytes.decode(charset))
+
+    @staticmethod
+    def create_document() -> ET.Element:
+        """创建一个空的 XML 文档根元素。
+
+        :return: 根为 ``<root/>`` 的 Element
+        """
+        return ET.Element("root")

@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from urllib.parse import parse_qs, quote, unquote
 
 from .http_request import HttpRequest
@@ -235,3 +235,77 @@ class HttpUtil:
         if not url_str:
             return ""
         return unquote(url_str)
+
+    @staticmethod
+    def download(url: str, dest=None, timeout: int = 60000) -> Union[int, bytes]:
+        """统一下载接口
+
+        如果dest为字符串路径，下载到文件并返回字节数。
+        如果dest为None，返回bytes。
+
+        :param url: 下载URL
+        :param dest: 目标文件路径或None
+        :param timeout: 超时时间（毫秒）
+        :return: 字节数或bytes
+        """
+        import httpx
+
+        timeout_seconds = timeout / 1000.0
+        if dest is not None:
+            with httpx.stream("GET", url, follow_redirects=True, timeout=timeout_seconds) as response:
+                response.raise_for_status()
+                total = 0
+                with open(dest, "wb") as f:
+                    for chunk in response.iter_bytes():
+                        f.write(chunk)
+                        total += len(chunk)
+                return total
+        else:
+            response = HttpRequest.get(url).timeout(timeout).execute()
+            return response.to_bytes()
+
+    @staticmethod
+    def encode_params(params: dict, charset: str = "utf-8") -> str:
+        """编码参数为URL查询字符串（to_params别名）
+
+        :param params: 参数字典
+        :param charset: 字符集
+        :return: URL编码后的查询字符串
+        """
+        return HttpUtil.to_params(params, charset)
+
+    @staticmethod
+    def get_mime_type(content_type: str) -> str:
+        """从Content-Type获取MIME类型
+
+        :param content_type: Content-Type头值
+        :return: MIME类型，如 'text/html'
+        """
+        if not content_type:
+            return ""
+        return content_type.split(";")[0].strip()
+
+    @staticmethod
+    def build_basic_auth(username: str, password: str) -> str:
+        """构建Basic认证头
+
+        :param username: 用户名
+        :param password: 密码
+        :return: Basic认证头值（如 'Basic dXNlcjpwYXNz'）
+        """
+        import base64
+
+        credentials = f"{username}:{password}"
+        encoded = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
+        return f"Basic {encoded}"
+
+    @staticmethod
+    def normalize_params(params: dict) -> dict:
+        """规范化参数（过滤None值）
+
+        :param params: 参数字典
+        :return: 过滤None值后的字典
+        """
+        if not params:
+            return {}
+        return {k: v for k, v in params.items() if v is not None}

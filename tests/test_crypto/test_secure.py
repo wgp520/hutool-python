@@ -1,3 +1,5 @@
+import base64
+
 from hutool import SecureUtil
 
 
@@ -86,3 +88,59 @@ class TestSecureUtil:
         """测试大偏移量（环绕）"""
         result = SecureUtil.caesar_encode("abc", 52)
         assert result == "abc"
+
+    def test_generate_key_aes(self):
+        key = SecureUtil.generate_key("AES", 128)
+        assert len(key) == 16
+
+    def test_generate_key_des(self):
+        key = SecureUtil.generate_key("DES")
+        assert len(key) == 8
+
+    def test_md5_convenience(self):
+        result = SecureUtil.md5("Hello")
+        assert isinstance(result, str)
+        assert len(result) == 32
+
+    def test_sha1_convenience(self):
+        result = SecureUtil.sha1("Hello")
+        assert isinstance(result, str)
+        assert len(result) == 40
+
+    def test_sha256_convenience(self):
+        result = SecureUtil.sha256("Hello")
+        assert isinstance(result, str)
+        assert len(result) == 64
+
+    def test_hmac_md5_convenience(self):
+        result = SecureUtil.hmac_md5("data", "key")
+        assert isinstance(result, str)
+
+    def test_hmac_sha1_convenience(self):
+        result = SecureUtil.hmac_sha1("data", "key")
+        assert isinstance(result, str)
+
+    def test_hmac_sha256_convenience(self):
+        result = SecureUtil.hmac_sha256("data", "key")
+        assert isinstance(result, str)
+
+    def test_pbkdf2(self):
+        result = SecureUtil.pbkdf2("password", "salt")
+        assert isinstance(result, bytes)
+        assert len(result) == 32
+
+    def test_decode_hex(self):
+        data = b"Hello"
+        hex_str = data.hex()
+        assert SecureUtil.decode(hex_str) == data
+
+    def test_decode_base64(self):
+        data = b"Hello"
+        b64 = base64.b64encode(data).decode()
+        assert SecureUtil.decode(b64) == data
+
+    def test_sign_params(self):
+        params = {"a": "1", "b": "2"}
+        result = SecureUtil.sign_params(params, "secret")
+        assert isinstance(result, str)
+        assert len(result) > 0
