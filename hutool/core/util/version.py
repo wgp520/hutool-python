@@ -62,3 +62,33 @@ class VersionUtil:
         :return: 主版本号，如 ``"1"``
         """
         return version.split(".")[0]
+
+    @staticmethod
+    def any_match(version: str, *candidates: str) -> bool:
+        """判断版本号是否匹配候选列表中的任意一个。
+
+        :param version: 版本号
+        :param candidates: 候选版本号
+        :return: 是否匹配
+        """
+        return any(VersionUtil.compare(version, c) == 0 for c in candidates)
+
+    @staticmethod
+    def is_greater_or_equal(version1: str, version2: str) -> bool:
+        """判断 version1 是否大于等于 version2。
+
+        :param version1: 版本号
+        :param version2: 版本号
+        :return: 是否大于等于
+        """
+        return VersionUtil.compare(version1, version2) >= 0
+
+    @staticmethod
+    def is_less_or_equal(version1: str, version2: str) -> bool:
+        """判断 version1 是否小于等于 version2。
+
+        :param version1: 版本号
+        :param version2: 版本号
+        :return: 是否小于等于
+        """
+        return VersionUtil.compare(version1, version2) <= 0

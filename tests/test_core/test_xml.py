@@ -26,3 +26,26 @@ class TestXmlUtil:
     def test_clean_invalid(self):
         result = XmlUtil.clean_invalid("abc\x00def")
         assert "\x00" not in result
+
+    def test_create_xml(self):
+        root = XmlUtil.create_xml("root")
+        assert root.tag == "root"
+
+    def test_get_root_element(self):
+        xml_str = "<root><child>text</child></root>"
+        root = XmlUtil.get_root_element(xml_str)
+        assert root.tag == "root"
+
+    def test_get_elements(self):
+        xml_str = "<root><item>a</item><item>b</item></root>"
+        root = XmlUtil.get_root_element(xml_str)
+        items = XmlUtil.get_elements(root, "item")
+        assert len(items) == 2
+
+    def test_get_element(self):
+        xml_str = "<root><child>text</child></root>"
+        root = XmlUtil.get_root_element(xml_str)
+        child = XmlUtil.get_element(root, "child")
+        assert child is not None
+        assert child.text == "text"
+        assert XmlUtil.get_element(root, "missing") is None

@@ -22,3 +22,17 @@ class TestVersionUtil:
     def test_compare_multi_part(self):
         assert VersionUtil.compare("1.0.0", "2.0.0") == -1
         assert VersionUtil.compare("1.1.0", "1.0.0") == 1
+
+    def test_any_match(self):
+        assert VersionUtil.any_match("1.0.0", "1.0.0", "2.0.0") is True
+        assert VersionUtil.any_match("3.0.0", "1.0.0", "2.0.0") is False
+
+    def test_is_greater_or_equal(self):
+        assert VersionUtil.is_greater_or_equal("1.0.1", "1.0.0") is True
+        assert VersionUtil.is_greater_or_equal("1.0.0", "1.0.0") is True
+        assert VersionUtil.is_greater_or_equal("0.9.0", "1.0.0") is False
+
+    def test_is_less_or_equal(self):
+        assert VersionUtil.is_less_or_equal("0.9.0", "1.0.0") is True
+        assert VersionUtil.is_less_or_equal("1.0.0", "1.0.0") is True
+        assert VersionUtil.is_less_or_equal("1.0.1", "1.0.0") is False

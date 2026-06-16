@@ -299,72 +299,6 @@ class TestStrUtil:
         assert StrUtil.prepend_if_missing("suffile", "pre", "suf") == "suffile"
         assert StrUtil.prepend_if_missing("file", "pre", "suf") == "prefile"
 
-
-class TestStrUtilOnlyDigits:
-    """测试 only_digits 方法"""
-
-    def test_only_digits_basic(self):
-        """测试基本数字提取"""
-        assert StrUtil.only_digits("abc123def456") == "123456"
-
-    def test_only_digits_all_digits(self):
-        """测试纯数字字符串"""
-        assert StrUtil.only_digits("12345") == "12345"
-
-    def test_only_digits_no_digits(self):
-        """测试无数字字符串"""
-        assert StrUtil.only_digits("abcdef") == ""
-
-    def test_only_digits_empty(self):
-        """测试空字符串"""
-        assert StrUtil.only_digits("") == ""
-
-    def test_only_digits_none(self):
-        """测试 None"""
-        assert StrUtil.only_digits(None) == ""
-
-    def test_only_digits_special_chars(self):
-        """测试特殊字符"""
-        assert StrUtil.only_digits("tel: 138-0000-1234") == "13800001234"
-
-    def test_only_digits_with_spaces(self):
-        """测试带空格"""
-        assert StrUtil.only_digits("1 2 3 4 5") == "12345"
-
-
-class TestStrUtilDeUmlaut:
-    """测试 de_umlaut 方法"""
-
-    def test_de_umlaut_basic(self):
-        """测试基本变音符号转换"""
-        assert StrUtil.de_umlaut("ä") == "ae"
-        assert StrUtil.de_umlaut("ö") == "oe"
-        assert StrUtil.de_umlaut("ü") == "ue"
-        assert StrUtil.de_umlaut("ß") == "ss"
-
-    def test_de_umlaut_uppercase(self):
-        """测试大写变音符号"""
-        assert StrUtil.de_umlaut("Ä") == "Ae"
-        assert StrUtil.de_umlaut("Ö") == "Oe"
-        assert StrUtil.de_umlaut("Ü") == "Ue"
-
-    def test_de_umlaut_in_word(self):
-        """测试单词中的变音符号"""
-        assert StrUtil.de_umlaut("München") == "Muenchen"
-        assert StrUtil.de_umlaut("Straße") == "Strasse"
-
-    def test_de_umlaut_no_umlaut(self):
-        """测试无变音符号"""
-        assert StrUtil.de_umlaut("hello") == "hello"
-
-    def test_de_umlaut_empty(self):
-        """测试空字符串"""
-        assert StrUtil.de_umlaut("") == ""
-
-
-class TestStrUtilNewMethods:
-    """hutoolpy 移植方法测试"""
-
     # ── 全角半角转换 ──────────────────────────────────────
 
     def test_full_to_half_width_basic(self):
@@ -609,10 +543,18 @@ class TestStrUtilNewMethods:
         assert StrUtil.brief(None, 8) is None
 
     def test_max_length(self):
-        assert StrUtil.max_length("hello world", 5) == "hello"
+        # 截断时追加 "..."，总长度 = max_length
+        assert StrUtil.max_length("hello world", 8) == "hello..."
 
     def test_max_length_short(self):
         assert StrUtil.max_length("hi", 5) == "hi"
+
+    def test_max_length_exact(self):
+        assert StrUtil.max_length("hello", 5) == "hello"
+
+    def test_max_length_very_short(self):
+        # max_length <= 3 时直接截断
+        assert StrUtil.max_length("hello", 2) == "he"
 
     def test_fix_length_pad(self):
         assert StrUtil.fix_length("hi", 5) == "hi   "
@@ -692,7 +634,21 @@ class TestStrUtilNewMethods:
         assert StrUtil.replace_ignore_case("Hello HELLO", "hello", "hi") == "hi hi"
 
     def test_replace_last(self):
-        assert StrUtil.replace_last("a.b.c", "\\.", "-") == "a.b-c"
+        # search_str 视为字面量，"." 匹配字面量点号
+        assert StrUtil.replace_last("a.b.c", ".", "-") == "a.b-c"
+
+    def test_replace_last_no_match(self):
+        assert StrUtil.replace_last("abc", "x", "y") == "abc"
+
+    def test_replace_first_literal(self):
+        # search_str 视为字面量，不会被当作正则
+        assert StrUtil.replace_first("a.b.c", ".", "-") == "a-b.c"
+
+    def test_replace_first_ignore_case(self):
+        assert StrUtil.replace_first("Hello HELLO", "hello", "hi", ignore_case=True) == "hi HELLO"
+
+    def test_replace_last_ignore_case(self):
+        assert StrUtil.replace_last("Hello HELLO", "hello", "hi", ignore_case=True) == "Hello hi"
 
     def test_remove_all_prefix(self):
         assert StrUtil.remove_all_prefix("///path", "/") == "path"
@@ -757,3 +713,290 @@ class TestStrUtilNewMethods:
     def test_compare_version_none(self):
         assert StrUtil.compare_version(None, "1.0") < 0
         assert StrUtil.compare_version("1.0", None) > 0
+
+    # ── Unicode / CodePoint ───────────────────────────────────
+
+    def test_sub_by_code_point_ascii(self):
+        assert StrUtil.sub_by_code_point("hello", 1, 4) == "ell"
+
+    def test_sub_by_code_point_emoji(self):
+        """emoji 安全截取"""
+        s = "a😀b😂c"
+        assert StrUtil.sub_by_code_point(s, 1, 3) == "😀b"
+
+    def test_sub_by_code_point_none(self):
+        assert StrUtil.sub_by_code_point(None, 0, 5) is None
+
+    def test_sub_suf_by_length(self):
+        assert StrUtil.sub_suf_by_length("hello", 3) == "llo"
+
+    def test_sub_suf_by_length_longer(self):
+        assert StrUtil.sub_suf_by_length("hi", 10) == "hi"
+
+    def test_sub_suf_by_length_none(self):
+        assert StrUtil.sub_suf_by_length(None, 3) is None
+
+    def test_sub_with_length(self):
+        assert StrUtil.sub_with_length("hello", 1, 3) == "ell"
+
+    def test_sub_with_length_none(self):
+        assert StrUtil.sub_with_length(None, 0, 3) is None
+
+    def test_sub_pre_gbk_ascii(self):
+        assert StrUtil.sub_pre_gbk("hello", 3) == "hel"
+
+    def test_sub_pre_gbk_chinese(self):
+        """中文占 2 字节"""
+        result = StrUtil.sub_pre_gbk("你好世界", 6)
+        assert len(result.encode("gbk")) <= 6
+
+    def test_sub_pre_gbk_none(self):
+        assert StrUtil.sub_pre_gbk(None, 5) is None
+
+    def test_reverse_by_code_point(self):
+        assert StrUtil.reverse_by_code_point("abc") == "cba"
+
+    def test_reverse_by_code_point_emoji(self):
+        s = "a😀b"
+        assert StrUtil.reverse_by_code_point(s) == "b😀a"
+
+    def test_reverse_by_code_point_none(self):
+        assert StrUtil.reverse_by_code_point(None) is None
+
+    def test_byte_length_utf8(self):
+        assert StrUtil.byte_length("hello") == 5
+        assert StrUtil.byte_length("你好") == 6  # 每个中文 3 字节
+
+    def test_byte_length_none(self):
+        assert StrUtil.byte_length(None) == 0
+
+    def test_length_normal(self):
+        assert StrUtil.length("hello") == 5
+
+    def test_length_none(self):
+        assert StrUtil.length(None) == 0
+
+    # ── 分割扩展 ─────────────────────────────────────────────
+
+    def test_split_to_long(self):
+        assert StrUtil.split_to_long("1,2,3") == [1, 2, 3]
+
+    def test_split_to_long_with_spaces(self):
+        assert StrUtil.split_to_long(" 1 , 2 , 3 ") == [1, 2, 3]
+
+    def test_split_to_long_empty(self):
+        assert StrUtil.split_to_long("") == []
+        assert StrUtil.split_to_long(None) == []
+
+    def test_split_to_int(self):
+        assert StrUtil.split_to_int("10,20,30") == [10, 20, 30]
+
+    def test_split_by_length(self):
+        assert StrUtil.split_by_length("abcdef", 2) == ["ab", "cd", "ef"]
+
+    def test_split_by_length_remainder(self):
+        assert StrUtil.split_by_length("abcde", 2) == ["ab", "cd", "e"]
+
+    def test_split_by_length_none(self):
+        assert StrUtil.split_by_length(None, 3) == []
+
+    def test_split_ignore_case(self):
+        result = StrUtil.split_ignore_case("aAbBcC", "b")
+        assert result == ["aA", "", "cC"]
+
+    # ── 替换扩展 ─────────────────────────────────────────────
+
+    def test_replace_from(self):
+        assert StrUtil.replace_from("aabbcc", 2, "b", "d") == "aadbcc"
+
+    def test_replace_from_none(self):
+        assert StrUtil.replace_from(None, 0, "a", "b") is None
+
+    def test_replace_by_func(self):
+
+        result = StrUtil.replace_by_func("hello123world456", r"\d+", lambda m: "[NUM]")
+        assert result == "hello[NUM]world[NUM]"
+
+    def test_replace_by_func_none(self):
+        assert StrUtil.replace_by_func(None, r"\d+", lambda m: "x") is None
+
+    # ── 大小写转换（null 安全）────────────────────────────────
+
+    def test_to_lower_case(self):
+        assert StrUtil.to_lower_case("HELLO") == "hello"
+        assert StrUtil.to_lower_case(None) is None
+
+    def test_to_upper_case(self):
+        assert StrUtil.to_upper_case("hello") == "HELLO"
+        assert StrUtil.to_upper_case(None) is None
+
+    # ── 空值安全查找 ─────────────────────────────────────────
+
+    def test_first_non_null(self):
+        assert StrUtil.first_non_null(None, "b", "c") == "b"
+        assert StrUtil.first_non_null(None, None) is None
+
+    def test_first_non_empty(self):
+        assert StrUtil.first_non_empty("", None, "b") == "b"
+        assert StrUtil.first_non_empty("", None) is None
+
+    def test_first_non_blank(self):
+        assert StrUtil.first_non_blank("  ", None, "b") == "b"
+        assert StrUtil.first_non_blank("  ", "") is None
+
+    # ── 包裹/解包裹 ─────────────────────────────────────────
+
+    def test_unwrap(self):
+        assert StrUtil.unwrap("[hello]", "[", "]") == "hello"
+
+    def test_unwrap_no_prefix(self):
+        assert StrUtil.unwrap("hello]", "[", "]") == "hello"
+
+    def test_unwrap_no_suffix(self):
+        assert StrUtil.unwrap("[hello", "[", "]") == "hello"
+
+    def test_unwrap_none(self):
+        assert StrUtil.unwrap(None, "[", "]") is None
+
+    # ── 字符级比较 ──────────────────────────────────────────
+
+    def test_is_char_equals_true(self):
+        assert StrUtil.is_char_equals("aaa") is True
+
+    def test_is_char_equals_false(self):
+        assert StrUtil.is_char_equals("aab") is False
+
+    def test_is_char_equals_empty(self):
+        assert StrUtil.is_char_equals("") is True
+        assert StrUtil.is_char_equals(None) is True
+
+    # ── 转换工具 ────────────────────────────────────────────
+
+    def test_to_string(self):
+        assert StrUtil.to_string(123) == "123"
+        assert StrUtil.to_string(None) == "null"
+        assert StrUtil.to_string("abc") == "abc"
+
+
+class TestStrUtilOnlyDigits:
+    """测试 only_digits 方法"""
+
+    def test_only_digits_basic(self):
+        """测试基本数字提取"""
+        assert StrUtil.only_digits("abc123def456") == "123456"
+
+    def test_only_digits_all_digits(self):
+        """测试纯数字字符串"""
+        assert StrUtil.only_digits("12345") == "12345"
+
+    def test_only_digits_no_digits(self):
+        """测试无数字字符串"""
+        assert StrUtil.only_digits("abcdef") == ""
+
+    def test_only_digits_empty(self):
+        """测试空字符串"""
+        assert StrUtil.only_digits("") == ""
+
+    def test_only_digits_none(self):
+        """测试 None"""
+        assert StrUtil.only_digits(None) == ""
+
+    def test_only_digits_special_chars(self):
+        """测试特殊字符"""
+        assert StrUtil.only_digits("tel: 138-0000-1234") == "13800001234"
+
+    def test_only_digits_with_spaces(self):
+        """测试带空格"""
+        assert StrUtil.only_digits("1 2 3 4 5") == "12345"
+
+
+class TestStrUtilDeUmlaut:
+    """测试 de_umlaut 方法"""
+
+    def test_de_umlaut_basic(self):
+        """测试基本变音符号转换"""
+        assert StrUtil.de_umlaut("ä") == "ae"
+        assert StrUtil.de_umlaut("ö") == "oe"
+        assert StrUtil.de_umlaut("ü") == "ue"
+        assert StrUtil.de_umlaut("ß") == "ss"
+
+    def test_de_umlaut_uppercase(self):
+        """测试大写变音符号"""
+        assert StrUtil.de_umlaut("Ä") == "Ae"
+        assert StrUtil.de_umlaut("Ö") == "Oe"
+        assert StrUtil.de_umlaut("Ü") == "Ue"
+
+    def test_de_umlaut_in_word(self):
+        """测试单词中的变音符号"""
+        assert StrUtil.de_umlaut("München") == "Muenchen"
+        assert StrUtil.de_umlaut("Straße") == "Strasse"
+
+    def test_de_umlaut_no_umlaut(self):
+        """测试无变音符号"""
+        assert StrUtil.de_umlaut("hello") == "hello"
+
+    def test_de_umlaut_empty(self):
+        """测试空字符串"""
+        assert StrUtil.de_umlaut("") == ""
+
+
+class TestStrUtilBehaviorFixes:
+    """行为修复测试"""
+
+    # ── center 多字符填充 ──────────────────────────────────────
+
+    def test_center_multi_char_pad(self):
+        """center 支持多字符 pad_str"""
+        # left_pads = 1 -> "y", right_pads = 2 -> "yz"
+        assert StrUtil.center("a", 4, "yz") == "yayz"
+
+    def test_center_single_char_pad(self):
+        """center 单字符填充仍然正常"""
+        assert StrUtil.center("abc", 7, "-") == "--abc--"
+
+    def test_center_size_less_than_str(self):
+        """size 小于字符串长度时返回原串"""
+        assert StrUtil.center("abcde", 3, "-") == "abcde"
+
+    def test_center_none(self):
+        assert StrUtil.center(None, 5, "*") == "*****"
+
+    def test_center_empty_pad(self):
+        """pad_str 为空时默认用空格"""
+        assert StrUtil.center("a", 4, "") == " a  "
+
+    # ── pad_pre/pad_after 多字符填充 ─────────────────────────
+
+    def test_pad_after_multi_char(self):
+        assert StrUtil.pad_after("hi", 7, "xy") == "hixyxyx"
+
+    def test_pad_pre_multi_char(self):
+        assert StrUtil.pad_pre("hi", 7, "xy") == "xyxyxhi"
+
+    def test_pad_after_single_char(self):
+        assert StrUtil.pad_after("hi", 5, "0") == "hi000"
+
+    def test_pad_pre_single_char(self):
+        assert StrUtil.pad_pre("hi", 5, "0") == "000hi"
+
+    def test_pad_after_none(self):
+        assert StrUtil.pad_after(None, 3, "x") == "xxx"
+
+    def test_pad_pre_none(self):
+        assert StrUtil.pad_pre(None, 3, "x") == "xxx"
+
+    # ── replace_first/replace_last 字面量模式 ────────────────
+
+    def test_replace_first_dot_literal(self):
+        """点号应视为字面量，不匹配任意字符"""
+        assert StrUtil.replace_first("1.2.3", ".", "-") == "1-2.3"
+
+    def test_replace_last_dot_literal(self):
+        assert StrUtil.replace_last("1.2.3", ".", "-") == "1.2-3"
+
+    def test_replace_first_special_chars(self):
+        """特殊正则字符应视为字面量"""
+        assert StrUtil.replace_first("a+b+c", "+", "-") == "a-b+c"
+
+    def test_replace_last_special_chars(self):
+        assert StrUtil.replace_last("a+b+c", "+", "-") == "a+b-c"

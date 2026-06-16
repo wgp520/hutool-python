@@ -29,6 +29,8 @@ class _SnowflakeWorkerPool:
 class IdUtil:
     """ID生成工具类，对应 Java cn.hutool.core.util.IdUtil"""
 
+    _snowflake_worker = None
+
     @staticmethod
     def random_uuid() -> str:
         """
@@ -170,6 +172,48 @@ class IdUtil:
         random_part = secrets.token_hex(5)
         counter_part = secrets.token_hex(3)
         return timestamp_part + random_part + counter_part
+
+    @staticmethod
+    def create_snowflake(worker_id: int = 1, datacenter_id: int = 1):
+        """创建雪花算法 ID 生成器。
+
+        :param worker_id: 工作机器 ID（0-31）
+        :param datacenter_id: 数据中心 ID（0-31）
+        :return: _SnowflakeIdWorker 实例
+        """
+        return _SnowflakeIdWorker(worker_id, datacenter_id)
+
+    @staticmethod
+    def get_snowflake(worker_id: int = 1, datacenter_id: int = 1):
+        """获取全局雪花算法 ID 生成器（单例）。
+
+        :param worker_id: 工作机器 ID（0-31）
+        :param datacenter_id: 数据中心 ID（0-31）
+        :return: _SnowflakeIdWorker 实例
+        """
+        if IdUtil._snowflake_worker is None:
+            IdUtil._snowflake_worker = _SnowflakeIdWorker(worker_id, datacenter_id)
+        return IdUtil._snowflake_worker
+
+    @staticmethod
+    def get_snowflake_next_id(worker_id: int = 1, datacenter_id: int = 1) -> int:
+        """获取下一个雪花 ID（int）。
+
+        :param worker_id: 工作机器 ID
+        :param datacenter_id: 数据中心 ID
+        :return: 64 位整数 ID
+        """
+        return IdUtil.get_snowflake(worker_id, datacenter_id).next_id()
+
+    @staticmethod
+    def get_snowflake_next_id_str(worker_id: int = 1, datacenter_id: int = 1) -> str:
+        """获取下一个雪花 ID（字符串）。
+
+        :param worker_id: 工作机器 ID
+        :param datacenter_id: 数据中心 ID
+        :return: 字符串 ID
+        """
+        return str(IdUtil.get_snowflake_next_id(worker_id, datacenter_id))
 
 
 class _SnowflakeIdWorker:

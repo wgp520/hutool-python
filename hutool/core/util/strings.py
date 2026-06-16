@@ -1699,18 +1699,28 @@ class CharSequenceUtil:
         return result
 
     @staticmethod
-    def replace_first(string: Optional[str], regex: str, replacement: str) -> Optional[str]:
+    def replace_first(
+        string: Optional[str],
+        search_str: str,
+        replacement: str,
+        ignore_case: bool = False,
+    ) -> Optional[str]:
         """
-        替换 *string* 中 *regex* 的第一个匹配项为 *replacement*。
+        替换 *string* 中 *search_str* 的第一个匹配项为 *replacement*。
+
+        **注意**：``search_str`` 视为字面量（非正则表达式）。
 
         :param string: 源字符串
-        :param regex: 正则表达式模式
-        :param replacement: 替换字符串（可包含反向引用如 ``\\1``）
-        :return: 替换第一个正则匹配后的字符串
+        :param search_str: 待替换的字面量字符串
+        :param replacement: 替换字符串
+        :param ignore_case: 是否忽略大小写，默认 False
+        :return: 替换后的字符串
         """
         if CharSequenceUtil.is_empty(string):
             return string
-        return re.sub(regex, replacement, string, count=1)  # type: ignore[arg-type]
+        escaped = re.escape(search_str)
+        flags = re.IGNORECASE if ignore_case else 0
+        return re.sub(escaped, replacement, string, count=1, flags=flags)  # type: ignore[arg-type]
 
     @staticmethod
     def replace_all(string: Optional[str], regex: str, replacement: str) -> Optional[str]:
@@ -1831,6 +1841,15 @@ class CharSequenceUtil:
         """
         使用 *pad_str* 将 *string* 居中对齐到 *size* 个字符。
 
+        支持多字符 ``pad_str``。
+        如果 ``size`` 小于字符串长度，返回原字符串。
+
+        Examples::
+
+            CharSequenceUtil.center("a", 4, "yz")   # "yazy"
+            CharSequenceUtil.center("abc", 7, " ")    # "  abc  "
+            CharSequenceUtil.center("ab", 4, " ")     # " ab "
+
         :param string: 源字符串
         :param size: 目标长度
         :param pad_str: 填充字符串（默认 ``" "``）
@@ -1838,9 +1857,17 @@ class CharSequenceUtil:
         """
         if string is None:
             string = ""
-        if len(pad_str) == 0:
+        if not pad_str:
             pad_str = " "
-        return string.center(size, pad_str)
+        str_len = len(string)
+        pads = size - str_len
+        if pads <= 0:
+            return string
+        left_pads = pads // 2
+        right_pads = pads - left_pads
+        left_pad = CharSequenceUtil._repeat_pad(pad_str, left_pads)
+        right_pad = CharSequenceUtil._repeat_pad(pad_str, right_pads)
+        return left_pad + string + right_pad
 
     # ------------------------------------------------------------------
     # Repeat
@@ -2557,17 +2584,27 @@ class CharSequenceUtil:
     @staticmethod
     def max_length(string: Optional[str], max_length: int) -> Optional[str]:
         """
-        强制截断 *string* 到 *max_length* 长度。
+        截断 *string* 到 *max_length* 长度，超出时追加 ``"..."``。
+
+        总长度恰好为 *max_length*（含后缀 ``"..."``）。
+        与 Java Hutool 行为一致。
 
         :param string: 待截断的字符串
-        :param max_length: 最大长度
+        :param max_length: 最大长度（含后缀）
         :return: 截断后的字符串
+        :raises ValueError: max_length 小于等于 0 时
         """
+        if max_length <= 0:
+            raise ValueError("max_length 必须大于 0")
         if string is None:
             return None
-        if len(string) > max_length:
+        if len(string) <= max_length:
+            return string
+        # 截断并追加 "..."，总长度不超过 max_length
+        suffix = "..."
+        if max_length <= len(suffix):
             return string[:max_length]
-        return string
+        return string[: max_length - len(suffix)] + suffix
 
     @staticmethod
     def fix_length(string: Optional[str], fixed_length: int, pad_char: str = " ") -> str:
@@ -2745,32 +2782,58 @@ class CharSequenceUtil:
         return [CharSequenceUtil.wrap_if_missing(s, prefix, suffix) if s is not None else s for s in arr]
 
     @staticmethod
-    def pad_after(string: Optional[str], length: int, pad_char: str = " ") -> Optional[str]:
+    def pad_after(string: Optional[str], length: int, pad_str: str = " ") -> Optional[str]:
         """
         右填充 *string* 到 *length*。
 
+        支持多字符 ``pad_str``。
+
         :param string: 待填充的字符串
         :param length: 目标长度
-        :param pad_char: 填充字符
+        :param pad_str: 填充字符串
         :return: 填充后的字符串
         """
         if string is None:
-            return pad_char * length
-        return string.ljust(length, pad_char)
+            return CharSequenceUtil._repeat_pad(pad_str, length)
+        str_len = len(string)
+        if str_len >= length:
+            return string
+        return string + CharSequenceUtil._repeat_pad(pad_str, length - str_len)
 
     @staticmethod
-    def pad_pre(string: Optional[str], length: int, pad_char: str = " ") -> Optional[str]:
+    def pad_pre(string: Optional[str], length: int, pad_str: str = " ") -> Optional[str]:
         """
         左填充 *string* 到 *length*。
 
+        支持多字符 ``pad_str``。
+
         :param string: 待填充的字符串
         :param length: 目标长度
-        :param pad_char: 填充字符
+        :param pad_str: 填充字符串
         :return: 填充后的字符串
         """
         if string is None:
-            return pad_char * length
-        return string.rjust(length, pad_char)
+            return CharSequenceUtil._repeat_pad(pad_str, length)
+        str_len = len(string)
+        if str_len >= length:
+            return string
+        return CharSequenceUtil._repeat_pad(pad_str, length - str_len) + string
+
+    @staticmethod
+    def _repeat_pad(pad_str: str, count: int) -> str:
+        """
+        重复 *pad_str* 直到达到 *count* 个字符（截取前 count 个字符）。
+
+        :param pad_str: 填充字符串
+        :param count: 目标字符数
+        :return: 填充字符串
+        """
+        if count <= 0:
+            return ""
+        if not pad_str:
+            pad_str = " "
+        repeat_times = (count + len(pad_str) - 1) // len(pad_str)
+        return (pad_str * repeat_times)[:count]
 
     @staticmethod
     def repeat_by_length(string: Optional[str], length: int) -> Optional[str]:
@@ -2806,19 +2869,29 @@ class CharSequenceUtil:
         return pattern.sub(replacement, string)
 
     @staticmethod
-    def replace_last(string: Optional[str], regex: str, replacement: str) -> Optional[str]:
+    def replace_last(
+        string: Optional[str],
+        search_str: str,
+        replacement: str,
+        ignore_case: bool = False,
+    ) -> Optional[str]:
         """
-        替换最后一个正则匹配。
+        替换 *string* 中 *search_str* 的最后一个匹配项为 *replacement*。
+
+        **注意**：``search_str`` 视为字面量（非正则表达式）。
 
         :param string: 待处理的字符串
-        :param regex: 正则表达式
+        :param search_str: 待替换的字面量字符串
         :param replacement: 替换字符串
+        :param ignore_case: 是否忽略大小写，默认 False
         :return: 替换后的字符串
         """
         if CharSequenceUtil.is_empty(string):
             return string
-        pattern = re.compile(regex)
-        matches = list(pattern.finditer(string))
+        escaped = re.escape(search_str)
+        flags = re.IGNORECASE if ignore_case else 0
+        pattern = re.compile(escaped, flags)
+        matches = list(pattern.finditer(string))  # type: ignore[arg-type]
         if not matches:
             return string
         last = matches[-1]
@@ -2999,6 +3072,378 @@ class CharSequenceUtil:
             if v1 != v2:
                 return 1 if v1 > v2 else -1
         return 0
+
+    # ------------------------------------------------------------------
+    # Unicode / CodePoint 操作
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def sub_by_code_point(string: Optional[str], start: int, end: int) -> Optional[str]:
+        """
+        按 Unicode 码点截取子串（支持 emoji 等多码单元字符）。
+
+        :param string: 源字符串
+        :param start: 起始码点索引（含）
+        :param end: 结束码点索引（不含）
+        :return: 截取的子串
+        """
+        if string is None:
+            return None
+        # Python 3 的 str 本身就是 Unicode 码点序列
+        code_points = list(string)
+        if start < 0:
+            start = 0
+        if end > len(code_points):
+            end = len(code_points)
+        if start >= end:
+            return ""
+        return "".join(code_points[start:end])
+
+    @staticmethod
+    def sub_suf_by_length(string: Optional[str], length: int) -> Optional[str]:
+        """
+        取最后 *length* 个字符。
+
+        :param string: 源字符串
+        :param length: 期望长度
+        :return: 最后的 *length* 个字符
+        """
+        if string is None:
+            return None
+        if length <= 0:
+            return ""
+        if length >= len(string):
+            return string
+        return string[-length:]
+
+    @staticmethod
+    def sub_with_length(string: Optional[str], start: int, length: int) -> Optional[str]:
+        """
+        从 *start* 位置开始取 *length* 个字符。
+
+        :param string: 源字符串
+        :param start: 起始位置
+        :param length: 期望长度
+        :return: 子串
+        """
+        if string is None:
+            return None
+        if start < 0:
+            start = 0
+        if length <= 0:
+            return ""
+        return string[start : start + length]
+
+    @staticmethod
+    def sub_pre_gbk(string: Optional[str], max_bytes: int) -> Optional[str]:
+        """
+        按 GBK 字节长度截断字符串（中文算 2 字节，ASCII 算 1 字节）。
+
+        :param string: 源字符串
+        :param max_bytes: 最大字节数
+        :return: 截断后的字符串
+        """
+        if string is None:
+            return None
+        if max_bytes <= 0:
+            return ""
+        try:
+            encoded = string.encode("gbk")
+            if len(encoded) <= max_bytes:
+                return string
+            truncated = encoded[:max_bytes]
+            # 尝试解码，如果最后一字节不完整则去掉
+            while truncated:
+                try:
+                    return truncated.decode("gbk")
+                except UnicodeDecodeError:
+                    truncated = truncated[:-1]
+            return ""
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # 无法编码为 GBK，回退到按字符截断
+            return string[:max_bytes]
+
+    @staticmethod
+    def reverse_by_code_point(string: Optional[str]) -> Optional[str]:
+        """
+        按码点反转字符串（emoji 安全）。
+
+        :param string: 源字符串
+        :return: 反转后的字符串
+        """
+        if string is None:
+            return None
+        return "".join(reversed(list(string)))
+
+    @staticmethod
+    def byte_length(string: Optional[str], charset: str = "utf-8") -> int:
+        """
+        获取字符串在指定编码下的字节长度。
+
+        :param string: 源字符串
+        :param charset: 编码名称，默认 ``"utf-8"``
+        :return: 字节长度
+        """
+        if string is None:
+            return 0
+        return len(string.encode(charset))
+
+    @staticmethod
+    def length(string: Optional[str]) -> int:
+        """
+        获取字符串长度，None 返回 0。
+
+        :param string: 源字符串
+        :return: 字符串长度
+        """
+        if string is None:
+            return 0
+        return len(string)
+
+    # ------------------------------------------------------------------
+    # 分割扩展
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def split_to_long(string: Optional[str], separator: str = ",") -> List[int]:
+        """
+        分割字符串为 long（int）数组。
+
+        :param string: 源字符串
+        :param separator: 分隔符，默认 ``,``
+        :return: int 列表
+        """
+        if CharSequenceUtil.is_empty(string):
+            return []
+        result = []  # type: List[int]
+        for part in string.split(separator):
+            part = part.strip()
+            if part:
+                try:
+                    result.append(int(part))
+                except ValueError:
+                    pass
+        return result
+
+    @staticmethod
+    def split_to_int(string: Optional[str], separator: str = ",") -> List[int]:
+        """
+        分割字符串为 int 数组（split_to_long 的别名）。
+
+        :param string: 源字符串
+        :param separator: 分隔符
+        :return: int 列表
+        """
+        return CharSequenceUtil.split_to_long(string, separator)
+
+    @staticmethod
+    def split_by_length(string: Optional[str], length: int) -> List[str]:
+        """
+        按固定长度分割字符串。
+
+        :param string: 源字符串
+        :param length: 每段长度
+        :return: 分割后的字符串列表
+        """
+        if CharSequenceUtil.is_empty(string):
+            return []
+        if length <= 0:
+            raise ValueError("length 必须大于 0")
+        return [string[i : i + length] for i in range(0, len(string), length)]
+
+    @staticmethod
+    def split_ignore_case(string: Optional[str], separator: str) -> List[str]:
+        """
+        忽略大小写分割字符串。
+
+        :param string: 源字符串
+        :param separator: 分隔符（忽略大小写匹配）
+        :return: 分割后的字符串列表
+        """
+        if CharSequenceUtil.is_empty(string):
+            return []
+        pattern = re.compile(re.escape(separator), re.IGNORECASE)
+        return pattern.split(string)
+
+    # ------------------------------------------------------------------
+    # 替换扩展
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def replace_from(
+        string: Optional[str],
+        start: int,
+        search_str: str,
+        replacement: str,
+        ignore_case: bool = False,
+    ) -> Optional[str]:
+        """
+        从 *start* 位置开始搜索并替换第一个 *search_str*。
+
+        :param string: 源字符串
+        :param start: 起始搜索位置
+        :param search_str: 待搜索的字符串
+        :param replacement: 替换字符串
+        :param ignore_case: 是否忽略大小写
+        :return: 替换后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        if start < 0:
+            start = 0
+        if start >= len(string):
+            return string
+        before = string[:start]
+        after = string[start:]
+        escaped = re.escape(search_str)
+        flags = re.IGNORECASE if ignore_case else 0
+        after = re.sub(escaped, replacement, after, count=1, flags=flags)
+        return before + after
+
+    @staticmethod
+    def replace_by_func(
+        string: Optional[str],
+        regex: str,
+        func: "Callable[[re.Match], str]",
+    ) -> Optional[str]:
+        """
+        使用正则表达式匹配并通过回调函数生成替换内容。
+
+        :param string: 源字符串
+        :param regex: 正则表达式
+        :param func: 回调函数，接受 ``re.Match`` 对象，返回替换字符串
+        :return: 替换后的字符串
+        """
+        if CharSequenceUtil.is_empty(string):
+            return string
+        return re.sub(regex, func, string)  # type: ignore[arg-type]
+
+    # ------------------------------------------------------------------
+    # 大小写转换（null 安全）
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def to_lower_case(string: Optional[str]) -> Optional[str]:
+        """
+        转为小写，None 安全。
+
+        :param string: 源字符串
+        :return: 小写字符串
+        """
+        if string is None:
+            return None
+        return string.lower()
+
+    @staticmethod
+    def to_upper_case(string: Optional[str]) -> Optional[str]:
+        """
+        转为大写，None 安全。
+
+        :param string: 源字符串
+        :return: 大写字符串
+        """
+        if string is None:
+            return None
+        return string.upper()
+
+    # ------------------------------------------------------------------
+    # 空值安全查找
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def first_non_null(*values: Optional[str]) -> Optional[str]:
+        """
+        返回第一个非 None 的值。
+
+        :param values: 候选值
+        :return: 第一个非 None 值，全部为 None 则返回 None
+        """
+        for v in values:
+            if v is not None:
+                return v
+        return None
+
+    @staticmethod
+    def first_non_empty(*values: Optional[str]) -> Optional[str]:
+        """
+        返回第一个非空（非 None 且非 ``""``）的值。
+
+        :param values: 候选值
+        :return: 第一个非空值
+        """
+        for v in values:
+            if v is not None and v != "":
+                return v
+        return None
+
+    @staticmethod
+    def first_non_blank(*values: Optional[str]) -> Optional[str]:
+        """
+        返回第一个非空白（非 None 且非纯空白）的值。
+
+        :param values: 候选值
+        :return: 第一个非空白值
+        """
+        for v in values:
+            if v is not None and v.strip():
+                return v
+        return None
+
+    # ------------------------------------------------------------------
+    # 包裹/解包裹
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def unwrap(string: Optional[str], prefix: str, suffix: str) -> Optional[str]:
+        """
+        移除字符串的前缀和后缀（如果存在）。
+
+        :param string: 源字符串
+        :param prefix: 前缀
+        :param suffix: 后缀
+        :return: 移除包裹后的字符串
+        """
+        if string is None:
+            return None
+        result = string
+        if result.startswith(prefix):
+            result = result[len(prefix) :]
+        if result.endswith(suffix):
+            result = result[: -len(suffix)]
+        return result
+
+    # ------------------------------------------------------------------
+    # 字符级比较
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def is_char_equals(string: Optional[str]) -> bool:
+        """
+        检查字符串中所有字符是否相同。
+
+        :param string: 源字符串
+        :return: 所有字符相同或为空时返回 True
+        """
+        if string is None or len(string) <= 1:
+            return True
+        first = string[0]
+        return all(c == first for c in string)
+
+    # ------------------------------------------------------------------
+    # 转换工具
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def to_string(obj: Any) -> str:
+        """
+        将对象转为字符串，None 返回 ``"null"``。
+
+        :param obj: 对象
+        :return: 字符串表示
+        """
+        if obj is None:
+            return "null"
+        return str(obj)
 
 
 # ---------------------------------------------------------------------------

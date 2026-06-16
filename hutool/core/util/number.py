@@ -1006,3 +1006,182 @@ class NumberUtil:
             return int(number_str)
         except (ValueError, TypeError):
             return default_value
+
+    # ------------------------------------------------------------------
+    # 进制转换
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def binary_to_long(binary_str: str) -> int:
+        """
+        二进制字符串转整数。
+
+        :param binary_str: 二进制字符串，如 ``"1010"``
+        :return: 对应的整数
+        :raises ValueError: 非法二进制字符串时
+        """
+        return int(binary_str, 2)
+
+    @staticmethod
+    def to_big_integer(n: Union[int, str], radix: int = 10) -> int:
+        """
+        将数字或字符串转为大整数（Python int）。
+
+        :param n: 数字或字符串
+        :param radix: 进制，默认 10
+        :return: 大整数
+        """
+        if isinstance(n, int):
+            return n
+        return int(str(n), radix)
+
+    @staticmethod
+    def new_big_integer(s: str, radix: int = 10) -> int:
+        """
+        按指定进制解析字符串为大整数。
+
+        :param s: 数字字符串
+        :param radix: 进制（2、8、10、16 等）
+        :return: 大整数
+        """
+        return int(s, radix)
+
+    @staticmethod
+    def to_unsigned_byte_array(n: int) -> bytes:
+        """
+        将非负整数转为无符号字节数组（大端序）。
+
+        :param n: 非负整数
+        :return: 字节串
+        :raises ValueError: n 为负数时
+        """
+        if n < 0:
+            raise ValueError("n 不能为负数")
+        if n == 0:
+            return b"\x00"
+        result = bytearray()
+        while n > 0:
+            result.append(n & 0xFF)
+            n >>= 8
+        return bytes(reversed(result))
+
+    @staticmethod
+    def from_unsigned_byte_array(data: bytes) -> int:
+        """
+        无符号字节数组（大端序）转整数。
+
+        :param data: 字节串
+        :return: 整数
+        """
+        return int.from_bytes(data, byteorder="big", signed=False)
+
+    # ------------------------------------------------------------------
+    # 整数运算
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def integer_sqrt(x: int) -> int:
+        """
+        整数平方根（向下取整）。
+
+        使用牛顿迭代法，避免浮点精度问题。
+
+        :param x: 非负整数
+        :return: 平方根的整数部分
+        :raises ValueError: x 为负数时
+        """
+        if x < 0:
+            raise ValueError("不能对负数求平方根")
+        if x < 2:
+            return x
+        # 牛顿迭代
+        guess = x
+        while guess * guess > x:
+            guess = (guess + x // guess) // 2
+        return guess
+
+    @staticmethod
+    def process_multiple(n: int, m: int) -> int:
+        """
+        计算组合数 C(n, m)。
+
+        :param n: 总数
+        :param m: 选取数
+        :return: 组合数
+        :raises ValueError: 参数非法时
+        """
+        if n < 0 or m < 0 or m > n:
+            raise ValueError(f"参数非法：n={n}, m={m}")
+        if m == 0 or m == n:
+            return 1
+        # 利用对称性减少计算
+        if m > n - m:
+            m = n - m
+        result = 1
+        for i in range(m):
+            result = result * (n - i) // (i + 1)
+        return result
+
+    # ------------------------------------------------------------------
+    # 解析扩展
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def parse_double(s: str, default_value: float = 0.0) -> float:
+        """
+        解析字符串为 float，失败返回默认值。
+
+        :param s: 数字字符串
+        :param default_value: 默认值
+        :return: float 值
+        """
+        try:
+            return float(s)
+        except (ValueError, TypeError):
+            return default_value
+
+    # ------------------------------------------------------------------
+    # 范围与生成
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def range(start: int, end: int, step: int = 1) -> List[int]:
+        """
+        生成数字范围列表（含 start，不含 end）。
+
+        :param start: 起始值（含）
+        :param end: 结束值（不含）
+        :param step: 步长，默认 1
+        :return: 数字列表
+        """
+        return list(range(start, end, step))
+
+    @staticmethod
+    def generate(count: int, min_val: int = 0, max_val: int = 100) -> List[int]:
+        """
+        生成指定个数的随机整数列表。
+
+        :param count: 个数
+        :param min_val: 最小值（含）
+        :param max_val: 最大值（不含）
+        :return: 随机整数列表
+        """
+        import secrets
+
+        if count <= 0:
+            return []
+        return [secrets.randbelow(max_val - min_val) + min_val for _ in range(count)]
+
+    # ------------------------------------------------------------------
+    # 空值处理
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def null_to_zero(n: Optional[Union[int, float]]) -> Union[int, float]:
+        """
+        None 转为 0。
+
+        :param n: 数值
+        :return: n 为 None 时返回 0，否则返回原值
+        """
+        return 0 if n is None else n

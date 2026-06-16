@@ -19,6 +19,12 @@ IterUtil.tail(3, range(10))        # [7, 8, 9]
 IterUtil.nth(range(10), 3)         # 3
 IterUtil.nth(range(3), 10)         # None（越界）
 IterUtil.nth(range(3), 10, -1)     # -1（自定义默认值）
+
+IterUtil.get([10, 20, 30], 1)         # 20
+IterUtil.get_first([10, 20])           # 10
+IterUtil.get_first_none_null([None, 1])  # 1
+IterUtil.first_match([1, 2, 3], lambda x: x > 2)  # 3
+IterUtil.get_element_type([1, 2])      # <class 'int'>
 ```
 
 ### 判断与统计
@@ -26,8 +32,14 @@ IterUtil.nth(range(3), 10, -1)     # -1（自定义默认值）
 ```python
 IterUtil.all_equal([1, 1, 1])                       # True
 IterUtil.all_equal([1, 2, 1])                       # False
+IterUtil.is_empty([])                               # True
+IterUtil.is_not_empty([1])                          # True
+IterUtil.has_null([1, None, 3])                     # True
+IterUtil.is_all_null([None, None])                  # True
 
-IterUtil.quantify([1, 2, 3, 4], lambda x: x % 2 == 0)  # 2（偶数个数）
+IterUtil.quantify([1, 2, 3, 4], lambda x: x % 2 == 0)       # 2（偶数个数）
+IterUtil.count_map(["a", "b", "a"])                         # {"a": 2, "b": 1}
+IterUtil.field_value_map([{"n": "a", "v": 1}], "n", "v")    # {"a": 1}
 ```
 
 ### 变换
@@ -46,6 +58,9 @@ list(IterUtil.grouper("ABCDEFG", 3, 'x'))
 # 交替轮询
 list(IterUtil.roundrobin("ABC", "D", "EF"))
 # ['A', 'D', 'E', 'B', 'F', 'C']
+
+IterUtil.to_map([("a", 1)], lambda x: x[0], lambda x: x[1])  # {"a": 1}
+IterUtil.to_list(range(3))  # [0, 1, 2]
 ```
 
 ### 分组与幂集
@@ -71,8 +86,19 @@ list(IterUtil.unique_everseen("AAAABBBCCDAABBB"))  # ['A','B','C','D']
 list(IterUtil.unique_everseen("ABBCcAD", str.lower))  # ['A','B','C','D']
 ```
 
----
+### 其他
 
-```{note}
-更多方法请参阅 {doc}`API 参考 </apidocs/index>` 文档。
+```python
+# 拼接
+IterUtil.join([1, 2, 3], "-")  # "1-2-3"
+
+# 映射/过滤
+IterUtil.edit([1, 2, 3], lambda x: x * 2)  # [2, 4, 6]
+IterUtil.filter_([1, 2, 3, 4], lambda x: x > 2)  # [3, 4]
+IterUtil.for_each([1, 2], print)
+
+# 工具
+IterUtil.size(range(100))            # 100
+IterUtil.is_equal_list([1, 2], [1, 2])  # True
+IterUtil.to_str([1, 2, 3], "-")       # "1-2-3"
 ```

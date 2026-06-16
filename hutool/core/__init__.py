@@ -1,4 +1,4 @@
-"""PyHutool Core 核心模块。"""
+"""Hutool-Python Core 核心模块。"""
 
 from .exceptions import (
     IllegalArgumentException,

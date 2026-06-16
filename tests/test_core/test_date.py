@@ -616,3 +616,435 @@ class TestDateTime:
         from datetime import date
 
         assert DateUtil.format_chinese_date(date(2024, 3, 15)) == "2024年3月15日"
+
+    def test_this_year(self):
+        from datetime import datetime
+
+        assert DateUtil.this_year() == datetime.now().year
+
+    def test_this_month(self):
+        from datetime import datetime
+
+        assert DateUtil.this_month() == datetime.now().month
+
+    def test_this_week_of_year(self):
+        result = DateUtil.this_week_of_year()
+        assert 1 <= result <= 53
+
+    def test_this_week_of_month(self):
+        result = DateUtil.this_week_of_month()
+        assert 1 <= result <= 5
+
+    def test_this_day_of_month(self):
+        from datetime import datetime
+
+        assert DateUtil.this_day_of_month() == datetime.now().day
+
+    def test_this_day_of_week(self):
+        result = DateUtil.this_day_of_week()
+        assert 1 <= result <= 7
+
+    def test_this_hour(self):
+        from datetime import datetime
+
+        assert DateUtil.this_hour() == datetime.now().hour
+
+    def test_this_minute(self):
+
+        assert 0 <= DateUtil.this_minute() <= 59
+
+    def test_this_second(self):
+
+        assert 0 <= DateUtil.this_second() <= 59
+
+    def test_this_millisecond(self):
+
+        assert 0 <= DateUtil.this_millisecond() <= 999
+
+    def test_time_to_second(self):
+        assert DateUtil.time_to_second("01:00:00") == 3600
+        assert DateUtil.time_to_second("00:01:30") == 90
+        assert DateUtil.time_to_second("00:00:00") == 0
+
+    def test_second_to_time(self):
+        assert DateUtil.second_to_time(3600) == "01:00:00"
+        assert DateUtil.second_to_time(90) == "00:01:30"
+        assert DateUtil.second_to_time(0) == "00:00:00"
+
+    def test_second_to_time_negative(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            DateUtil.second_to_time(-1)
+
+    def test_age_of_now(self):
+        age = DateUtil.age_of_now("1990-01-01")
+        assert 30 < age < 50
+
+    def test_age(self):
+        from datetime import date
+
+        assert DateUtil.age(date(1990, 6, 15), date(2024, 6, 14)) == 33
+        assert DateUtil.age(date(1990, 6, 15), date(2024, 6, 15)) == 34
+        assert DateUtil.age(date(1990, 6, 15), date(2024, 6, 16)) == 34
+
+    def test_truncate_day(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.truncate(dt, "day")
+        assert result == datetime(2024, 6, 15, 0, 0, 0)
+
+    def test_truncate_hour(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.truncate(dt, "hour")
+        assert result == datetime(2024, 6, 15, 14, 0, 0)
+
+    def test_truncate_year(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.truncate(dt, "year")
+        assert result == datetime(2024, 1, 1, 0, 0, 0)
+
+    def test_truncate_month(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.truncate(dt, "month")
+        assert result == datetime(2024, 6, 1, 0, 0, 0)
+
+    def test_range_contains(self):
+        from datetime import datetime
+
+        start = datetime(2024, 1, 1)
+        end = datetime(2024, 12, 31)
+        assert DateUtil.range_contains(start, end, datetime(2024, 6, 15)) is True
+        assert DateUtil.range_contains(start, end, datetime(2025, 1, 1)) is False
+        assert DateUtil.range_contains(start, end, start) is True
+        assert DateUtil.range_contains(start, end, end) is True
+
+    def test_year_and_quarter(self):
+        from datetime import datetime
+
+        assert DateUtil.year_and_quarter(datetime(2024, 3, 15)) == "20241"
+        assert DateUtil.year_and_quarter(datetime(2024, 6, 15)) == "20242"
+        assert DateUtil.year_and_quarter(datetime(2024, 9, 15)) == "20243"
+        assert DateUtil.year_and_quarter(datetime(2024, 12, 15)) == "20244"
+
+    def test_create_stop_watch(self):
+        sw = DateUtil.create_stop_watch("test")
+        assert sw is not None
+
+    def test_nanos_to_millis(self):
+        assert DateUtil.nanos_to_millis(1_000_000) == 1.0
+        assert DateUtil.nanos_to_millis(1_500_000) == 1.5
+
+    def test_nanos_to_seconds(self):
+        assert DateUtil.nanos_to_seconds(1_000_000_000) == 1.0
+        assert DateUtil.nanos_to_seconds(2_500_000_000) == 2.5
+
+    def test_format_between_ms(self):
+        result = DateUtil.format_between_ms(3661001)
+        assert "1小时" in result
+        assert "1分" in result
+        assert "1秒" in result
+        assert "1毫秒" in result
+
+    def test_format_between_ms_level_day(self):
+        result = DateUtil.format_between_ms(90000000, level="day")
+        assert result == "1天"
+
+    def test_format_between_ms_level_hour(self):
+        result = DateUtil.format_between_ms(7200000, level="hour")
+        assert result == "2小时"
+
+    def test_format_between_ms_level_second(self):
+        result = DateUtil.format_between_ms(5000, level="second")
+        assert result == "5秒"
+
+    def test_format_between_ms_zero(self):
+        result = DateUtil.format_between_ms(0)
+        assert result == "0毫秒"
+
+    def test_format_between_ms_negative(self):
+        result = DateUtil.format_between_ms(-5000)
+        assert "5秒" in result
+
+    def test_format_local_datetime(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.format_local_datetime(dt)
+        assert result == "2024-06-15 14:30:45"
+
+    def test_parse_local_datetime(self):
+        result = DateUtil.parse_local_datetime("2024-06-15 14:30:45")
+        assert result.year == 2024
+        assert result.month == 6
+        assert result.hour == 14
+
+    def test_round_day(self):
+        from datetime import datetime
+
+        # 12:00:00 is the midpoint
+        dt_before = datetime(2024, 6, 15, 11, 59, 59)
+        dt_after = datetime(2024, 6, 15, 12, 0, 0)
+        assert DateUtil.round(dt_before, "day") == datetime(2024, 6, 15, 0, 0, 0)
+        assert DateUtil.round(dt_after, "day") == datetime(2024, 6, 16, 0, 0, 0)
+
+    def test_round_hour(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 29, 59)
+        assert DateUtil.round(dt, "hour") == datetime(2024, 6, 15, 14, 0, 0)
+        dt2 = datetime(2024, 6, 15, 14, 30, 0)
+        assert DateUtil.round(dt2, "hour") == datetime(2024, 6, 15, 15, 0, 0)
+
+    def test_ceiling(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        assert DateUtil.ceiling(dt, "day") == datetime(2024, 6, 16, 0, 0, 0)
+        assert DateUtil.ceiling(dt, "hour") == datetime(2024, 6, 15, 15, 0, 0)
+
+    def test_ceiling_already_truncated(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 0, 0, 0)
+        assert DateUtil.ceiling(dt, "day") == datetime(2024, 6, 15, 0, 0, 0)
+
+    def test_begin_of_hour(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45, 123456)
+        assert DateUtil.begin_of_hour(dt) == datetime(2024, 6, 15, 14, 0, 0)
+
+    def test_end_of_hour(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.end_of_hour(dt)
+        assert result.hour == 14
+        assert result.minute == 59
+
+    def test_begin_of_minute(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45, 123456)
+        assert DateUtil.begin_of_minute(dt) == datetime(2024, 6, 15, 14, 30, 0)
+
+    def test_end_of_minute(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.end_of_minute(dt)
+        assert result.second == 59
+
+    def test_begin_of_second(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45, 123456)
+        assert DateUtil.begin_of_second(dt) == datetime(2024, 6, 15, 14, 30, 45)
+
+    def test_end_of_second(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.end_of_second(dt)
+        assert result.microsecond == 999999
+
+    def test_offset_generic_day(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 1, 15)
+        result = DateUtil.offset(dt, "day", 5)
+        assert result.day == 20
+
+    def test_offset_generic_month(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 1, 31)
+        result = DateUtil.offset(dt, "month", 1)
+        assert result.month == 2
+        assert result.day == 29  # 2024 is leap year
+
+    def test_offset_generic_year(self):
+        from datetime import datetime
+
+        dt = datetime(2024, 6, 15)
+        result = DateUtil.offset(dt, "year", -1)
+        assert result.year == 2023
+
+    def test_range(self):
+        from datetime import datetime
+
+        result = DateUtil.range(datetime(2024, 1, 1), datetime(2024, 1, 4))
+        assert len(result) == 3
+        assert result[0] == datetime(2024, 1, 1)
+        assert result[-1] == datetime(2024, 1, 3)
+
+    def test_range_to_list(self):
+        from datetime import datetime
+
+        result = DateUtil.range_to_list(datetime(2024, 1, 1), datetime(2024, 1, 3))
+        assert len(result) == 3
+        assert result[-1] == datetime(2024, 1, 3)
+
+    def test_parse_utc(self):
+        dt = DateUtil.parse_utc("2024-01-15T10:30:00Z")
+        assert dt.year == 2024
+        assert dt.hour == 10
+
+    def test_parse_rfc2822(self):
+        dt = DateUtil.parse_rfc2822("Mon, 15 Jan 2024 10:30:00 +0000")
+        assert dt.year == 2024
+        assert dt.month == 1
+        assert dt.day == 15
+
+    def test_of_date(self):
+        dt = DateTime.of_date(2024, 6, 15)
+        assert dt.year() == 2024
+        assert dt.month() == 6
+        assert dt.day_of_month() == 15
+
+    def test_of_datetime(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        assert dt.hour() == 14
+        assert dt.minute() == 30
+        assert dt.second() == 45
+
+    def test_of_pattern(self):
+        dt = DateTime.of_pattern("2024-06-15 14:30:45", "yyyy-MM-dd HH:mm:ss")
+        assert dt.year() == 2024
+        assert dt.hour() == 14
+
+    def test_now_utc(self):
+        dt = DateTime.now_utc()
+        assert dt is not None
+
+    def test_of_epoch_millis(self):
+        ts = 1700000000000  # 2023-11-14 ~22:13:20 UTC
+        dt = DateTime.of_epoch(ts, is_millis=True)
+        assert dt.year() == 2023
+
+    def test_of_epoch_seconds(self):
+        ts = 1700000000
+        dt = DateTime.of_epoch(ts, is_millis=False)
+        assert dt.year() == 2023
+
+    def test_is_weekend(self):
+        # 2024-01-13 is Saturday
+        dt = DateTime.of_date(2024, 1, 13)
+        assert dt.is_weekend() is True
+        dt2 = DateTime.of_date(2024, 1, 15)  # Monday
+        assert dt2.is_weekend() is False
+
+    def test_is_am_pm(self):
+        dt = DateTime.of_datetime(2024, 1, 1, 10, 0, 0)
+        assert dt.is_am() is True
+        assert dt.is_pm() is False
+        dt2 = DateTime.of_datetime(2024, 1, 1, 14, 0, 0)
+        assert dt2.is_am() is False
+        assert dt2.is_pm() is True
+
+    def test_is_past(self):
+        dt = DateTime.of_date(2000, 1, 1)
+        assert dt.is_past() is True
+
+    def test_is_future(self):
+        dt = DateTime.of_date(2099, 1, 1)
+        assert dt.is_future() is True
+
+    def test_is_before_after(self):
+        dt1 = DateTime.of_date(2024, 1, 1)
+        dt2 = DateTime.of_date(2024, 6, 1)
+        assert dt1.is_before(dt2) is True
+        assert dt2.is_after(dt1) is True
+
+    def test_is_between(self):
+        dt = DateTime.of_date(2024, 6, 15)
+        start = DateTime.of_date(2024, 1, 1)
+        end = DateTime.of_date(2024, 12, 31)
+        assert dt.is_between(start, end) is True
+
+    def test_is_leap_year(self):
+        dt = DateTime.of_date(2024, 1, 1)
+        assert dt.is_leap_year() is True
+        dt2 = DateTime.of_date(2023, 1, 1)
+        assert dt2.is_leap_year() is False
+
+    def test_is_last_day_of_month(self):
+        dt = DateTime.of_date(2024, 2, 29)
+        assert dt.is_last_day_of_month() is True
+        dt2 = DateTime.of_date(2024, 2, 28)
+        assert dt2.is_last_day_of_month() is False
+
+    def test_length_of_month(self):
+        dt = DateTime.of_date(2024, 2, 1)
+        assert dt.length_of_month() == 29
+        dt2 = DateTime.of_date(2024, 1, 1)
+        assert dt2.length_of_month() == 31
+
+    def test_length_of_year(self):
+        dt = DateTime.of_date(2024, 1, 1)
+        assert dt.length_of_year() == 366
+        dt2 = DateTime.of_date(2023, 1, 1)
+        assert dt2.length_of_year() == 365
+
+    def test_offset_methods(self):
+        dt = DateTime.of_date(2024, 1, 15)
+        assert dt.offset_day(1).day_of_month() == 16
+        assert dt.offset_week(1).day_of_month() == 22
+        assert dt.offset_month(1).month() == 2
+        assert dt.offset_year(1).year() == 2025
+
+    def test_begin_of_second(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.begin_of_second()
+        assert result.second() == 45
+
+    def test_end_of_second(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.end_of_second()
+        assert result.second() == 45
+
+    def test_begin_of_hour(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.begin_of_hour()
+        assert result.minute() == 0
+        assert result.second() == 0
+
+    def test_end_of_hour(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.end_of_hour()
+        assert result.minute() == 59
+
+    def test_begin_of_minute(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.begin_of_minute()
+        assert result.second() == 0
+
+    def test_end_of_minute(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        result = dt.end_of_minute()
+        assert result.second() == 59
+
+    def test_format(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        assert dt.format("YYYY-MM-DD") == "2024-06-15"
+
+    def test_to_local_datetime_str(self):
+        dt = DateTime.of_datetime(2024, 6, 15, 14, 30, 45)
+        assert dt.to_local_datetime_str() == "2024-06-15 14:30:45"
+
+    def test_with_timezone(self):
+        dt = DateTime.now_utc()
+        shanghai = dt.with_timezone("Asia/Shanghai")
+        assert shanghai is not None
+
+    def test_timezone_name(self):
+        dt = DateTime.now_utc()
+        assert dt.timezone_name() == "UTC"

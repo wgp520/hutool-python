@@ -314,3 +314,90 @@ class TestNumberUtil:
 
     def test_parse_long_default(self):
         assert NumberUtil.parse_long("abc", -1) == -1
+
+    def test_binary_to_long(self):
+        """测试二进制字符串转 int"""
+        assert NumberUtil.binary_to_long("1010") == 10
+        assert NumberUtil.binary_to_long("0") == 0
+        assert NumberUtil.binary_to_long("11111111") == 255
+
+    def test_integer_sqrt(self):
+        """测试整数平方根"""
+        assert NumberUtil.integer_sqrt(0) == 0
+        assert NumberUtil.integer_sqrt(1) == 1
+        assert NumberUtil.integer_sqrt(4) == 2
+        assert NumberUtil.integer_sqrt(9) == 3
+        assert NumberUtil.integer_sqrt(10) == 3  # 向下取整
+        assert NumberUtil.integer_sqrt(15) == 3
+        assert NumberUtil.integer_sqrt(16) == 4
+
+    def test_integer_sqrt_negative_raises(self):
+        """测试负数抛异常"""
+        import pytest
+
+        with pytest.raises(ValueError):
+            NumberUtil.integer_sqrt(-1)
+
+    def test_process_multiple(self):
+        """测试组合数 C(n, m)"""
+        assert NumberUtil.process_multiple(5, 0) == 1
+        assert NumberUtil.process_multiple(5, 1) == 5
+        assert NumberUtil.process_multiple(5, 5) == 1
+        assert NumberUtil.process_multiple(5, 2) == 10
+        assert NumberUtil.process_multiple(6, 3) == 20
+        assert NumberUtil.process_multiple(10, 3) == 120
+
+    def test_parse_double(self):
+        """测试带默认值的 float 解析"""
+        assert NumberUtil.parse_double("3.14") == 3.14
+        assert NumberUtil.parse_double("abc", 0.0) == 0.0
+        assert NumberUtil.parse_double(None, -1.0) == -1.0
+        assert NumberUtil.parse_double("100") == 100.0
+
+    def test_to_big_integer(self):
+        """测试转 int"""
+        assert NumberUtil.to_big_integer(42) == 42
+        assert NumberUtil.to_big_integer("12345") == 12345
+        assert NumberUtil.to_big_integer(100) == 100
+
+    def test_new_big_integer(self):
+        """测试按进制解析"""
+        assert NumberUtil.new_big_integer("ff", 16) == 255
+        assert NumberUtil.new_big_integer("77", 8) == 63
+        assert NumberUtil.new_big_integer("1010", 2) == 10
+
+    def test_to_unsigned_byte_array(self):
+        """测试转无符号字节数组"""
+        result = NumberUtil.to_unsigned_byte_array(256)
+        assert result == b"\x01\x00"  # 大端序
+
+    def test_to_unsigned_byte_array_zero(self):
+        assert NumberUtil.to_unsigned_byte_array(0) == b"\x00"
+
+    def test_from_unsigned_byte_array(self):
+        """测试从无符号字节数组恢复"""
+        assert NumberUtil.from_unsigned_byte_array(b"\x00\x00\x01\x00") == 256
+        assert NumberUtil.from_unsigned_byte_array(b"\xff") == 255
+
+    def test_from_unsigned_byte_array_roundtrip(self):
+        """测试无符号字节数组往返"""
+        for val in [0, 1, 127, 128, 255, 256, 65535, 123456]:
+            arr = NumberUtil.to_unsigned_byte_array(val)
+            assert NumberUtil.from_unsigned_byte_array(arr) == val
+
+    def test_range_method(self):
+        """测试 range 方法"""
+        assert NumberUtil.range_(0, 5) == [0, 1, 2, 3, 4]
+        assert NumberUtil.range_(1, 10, 2) == [1, 3, 5, 7, 9]
+
+    def test_generate(self):
+        """测试生成随机整数列表"""
+        result = NumberUtil.generate(5, 1, 100)
+        assert len(result) == 5
+        assert all(1 <= x < 100 for x in result)
+
+    def test_null_to_zero(self):
+        """测试 None 转 0"""
+        assert NumberUtil.null_to_zero(None) == 0
+        assert NumberUtil.null_to_zero(42) == 42
+        assert NumberUtil.null_to_zero(0) == 0

@@ -15,6 +15,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Optional,
     Sequence,
@@ -560,6 +561,282 @@ class MapUtil:
         if m2:
             result.update(m2)
         return result
+
+    @staticmethod
+    def to_camel_case_map(m: dict) -> dict:
+        """将字典的键转换为驼峰命名。
+
+        :param m: 原字典（键为 snake_case 字符串）
+        :return: 键为 camelCase 的新字典
+        """
+        if m is None:
+            return {}
+        result = {}
+        for k, v in m.items():
+            parts = k.split("_")
+            camel = parts[0] + "".join(p.capitalize() for p in parts[1:])
+            result[camel] = v
+        return result
+
+    @staticmethod
+    def to_object_array(m: dict) -> list:
+        """将字典转为二维数组 [[key, value], ...]。
+
+        :param m: 字典
+        :return: 二维数组
+        """
+        if m is None:
+            return []
+        return [[k, v] for k, v in m.items()]
+
+    @staticmethod
+    def join_ignore_null(m: dict, separator: str = "&", kv_sep: str = "=") -> str:
+        """将字典拼接为查询字符串，忽略值为 None 的条目。
+
+        :param m: 字典
+        :param separator: 键值对分隔符
+        :param kv_sep: 键值分隔符
+        :return: 拼接后的字符串
+        """
+        if m is None:
+            return ""
+        parts = []
+        for k, v in m.items():
+            if v is not None:
+                parts.append(f"{k}{kv_sep}{v}")
+        return separator.join(parts)
+
+    @staticmethod
+    def edit(m: dict, func: Callable) -> dict:
+        """对字典的每个值应用函数。
+
+        :param m: 原字典
+        :param func: 值转换函数，接收 (key, value) 参数
+        :return: 新字典
+        """
+        if m is None:
+            return {}
+        return {k: func(k, v) for k, v in m.items()}
+
+    @staticmethod
+    def map_(m: dict, key_func=None, value_func=None) -> dict:
+        """对字典的键和/或值进行映射。
+
+        :param m: 原字典
+        :param key_func: 键映射函数
+        :param value_func: 值映射函数
+        :return: 映射后的新字典
+        """
+        if m is None:
+            return {}
+        result = {}
+        for k, v in m.items():
+            new_key = key_func(k) if key_func else k
+            new_value = value_func(v) if value_func else v
+            result[new_key] = new_value
+        return result
+
+    @staticmethod
+    def reverse(m: dict) -> dict:
+        """反转字典（值做键，键做值），值重复时后者覆盖。
+
+        :param m: 原字典
+        :return: 反转后的字典
+        """
+        return MapUtil.inverse(m)
+
+    @staticmethod
+    def rename_key(m: dict, old_key: Any, new_key: Any) -> dict:
+        """重命名字典的键。
+
+        :param m: 原字典（会被修改）
+        :param old_key: 旧键
+        :param new_key: 新键
+        :return: 修改后的字典
+        """
+        if m is not None and old_key in m:
+            m[new_key] = m.pop(old_key)
+        return m
+
+    @staticmethod
+    def remove_null_value(m: dict) -> dict:
+        """移除值为 None 的条目。
+
+        :param m: 原字典（会被修改）
+        :return: 修改后的字典
+        """
+        if m is None:
+            return {}
+        keys_to_remove = [k for k, v in m.items() if v is None]
+        for k in keys_to_remove:
+            del m[k]
+        return m
+
+    @staticmethod
+    def remove_by_value(m: dict, value: Any) -> dict:
+        """移除指定值的所有条目。
+
+        :param m: 原字典（会被修改）
+        :param value: 要移除的值
+        :return: 修改后的字典
+        """
+        if m is None:
+            return {}
+        keys_to_remove = [k for k, v in m.items() if v == value]
+        for k in keys_to_remove:
+            del m[k]
+        return m
+
+    @staticmethod
+    def remove_if(m: dict, predicate: Callable) -> dict:
+        """按条件移除条目。
+
+        :param m: 原字典（会被修改）
+        :param predicate: 条件函数，接收 (key, value)，返回 True 表示移除
+        :return: 修改后的字典
+        """
+        if m is None:
+            return {}
+        keys_to_remove = [k for k, v in m.items() if predicate(k, v)]
+        for k in keys_to_remove:
+            del m[k]
+        return m
+
+    @staticmethod
+    def get_any(m: dict, *keys: Any) -> Any:
+        """按顺序查找第一个存在的键并返回其值。
+
+        :param m: 字典
+        :param keys: 多个键
+        :return: 第一个存在的键对应的值，都不存在返回 None
+        """
+        if m is None:
+            return None
+        for key in keys:
+            if key in m:
+                return m[key]
+        return None
+
+    @staticmethod
+    def get_double(m: dict, key: Any, default: float = 0.0) -> float:
+        """获取 double 类型的值。
+
+        :param m: 字典
+        :param key: 键
+        :param default: 默认值
+        :return: float 值
+        """
+        if m is None or key not in m:
+            return default
+        v = m[key]
+        if v is None:
+            return default
+        return float(v)
+
+    @staticmethod
+    def get_long(m: dict, key: Any, default: int = 0) -> int:
+        """获取 long 类型的值。
+
+        :param m: 字典
+        :param key: 键
+        :param default: 默认值
+        :return: int 值
+        """
+        if m is None or key not in m:
+            return default
+        v = m[key]
+        if v is None:
+            return default
+        return int(v)
+
+    @staticmethod
+    def get_date(m: dict, key: Any, default=None):
+        """获取日期类型的值。
+
+        :param m: 字典
+        :param key: 键
+        :param default: 默认值
+        :return: 值（不做转换，直接返回）
+        """
+        if m is None or key not in m:
+            return default
+        return m[key]
+
+    @staticmethod
+    def entry(key: Any, value: Any) -> dict:
+        """创建单键值对字典。
+
+        :param key: 键
+        :param value: 值
+        :return: 单键值对字典
+        """
+        return {key: value}
+
+    @staticmethod
+    def compute_if_absent(m: dict, key: Any, func: Callable) -> Any:
+        """如果键不存在，则计算并添加值。
+
+        :param m: 字典（会被修改）
+        :param key: 键
+        :param func: 值计算函数（接收 key 参数）
+        :return: 值
+        """
+        if key not in m:
+            m[key] = func(key)
+        return m[key]
+
+    @staticmethod
+    def partition(m: dict, size: int) -> List[dict]:
+        """将字典按大小分割为多个子字典。
+
+        :param m: 字典
+        :param size: 每个子字典的最大条目数
+        :return: 子字典列表
+        """
+        if m is None:
+            return []
+        if size <= 0:
+            raise ValueError("分割大小必须大于0")
+        result = []
+        current = {}
+        for k, v in m.items():
+            current[k] = v
+            if len(current) >= size:
+                result.append(current)
+                current = {}
+        if current:
+            result.append(current)
+        return result
+
+    @staticmethod
+    def flatten(m: dict, prefix: str = "", separator: str = ".") -> dict:
+        """将嵌套字典扁平化。
+
+        :param m: 嵌套字典
+        :param prefix: 键前缀
+        :param separator: 键分隔符
+        :return: 扁平化后的字典
+        """
+        result = {}
+        for k, v in m.items():
+            new_key = f"{prefix}{separator}{k}" if prefix else k
+            if isinstance(v, dict):
+                result.update(MapUtil.flatten(v, new_key, separator))
+            else:
+                result[new_key] = v
+        return result
+
+    @staticmethod
+    def values_of_keys(m: dict, keys: Iterable) -> list:
+        """获取字典中指定键的值列表。
+
+        :param m: 字典
+        :param keys: 键列表
+        :return: 值列表
+        """
+        if m is None:
+            return []
+        return [m[k] for k in keys if k in m]
 
 
 # ====================================================================

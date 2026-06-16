@@ -297,6 +297,305 @@ class DateTime:
             return DateTime(self._dt + other)
         return NotImplemented
 
+    # ---- 工厂方法 ----
+
+    @classmethod
+    def of(cls, dt: Union[datetime, str, PendulumDateTime, DateTime, None] = None) -> DateTime:
+        """工厂方法，等同于构造函数。
+
+        :param dt: 日期时间
+        :return: DateTime 对象
+        """
+        return cls(dt)
+
+    @classmethod
+    def of_date(cls, y: int, m: int, d: int) -> DateTime:
+        """根据年月日创建 DateTime。
+
+        :param y: 年
+        :param m: 月
+        :param d: 日
+        :return: DateTime 对象
+        """
+        return cls(pendulum.datetime(y, m, d))
+
+    @classmethod
+    def of_datetime(cls, y: int, m: int, d: int, h: int = 0, mi: int = 0, s: int = 0) -> DateTime:
+        """根据年月日时分秒创建 DateTime。
+
+        :param y: 年
+        :param m: 月
+        :param d: 日
+        :param h: 时
+        :param mi: 分
+        :param s: 秒
+        :return: DateTime 对象
+        """
+        return cls(pendulum.datetime(y, m, d, h, mi, s))
+
+    @classmethod
+    def of_pattern(cls, date_str: str, fmt: str) -> DateTime:
+        """根据格式字符串解析创建 DateTime。
+
+        :param date_str: 日期字符串
+        :param fmt: 格式模式，如 "yyyy-MM-dd HH:mm:ss"
+        :return: DateTime 对象
+        """
+        # 将 Java 格式转为 Python strftime 格式
+        py_fmt = (
+            fmt.replace("yyyy", "%Y")
+            .replace("yy", "%y")
+            .replace("MM", "%m")
+            .replace("dd", "%d")
+            .replace("HH", "%H")
+            .replace("mm", "%M")
+            .replace("ss", "%S")
+        )
+        dt = datetime.strptime(date_str, py_fmt)
+        return cls(dt)
+
+    @classmethod
+    def now_utc(cls) -> DateTime:
+        """获取 UTC 当前时间的 DateTime。
+
+        :return: DateTime 对象
+        """
+        return cls(pendulum.now("UTC"))
+
+    @classmethod
+    def of_epoch(cls, epoch: Union[int, float], is_millis: bool = True) -> DateTime:
+        """根据时间戳创建 DateTime。
+
+        :param epoch: 时间戳
+        :param is_millis: 是否为毫秒时间戳
+        :return: DateTime 对象
+        """
+        if is_millis:
+            epoch = epoch / 1000
+        return cls(datetime.fromtimestamp(epoch))
+
+    # ---- 查询方法 ----
+
+    def is_weekend(self) -> bool:
+        """是否为周末。
+
+        :return: 周六或周日返回 True
+        """
+        return self._dt.isoweekday() in (6, 7)
+
+    def is_am(self) -> bool:
+        """是否为上午。
+
+        :return: 上午返回 True
+        """
+        return self._dt.hour < 12
+
+    def is_pm(self) -> bool:
+        """是否为下午。
+
+        :return: 下午返回 True
+        """
+        return self._dt.hour >= 12
+
+    def is_past(self) -> bool:
+        """是否为过去时间。
+
+        :return: 过去时间返回 True
+        """
+        return self._dt < pendulum.now()
+
+    def is_future(self) -> bool:
+        """是否为未来时间。
+
+        :return: 未来时间返回 True
+        """
+        return self._dt > pendulum.now()
+
+    def is_before(self, other: Union[DateTime, datetime]) -> bool:
+        """判断是否在指定时间之前。
+
+        :param other: 比较对象
+        :return: 是否在前
+        """
+        if isinstance(other, DateTime):
+            return self._dt < other._dt
+        return self._dt < pendulum.instance(other)
+
+    def is_after(self, other: Union[DateTime, datetime]) -> bool:
+        """判断是否在指定时间之后。
+
+        :param other: 比较对象
+        :return: 是否在后
+        """
+        if isinstance(other, DateTime):
+            return self._dt > other._dt
+        return self._dt > pendulum.instance(other)
+
+    def is_between(
+        self,
+        start: Union[DateTime, datetime],
+        end: Union[DateTime, datetime],
+    ) -> bool:
+        """判断是否在指定时间范围内（含边界）。
+
+        :param start: 起始时间
+        :param end: 结束时间
+        :return: 是否在范围内
+        """
+        s = start._dt if isinstance(start, DateTime) else pendulum.instance(start)
+        e = end._dt if isinstance(end, DateTime) else pendulum.instance(end)
+        return s <= self._dt <= e
+
+    def is_leap_year(self) -> bool:
+        """是否为闰年。
+
+        :return: 闰年返回 True
+        """
+        year = self._dt.year
+        return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+
+    def is_last_day_of_month(self) -> bool:
+        """是否为当月最后一天。
+
+        :return: 最后一天返回 True
+        """
+        import calendar
+
+        _, last_day = calendar.monthrange(self._dt.year, self._dt.month)
+        return self._dt.day == last_day
+
+    def length_of_month(self) -> int:
+        """获取当月天数。
+
+        :return: 天数
+        """
+        import calendar
+
+        _, last_day = calendar.monthrange(self._dt.year, self._dt.month)
+        return last_day
+
+    def length_of_year(self) -> int:
+        """获取当年天数。
+
+        :return: 天数
+        """
+        return 366 if self.is_leap_year() else 365
+
+    # ---- 偏移方法 ----
+
+    def offset_day(self, days: int) -> DateTime:
+        """按天偏移。
+
+        :param days: 偏移天数
+        :return: 新的 DateTime
+        """
+        return DateTime(self._dt.add(days=days))
+
+    def offset_week(self, weeks: int) -> DateTime:
+        """按周偏移。
+
+        :param weeks: 偏移周数
+        :return: 新的 DateTime
+        """
+        return DateTime(self._dt.add(weeks=weeks))
+
+    def offset_month(self, months: int) -> DateTime:
+        """按月偏移。
+
+        :param months: 偏移月数
+        :return: 新的 DateTime
+        """
+        return DateTime(self._dt.add(months=months))
+
+    def offset_year(self, years: int) -> DateTime:
+        """按年偏移。
+
+        :param years: 偏移年数
+        :return: 新的 DateTime
+        """
+        return DateTime(self._dt.add(years=years))
+
+    # ---- 开始/结束（扩展） ----
+
+    def begin_of_second(self) -> DateTime:
+        """获取秒的开始（毫秒归零）。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(microsecond=0))
+
+    def end_of_second(self) -> DateTime:
+        """获取秒的结束。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(microsecond=999999))
+
+    def begin_of_hour(self) -> DateTime:
+        """获取小时的开始。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(minute=0, second=0, microsecond=0))
+
+    def end_of_hour(self) -> DateTime:
+        """获取小时的结束。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(minute=59, second=59, microsecond=999999))
+
+    def begin_of_minute(self) -> DateTime:
+        """获取分钟的开始。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(second=0, microsecond=0))
+
+    def end_of_minute(self) -> DateTime:
+        """获取分钟的结束。
+
+        :return: DateTime
+        """
+        return DateTime(self._dt.replace(second=59, microsecond=999999))
+
+    # ---- 格式化 ----
+
+    def format(self, fmt: str = "YYYY-MM-DD HH:mm:ss") -> str:
+        """格式化为字符串。
+
+        :param fmt: pendulum 格式模式
+        :return: 格式化字符串
+        """
+        return self._dt.format(fmt)
+
+    def to_local_datetime_str(self) -> str:
+        """转换为本地日期时间字符串 "YYYY-MM-DD HH:mm:ss"。
+
+        :return: 日期时间字符串
+        """
+        return self._dt.naive().strftime("%Y-%m-%d %H:%M:%S")
+
+    # ---- 时区 ----
+
+    def with_timezone(self, tz: str) -> DateTime:
+        """转换时区。
+
+        :param tz: 时区名称，如 "UTC", "Asia/Shanghai"
+        :return: 新的 DateTime
+        """
+        return DateTime(self._dt.in_timezone(tz))
+
+    def timezone_name(self) -> Optional[str]:
+        """获取时区名称。
+
+        :return: 时区名称字符串
+        """
+        tz = self._dt.timezone
+        if tz:
+            return str(tz.name)
+        return None
+
 
 def _to_pendulum(dt: Union[DateTime, datetime, PendulumDateTime]) -> PendulumDateTime:
     """将各种日期类型统一转换为 pendulum.DateTime。
@@ -1735,3 +2034,636 @@ class DateUtil:
         if isinstance(dt, date) and not isinstance(dt, datetime):
             return pendulum.instance(datetime(dt.year, dt.month, dt.day))
         return pendulum.instance(dt)
+
+    # ── 当前时间快捷方法 ──────────────────────────────────────
+
+    @staticmethod
+    def this_year() -> int:
+        """获取当前年份。
+
+        :return: 当前年份
+        """
+        return pendulum.now().year
+
+    @staticmethod
+    def this_month() -> int:
+        """获取当前月份（1~12）。
+
+        :return: 当前月份
+        """
+        return pendulum.now().month
+
+    @staticmethod
+    def this_week_of_year() -> int:
+        """获取当前是本年第几周。
+
+        :return: 周数
+        """
+        return pendulum.now().week_of_year
+
+    @staticmethod
+    def this_week_of_month() -> int:
+        """获取当前是本月第几周。
+
+        :return: 周数
+        """
+        now = pendulum.now()
+        return (now.day - 1) // 7 + 1
+
+    @staticmethod
+    def this_day_of_month() -> int:
+        """获取当前是本月第几天。
+
+        :return: 天数
+        """
+        return pendulum.now().day
+
+    @staticmethod
+    def this_day_of_week() -> int:
+        """获取当前是本周第几天（1=周一，7=周日）。
+
+        :return: 天数
+        """
+        return pendulum.now().isoweekday()
+
+    @staticmethod
+    def this_hour() -> int:
+        """获取当前小时（0~23）。
+
+        :return: 小时
+        """
+        return pendulum.now().hour
+
+    @staticmethod
+    def this_minute() -> int:
+        """获取当前分钟（0~59）。
+
+        :return: 分钟
+        """
+        return pendulum.now().minute
+
+    @staticmethod
+    def this_second() -> int:
+        """获取当前秒（0~59）。
+
+        :return: 秒
+        """
+        return pendulum.now().second
+
+    @staticmethod
+    def this_millisecond() -> int:
+        """获取当前毫秒（0~999）。
+
+        :return: 毫秒
+        """
+        return pendulum.now().microsecond // 1000
+
+    # ── 时间转换 ──────────────────────────────────────────────
+
+    @staticmethod
+    def time_to_second(time_str: str) -> int:
+        """将 HH:mm:ss 格式的时间字符串转为秒数。
+
+        :param time_str: 时间字符串，如 "01:30:00"
+        :return: 总秒数
+        """
+        parts = time_str.split(":")
+        if len(parts) == 3:
+            h, m, s = int(parts[0]), int(parts[1]), int(parts[2])
+        elif len(parts) == 2:
+            h, m, s = int(parts[0]), int(parts[1]), 0
+        else:
+            raise ValueError(f"无效的时间格式: {time_str}")
+        return h * 3600 + m * 60 + s
+
+    @staticmethod
+    def second_to_time(seconds: int) -> str:
+        """将秒数转为 HH:mm:ss 格式。
+
+        :param seconds: 总秒数
+        :return: HH:mm:ss 格式字符串
+        """
+        if seconds < 0:
+            raise ValueError("秒数不能为负")
+        h = seconds // 3600
+        m = (seconds % 3600) // 60
+        s = seconds % 60
+        return f"{h:02d}:{m:02d}:{s:02d}"
+
+    # ── 年龄计算 ──────────────────────────────────────────────
+
+    @staticmethod
+    def age_of_now(birth: Union[DateTime, datetime, date, str]) -> int:
+        """计算到当前时间的年龄。
+
+        :param birth: 出生日期
+        :return: 年龄
+        """
+        if isinstance(birth, str):
+            birth = DateUtil.parse(birth)
+        return DateUtil.age(birth, pendulum.now())
+
+    @staticmethod
+    def age(
+        birth: Union[DateTime, datetime, date],
+        now: Union[DateTime, datetime, date],
+    ) -> int:
+        """计算两个日期之间的年龄。
+
+        :param birth: 出生日期
+        :param now: 当前日期
+        :return: 年龄
+        """
+        if isinstance(birth, DateTime):
+            birth = birth.to_date()
+        if isinstance(now, DateTime):
+            now = now.to_date()
+        if isinstance(birth, datetime):
+            birth = birth.date()
+        if isinstance(now, datetime):
+            now = now.date()
+        age = now.year - birth.year
+        if (now.month, now.day) < (birth.month, birth.day):
+            age -= 1
+        return age
+
+    # ── 截断/舍入 ─────────────────────────────────────────────
+
+    @staticmethod
+    def truncate(dt: Union[DateTime, datetime], field: str = "day") -> datetime:
+        """截断日期时间到指定字段。
+
+        :param dt: 日期时间
+        :param field: 截断字段，支持 "year", "month", "day", "hour", "minute", "second"
+        :return: 截断后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if field == "year":
+            return dt.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif field == "month":
+            return dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif field == "day":
+            return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif field == "hour":
+            return dt.replace(minute=0, second=0, microsecond=0)
+        elif field == "minute":
+            return dt.replace(second=0, microsecond=0)
+        elif field == "second":
+            return dt.replace(microsecond=0)
+        raise ValueError(f"不支持的截断字段: {field}")
+
+    # ── 范围操作 ──────────────────────────────────────────────
+
+    @staticmethod
+    def range_contains(
+        start: Union[DateTime, datetime],
+        end: Union[DateTime, datetime],
+        dt: Union[DateTime, datetime],
+    ) -> bool:
+        """判断日期是否在范围内（含边界）。
+
+        :param start: 起始日期
+        :param end: 结束日期
+        :param dt: 待判断日期
+        :return: 是否在范围内
+        """
+        if isinstance(start, DateTime):
+            start = start.to_datetime()
+        if isinstance(end, DateTime):
+            end = end.to_datetime()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        return start <= dt <= end
+
+    @staticmethod
+    def year_and_quarter(dt: Union[DateTime, datetime, date]) -> str:
+        """返回年份和季度，如 "20241" 表示 2024 年第 1 季度。
+
+        :param dt: 日期
+        :return: 年份+季度字符串
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        q = (dt.month - 1) // 3 + 1
+        return f"{dt.year}{q}"
+
+    # ── StopWatch ─────────────────────────────────────────────
+
+    @staticmethod
+    def create_stop_watch(name: str = "") -> "StopWatch":  # noqa: F821,UP037
+        """创建秒表计时器。
+
+        :param name: 秒表名称
+        :return: StopWatch 实例
+        """
+        from hutool.core.text import StopWatch
+
+        return StopWatch(name)
+
+    # ── 纳秒转换 ──────────────────────────────────────────────
+
+    @staticmethod
+    def nanos_to_millis(nanos: int) -> float:
+        """纳秒转毫秒。
+
+        :param nanos: 纳秒
+        :return: 毫秒
+        """
+        return nanos / 1_000_000
+
+    @staticmethod
+    def nanos_to_seconds(nanos: int) -> float:
+        """纳秒转秒。
+
+        :param nanos: 纳秒
+        :return: 秒
+        """
+        return nanos / 1_000_000_000
+
+    # ── 格式化间隔 ────────────────────────────────────────────
+
+    @staticmethod
+    def format_between_ms(between_ms: int, level: str = "millisecond") -> str:
+        """格式化时间间隔（毫秒）。
+
+        :param between_ms: 毫秒间隔
+        :param level: 精度级别，"day", "hour", "minute", "second", "millisecond"
+        :return: 格式化后的间隔字符串
+        """
+        if between_ms < 0:
+            between_ms = -between_ms
+        days = between_ms // 86400000
+        hours = (between_ms % 86400000) // 3600000
+        minutes = (between_ms % 3600000) // 60000
+        seconds = (between_ms % 60000) // 1000
+        millis = between_ms % 1000
+
+        level_order = ["day", "hour", "minute", "second", "millisecond"]
+        try:
+            level_idx = level_order.index(level)
+        except ValueError:
+            raise ValueError(f"不支持的精度级别: {level}")
+
+        time_parts = [
+            (days, "天"),
+            (hours, "小时"),
+            (minutes, "分"),
+            (seconds, "秒"),
+            (millis, "毫秒"),
+        ]
+        parts = []
+        for i, (val, unit) in enumerate(time_parts):
+            if i > level_idx:
+                break
+            if val > 0 or i == level_idx:
+                parts.append(f"{val}{unit}")
+                if i == level_idx:
+                    break
+        return "".join(parts) if parts else "0毫秒"
+
+    # ── 格式化/解析扩展 ──────────────────────────────────────
+
+    @staticmethod
+    def format_local_datetime(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> str:
+        """格式化为本地日期时间字符串 "YYYY-MM-DD HH:mm:ss"。
+
+        :param dt: 日期时间，默认当前时间
+        :return: 格式化字符串
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def parse_local_datetime(s: str) -> datetime:
+        """解析本地日期时间字符串 "YYYY-MM-DD HH:mm:ss"。
+
+        :param s: 日期时间字符串
+        :return: datetime 对象
+        """
+        return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def parse_utc(s: str) -> datetime:
+        """解析 UTC 日期时间字符串。
+
+        :param s: UTC 日期时间字符串，如 "2024-01-15T10:30:00Z"
+        :return: datetime 对象
+        """
+        return pendulum.parse(s, tz="UTC").naive()
+
+    @staticmethod
+    def parse_cst(s: str) -> datetime:
+        """解析 CST（中国标准时间 UTC+8）日期时间字符串。
+
+        :param s: CST 日期时间字符串
+        :return: datetime 对象（已转换为本地时间）
+        """
+        return pendulum.parse(s, tz="Asia/Shanghai").naive()
+
+    @staticmethod
+    def parse_rfc2822(s: str) -> datetime:
+        """解析 RFC 2822 日期字符串，如 'Mon, 15 Jan 2024 10:30:00 +0800'。
+
+        :param s: RFC 2822 日期字符串
+        :return: datetime 对象
+        """
+        from email.utils import parsedate_to_datetime
+
+        return parsedate_to_datetime(s).replace(tzinfo=None)
+
+    # ── 舍入/天花板 ──────────────────────────────────────────
+
+    @staticmethod
+    def round(dt: Union[DateTime, datetime], field: str = "day") -> datetime:
+        """四舍五入日期时间到指定字段。
+
+        超过字段中间值时向上舍入，否则截断。
+        例如 round(dt, "hour") 在分钟 >= 30 时进位。
+
+        :param dt: 日期时间
+        :param field: 舍入字段，支持 "year", "month", "day", "hour", "minute"
+        :return: 舍入后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        truncated = DateUtil.truncate(dt, field)
+        if field == "year":
+            mid = truncated.replace(month=7, day=1)
+        elif field == "month":
+            import calendar
+
+            _, last_day = calendar.monthrange(dt.year, dt.month)
+            mid = truncated.replace(day=last_day // 2 + 1)
+        elif field == "day":
+            mid = truncated.replace(hour=12)
+        elif field == "hour":
+            mid = truncated.replace(minute=30)
+        elif field == "minute":
+            mid = truncated.replace(second=30)
+        else:
+            raise ValueError(f"不支持的舍入字段: {field}")
+        if dt >= mid:
+            import calendar
+
+            if field == "year":
+                return truncated.replace(year=truncated.year + 1)
+            elif field == "month":
+                if truncated.month == 12:
+                    return truncated.replace(year=truncated.year + 1, month=1)
+                return truncated.replace(month=truncated.month + 1)
+            elif field == "day":
+                return truncated + timedelta(days=1)
+            elif field == "hour":
+                return truncated + timedelta(hours=1)
+            elif field == "minute":
+                return truncated + timedelta(minutes=1)
+        return truncated
+
+    @staticmethod
+    def ceiling(dt: Union[DateTime, datetime], field: str = "day") -> datetime:
+        """天花板舍入（向上取整）日期时间到指定字段。
+
+        如果已经是截断值则不变，否则向上进位。
+
+        :param dt: 日期时间
+        :param field: 字段，支持 "year", "month", "day", "hour", "minute", "second"
+        :return: 天花板后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        truncated = DateUtil.truncate(dt, field)
+        if truncated == dt:
+            return truncated
+        if field == "year":
+            return truncated.replace(year=truncated.year + 1)
+        elif field == "month":
+            if truncated.month == 12:
+                return truncated.replace(year=truncated.year + 1, month=1)
+            return truncated.replace(month=truncated.month + 1)
+        elif field == "day":
+            return truncated + timedelta(days=1)
+        elif field == "hour":
+            return truncated + timedelta(hours=1)
+        elif field == "minute":
+            return truncated + timedelta(minutes=1)
+        elif field == "second":
+            return truncated + timedelta(seconds=1)
+        raise ValueError(f"不支持的字段: {field}")
+
+    # ── 时间开始/结束（秒/时/分） ────────────────────────────
+
+    @staticmethod
+    def begin_of_second(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取秒的开始（毫秒归零）。
+
+        :param dt: 日期时间
+        :return: 秒开始的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(microsecond=0)
+
+    @staticmethod
+    def end_of_second(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取秒的结束（毫秒设为最大值）。
+
+        :param dt: 日期时间
+        :return: 秒结束的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(microsecond=999999)
+
+    @staticmethod
+    def begin_of_hour(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取小时的开始。
+
+        :param dt: 日期时间
+        :return: 小时开始的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(minute=0, second=0, microsecond=0)
+
+    @staticmethod
+    def end_of_hour(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取小时的结束。
+
+        :param dt: 日期时间
+        :return: 小时结束的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(minute=59, second=59, microsecond=999999)
+
+    @staticmethod
+    def begin_of_minute(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取分钟的开始。
+
+        :param dt: 日期时间
+        :return: 分钟开始的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(second=0, microsecond=0)
+
+    @staticmethod
+    def end_of_minute(
+        dt: Union[DateTime, datetime, PendulumDateTime, None] = None,
+    ) -> datetime:
+        """获取分钟的结束。
+
+        :param dt: 日期时间
+        :return: 分钟结束的 datetime
+        """
+        if dt is None:
+            dt = pendulum.now()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, PendulumDateTime):
+            dt = dt.naive()
+        return dt.replace(second=59, microsecond=999999)
+
+    # ── 通用偏移 ─────────────────────────────────────────────
+
+    @staticmethod
+    def offset(dt: Union[DateTime, datetime], field: str, amount: int) -> datetime:
+        """通用日期偏移。
+
+        :param dt: 日期时间
+        :param field: 偏移字段，支持 "year", "month", "week", "day", "hour", "minute", "second"
+        :param amount: 偏移量（正数向未来，负数向过去）
+        :return: 偏移后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if field == "year":
+            try:
+                return dt.replace(year=dt.year + amount)
+            except ValueError:
+                import calendar
+
+                _, last_day = calendar.monthrange(dt.year + amount, dt.month)
+                return dt.replace(year=dt.year + amount, day=min(dt.day, last_day))
+        elif field == "month":
+            month = dt.month - 1 + amount
+            year = dt.year + month // 12
+            month = month % 12 + 1
+            import calendar
+
+            _, last_day = calendar.monthrange(year, month)
+            return dt.replace(year=year, month=month, day=min(dt.day, last_day))
+        elif field == "week":
+            return dt + timedelta(weeks=amount)
+        elif field == "day":
+            return dt + timedelta(days=amount)
+        elif field == "hour":
+            return dt + timedelta(hours=amount)
+        elif field == "minute":
+            return dt + timedelta(minutes=amount)
+        elif field == "second":
+            return dt + timedelta(seconds=amount)
+        raise ValueError(f"不支持的偏移字段: {field}")
+
+    # ── 日期范围 ─────────────────────────────────────────────
+
+    @staticmethod
+    def range(
+        start: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+        unit: str = "day",
+    ) -> List[datetime]:
+        """生成日期范围列表。
+
+        :param start: 起始日期
+        :param end: 结束日期（不含）
+        :param unit: 步进单位，"day", "week", "month"
+        :return: 日期列表
+        """
+        if isinstance(start, DateTime):
+            start = start.to_datetime()
+        if isinstance(end, DateTime):
+            end = end.to_datetime()
+        if isinstance(start, date) and not isinstance(start, datetime):
+            start = datetime(start.year, start.month, start.day)
+        if isinstance(end, date) and not isinstance(end, datetime):
+            end = datetime(end.year, end.month, end.day)
+        result = []
+        current = start
+        while current < end:
+            result.append(current)
+            if unit == "day":
+                current += timedelta(days=1)
+            elif unit == "week":
+                current += timedelta(weeks=1)
+            elif unit == "month":
+                month = current.month - 1 + 1
+                year = current.year + month // 12
+                month = month % 12 + 1
+                import calendar
+
+                _, last_day = calendar.monthrange(year, month)
+                current = current.replace(year=year, month=month, day=min(current.day, last_day))
+            else:
+                raise ValueError(f"不支持的步进单位: {unit}")
+        return result
+
+    @staticmethod
+    def range_to_list(
+        start: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+        unit: str = "day",
+    ) -> List[datetime]:
+        """生成日期范围列表（含结束日期）。
+
+        :param start: 起始日期
+        :param end: 结束日期（含）
+        :param unit: 步进单位，"day", "week", "month"
+        :return: 日期列表
+        """
+        if isinstance(end, DateTime):
+            end = end.to_datetime()
+        if isinstance(end, date) and not isinstance(end, datetime):
+            end = datetime(end.year, end.month, end.day)
+        result = DateUtil.range(start, end, unit)
+        if result and result[-1] != end:
+            result.append(end)
+        return result

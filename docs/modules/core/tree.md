@@ -64,3 +64,19 @@ tree_map = TreeUtil.to_map(tree)
 # 根据 ID 查找节点
 node = TreeUtil.get_node_id(tree, 4)
 ```
+
+### 其他
+
+```python
+# 构建单根树
+root = TreeUtil.build_single(data, root_id=0)
+
+# 获取节点完整路径名称
+path = TreeUtil.get_parents_name(tree, 4, separator="/")  # "根/父/子"
+
+# 获取祖先 ID 列表
+ids = TreeUtil.get_parents_id(tree, 4)  # [1, 2, 4]
+
+# 创建空节点
+node = TreeUtil.create_empty_node(99, "new_node", parent_id=1)
+```

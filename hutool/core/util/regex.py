@@ -1,7 +1,7 @@
 """正则表达式工具类，对应 Java cn.hutool.core.util.ReUtil"""
 
 import re
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional
 
 
 class ReUtil:
@@ -353,3 +353,24 @@ class ReUtil:
                 pass
             remaining = remaining[match.end() :]
         return results
+
+    @staticmethod
+    def get_all_group_names(pattern: str) -> Dict[str, int]:
+        """获取正则表达式中所有命名捕获组。
+
+        :param pattern: 正则表达式
+        :return: 命名组名到组索引的映射字典
+        """
+        compiled = re.compile(pattern)
+        return compiled.groupindex
+
+    @staticmethod
+    def replace_by_func(content: str, pattern: str, func: Callable[[re.Match], str]) -> str:
+        """正则替换，使用回调函数处理每个匹配。
+
+        :param content: 被替换的内容
+        :param pattern: 正则表达式
+        :param func: 回调函数，接受 re.Match 对象，返回替换字符串
+        :return: 替换后的字符串
+        """
+        return re.sub(pattern, func, content)

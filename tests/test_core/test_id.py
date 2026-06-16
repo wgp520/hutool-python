@@ -84,3 +84,25 @@ class TestIdUtil:
         valid_chars = set("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
         result = IdUtil.guid128()
         assert all(c in valid_chars for c in result)
+
+    def test_create_snowflake(self):
+        worker = IdUtil.create_snowflake(1, 1)
+        assert worker is not None
+        id1 = worker.next_id()
+        assert isinstance(id1, int)
+        assert id1 > 0
+
+    def test_get_snowflake(self):
+        w1 = IdUtil.get_snowflake(1, 1)
+        w2 = IdUtil.get_snowflake(1, 1)
+        assert w1 is w2  # 单例
+
+    def test_get_snowflake_next_id(self):
+        id1 = IdUtil.get_snowflake_next_id(1, 1)
+        assert isinstance(id1, int)
+        assert id1 > 0
+
+    def test_get_snowflake_next_id_str(self):
+        id_str = IdUtil.get_snowflake_next_id_str(1, 1)
+        assert isinstance(id_str, str)
+        assert len(id_str) > 0

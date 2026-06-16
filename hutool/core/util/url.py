@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 from urllib.parse import parse_qs, parse_qsl, quote, unquote, urlencode, urlparse
 
 
@@ -8,9 +8,11 @@ class URLUtil:
 
     @staticmethod
     def normalize(url_str: str) -> str:
-        """标准化URL，补齐协议头
+        """标准化URL
 
-        如果URL缺少协议头（http:// 或 https://），自动补充 http://。
+        - 补齐协议头（缺少时添加 http://）
+        - 将反斜杠替换为正斜杠
+        - 合并路径中的连续斜杠（保留协议后的双斜杠）
 
         :param url_str: 原始URL字符串
         :return: 标准化后的URL字符串
@@ -18,8 +20,19 @@ class URLUtil:
         if not url_str:
             return url_str
         url_str = url_str.strip()
+        # 反斜杠替换为正斜杠
+        url_str = url_str.replace("\\", "/")
         if not re.match(r"^[a-zA-Z]+://", url_str):
             url_str = "http://" + url_str
+        # 合并路径中的连续斜杠（保留协议后的 //）
+        # 先拆分协议部分
+        proto_match = re.match(r"^(https?://)(.*)", url_str)
+        if proto_match:
+            protocol = proto_match.group(1)
+            rest = proto_match.group(2)
+            # 合并连续斜杠（但保留开头的单斜杠）
+            rest = re.sub(r"/+", "/", rest)
+            url_str = protocol + rest
         return url_str
 
     @staticmethod
@@ -280,3 +293,43 @@ class URLUtil:
             return URLUtil.decode_param_map(parsed.query)
         except Exception:
             return {}
+
+    @staticmethod
+    def get_data_uri_base64(mime_type: str, data: str) -> str:
+        """构建 base64 编码的 Data URI。
+
+        :param mime_type: MIME 类型，如 ``"image/png"``
+        :param data: base64 编码后的数据
+        :return: Data URI 字符串，如 ``data:image/png;base64,iVBOR...``
+        """
+        return URLUtil.get_data_uri(mime_type, "base64", data)
+
+    @staticmethod
+    def get_data_uri(
+        mime_type: Optional[str] = None,
+        encoding: Optional[str] = None,
+        data: str = "",
+        charset: Optional[str] = None,
+    ) -> str:
+        """构建 Data URI。
+
+        Data URI 格式：``data:[<mime>][;charset=<charset>][;<encoding>],<data>``
+
+        :param mime_type: MIME 类型，如 ``"image/png"``，可为 None
+        :param encoding: 编码方式，如 ``"base64"``，可为 None
+        :param data: 数据内容
+        :param charset: 字符集，如 ``"utf-8"``，可为 None
+        :return: Data URI 字符串
+        """
+        parts = ["data:"]
+        if mime_type:
+            parts.append(mime_type)
+        if charset:
+            parts.append(";charset=")
+            parts.append(charset)
+        if encoding:
+            parts.append(";")
+            parts.append(encoding)
+        parts.append(",")
+        parts.append(data)
+        return "".join(parts)

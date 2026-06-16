@@ -23,7 +23,7 @@ RandomUtil.random_bytes(16)            # 16 字节随机数据
 ```python
 RandomUtil.random_string(10)           # "aB3dE5fG7h"（10位随机字符串）
 RandomUtil.random_string_upper(8)      # "ABCDEFGH"（大写）
-RandomUtil.random_string_lower(8)      # "abcdefgh"（小写）
+RandomUtil.random_string_lower(8)      # "ab3cd5ef"（小写+数字）
 RandomUtil.random_numbers(6)           # "384756"（纯数字）
 ```
 
@@ -35,12 +35,6 @@ RandomUtil.random_ele(items)           # 随机选一个
 RandomUtil.random_eles(items, 2)       # 随机选两个
 ```
 
-### 其他
-
-```python
-RandomUtil.random_color()              # "#a1b2c3"（随机十六进制颜色）
-```
-
 ### 加权随机
 
 ```python
@@ -49,9 +43,12 @@ RandomUtil.weighted_choice(["a", "b", "c"], [1, 2, 3])
 # "c" 出现概率最高（权重 3/6）
 ```
 
-### 新增方法
+### 其他
 
 ```python
+# 随机颜色
+RandomUtil.random_color()              # "#a1b2c3"（随机十六进制颜色）
+
 # 随机中文字符
 RandomUtil.random_chinese(5)  # 5个随机汉字
 
@@ -72,4 +69,38 @@ RandomUtil.random_string_lower_without_str(10, "xz") # 小写，不含 x 和 z
 # 按条件随机选取
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 RandomUtil.random_ele_with_condition(data, lambda x: x > 5, 3)  # 3个>5的随机数
+
+# 随机生成器工厂
+rng = RandomUtil.create_secure_random()           # 创建随机数生成器
+rng = RandomUtil.create_secure_random(b"seed")     # 带种子（可复现）
+rng = RandomUtil.get_secure_random()               # 默认随机数生成器
+rng = RandomUtil.get_secure_random_strong()        # 强随机数生成器
+
+# 带边界控制的随机整数
+RandomUtil.random_int_with_bound(1, 10, include_min=True, include_max=True)  # [1,10]
+RandomUtil.random_int_with_bound(1, 10, include_min=False, include_max=False)  # (1,10)
+
+# 随机长整数
+RandomUtil.random_long()           # 0~2^63 的随机长整数
+RandomUtil.random_long(10, 100)    # [10, 100)
+
+# 随机排列
+RandomUtil.random_ints_permutation(5)  # [0, 5) 的随机排列，如 [3, 0, 4, 1, 2]
+
+# 随机字符
+RandomUtil.random_number_char()    # 随机数字字符 '0'-'9'
+RandomUtil.random_char_no_arg()    # 大小写字母+数字中随机取一个
+
+# 不重复随机元素
+RandomUtil.random_ele_list(items, 3)   # 不重复列表
+RandomUtil.random_ele_set(items, 3)    # 不重复集合
+
+# 从前 N 个元素中随机取
+RandomUtil.random_ele_from_first_n(items, 3)  # 从前3个中随机取1个
+
+# weight_random 别名
+RandomUtil.weight_random([(1, "a"), (9, "b")])  # "b" 概率更高
+
+# 允许重复选取
+RandomUtil.random_eles(items, 5, allow_duplicate=True)  # 可重复
 ```

@@ -1,3 +1,5 @@
+import os
+
 from hutool import CharsetUtil
 
 
@@ -34,3 +36,36 @@ class TestCharsetUtil:
         assert CharsetUtil.clean_invalid("a\tb\nc\rd") == "a\tb\nc\rd"
         assert CharsetUtil.clean_invalid("") == ""
         assert CharsetUtil.clean_invalid(None) == ""
+
+    def test_parse(self):
+        assert CharsetUtil.parse(None) == "utf-8"
+        assert CharsetUtil.parse("") == "utf-8"
+        assert CharsetUtil.parse("GBK") == "gbk"
+
+    def test_system_charset_name(self):
+        result = CharsetUtil.system_charset_name()
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_default_charset_name(self):
+        result = CharsetUtil.default_charset_name()
+        assert isinstance(result, str)
+
+    def test_detect_charset(self):
+        # UTF-8 BOM
+        data = b"\xef\xbb\xbfhello"
+        assert CharsetUtil.detect_charset(data) == "utf-8-sig"
+        # 普通 UTF-8
+        assert CharsetUtil.detect_charset(b"hello") == "utf-8"
+
+    def test_convert_file(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "src.txt")
+            dest = os.path.join(tmpdir, "dest.txt")
+            with open(src, "wb") as f:
+                f.write("你好".encode())
+            CharsetUtil.convert_file(src, dest, "utf-8", "utf-8")
+            with open(dest, "rb") as f:
+                assert f.read() == "你好".encode()

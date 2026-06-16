@@ -679,6 +679,378 @@ class CollUtil:
         set2 = set(coll2)
         return list(set1.symmetric_difference(set2))
 
+    # ---- 集合运算（增强） ----
+
+    @staticmethod
+    def union(*colls: Iterable) -> list:
+        """合并多个集合（不去重）。
+
+        :param colls: 多个可迭代对象
+        :return: 合并后的列表
+        """
+        result = []
+        for c in colls:
+            if c is not None:
+                result.extend(c)
+        return result
+
+    @staticmethod
+    def union_distinct(*colls: Iterable) -> list:
+        """合并多个集合并去重。
+
+        :param colls: 多个可迭代对象
+        :return: 去重后的列表（保持首次出现顺序）
+        """
+        seen = set()
+        result = []
+        for c in colls:
+            if c is not None:
+                for item in c:
+                    if item not in seen:
+                        seen.add(item)
+                        result.append(item)
+        return result
+
+    @staticmethod
+    def intersection_distinct(coll1: Iterable, coll2: Iterable) -> list:
+        """求交集（去重）。
+
+        :param coll1: 集合1
+        :param coll2: 集合2
+        :return: 交集列表
+        """
+        if coll1 is None or coll2 is None:
+            return []
+        set2 = set(coll2)
+        seen = set()
+        result = []
+        for item in coll1:
+            if item in set2 and item not in seen:
+                seen.add(item)
+                result.append(item)
+        return result
+
+    @staticmethod
+    def subtract(coll1: Iterable, coll2: Iterable) -> list:
+        """求差集（coll1 有但 coll2 没有，不去重）。
+
+        :param coll1: 集合1
+        :param coll2: 集合2
+        :return: 差集列表
+        """
+        if coll1 is None:
+            return []
+        if coll2 is None:
+            return list(coll1)
+        set2 = set(coll2)
+        return [item for item in coll1 if item not in set2]
+
+    # ---- 安全操作 ----
+
+    @staticmethod
+    def safe_contains(coll, element: Any) -> bool:
+        """安全地判断集合是否包含元素（None 安全）。
+
+        :param coll: 集合（可为 None）
+        :param element: 要查找的元素
+        :return: 是否包含
+        """
+        if coll is None:
+            return False
+        return element in coll
+
+    @staticmethod
+    def contains_by_pred(coll: Iterable, predicate: Callable[[Any], bool]) -> bool:
+        """判断集合中是否有满足条件的元素。
+
+        :param coll: 可迭代对象
+        :param predicate: 条件函数
+        :return: 是否有满足条件的元素
+        """
+        if coll is None:
+            return False
+        return any(predicate(item) for item in coll)
+
+    # ---- 统计/映射 ----
+
+    @staticmethod
+    def count_map(coll: Iterable, key_func: Optional[Callable[[Any], Any]] = None) -> dict:
+        """统计集合中各元素出现次数。
+
+        :param coll: 可迭代对象
+        :param key_func: 可选的键函数，用于分组统计
+        :return: {元素: 出现次数}
+        """
+        result = {}
+        for item in coll:
+            key = key_func(item) if key_func else item
+            result[key] = result.get(key, 0) + 1
+        return result
+
+    @staticmethod
+    def field_value_map(coll: Iterable, key_field: str, value_field: str) -> dict:
+        """将集合转为 {key_field值: value_field值} 的映射。
+
+        :param coll: 可迭代对象（元素为 dict 或对象）
+        :param key_field: 作为键的字段名
+        :param value_field: 作为值的字段名
+        :return: 字典映射
+        """
+        result = {}
+        for item in coll:
+            if isinstance(item, dict):
+                k = item.get(key_field)
+                v = item.get(value_field)
+            else:
+                k = getattr(item, key_field, None)
+                v = getattr(item, value_field, None)
+            result[k] = v
+        return result
+
+    @staticmethod
+    def to_map_list(coll: Iterable, key_func: Callable) -> dict:
+        """按 key_func 分组，值为列表。
+
+        :param coll: 可迭代对象
+        :param key_func: 键函数
+        :return: {key: [values]}
+        """
+        result = {}
+        for item in coll:
+            key = key_func(item)
+            result.setdefault(key, []).append(item)
+        return result
+
+    # ---- 分组/排序 ----
+
+    @staticmethod
+    def group(coll: Iterable, key_func: Callable) -> dict:
+        """按条件分组。
+
+        :param coll: 可迭代对象
+        :param key_func: 分组键函数
+        :return: {key: [items]}
+        """
+        return CollUtil.to_map_list(coll, key_func)
+
+    @staticmethod
+    def group_by_field(coll: Iterable, field: str) -> dict:
+        """按字段分组。
+
+        :param coll: 可迭代对象（元素为 dict 或对象）
+        :param field: 分组字段名
+        :return: {field_value: [items]}
+        """
+
+        def _key(item):
+            if isinstance(item, dict):
+                return item.get(field)
+            return getattr(item, field, None)
+
+        return CollUtil.group(coll, _key)
+
+    @staticmethod
+    def sort_page_all(coll: Iterable, key_func: Optional[Callable] = None, reverse: bool = False) -> list:
+        """排序后返回全部。
+
+        :param coll: 可迭代对象
+        :param key_func: 排序键函数
+        :param reverse: 是否降序
+        :return: 排序后的列表
+        """
+        lst = list(coll) if coll is not None else []
+        return sorted(lst, key=key_func, reverse=reverse) if key_func else sorted(lst, reverse=reverse)
+
+    # ---- 工具方法 ----
+
+    @staticmethod
+    def pop_part(lst: list, count: int) -> list:
+        """从列表头部弹出指定数量的元素。
+
+        :param lst: 列表（会被修改）
+        :param count: 弹出数量
+        :return: 弹出的元素列表
+        """
+        if lst is None or count <= 0:
+            return []
+        result = []
+        for _ in range(min(count, len(lst))):
+            result.append(lst.pop(0))
+        return result
+
+    @staticmethod
+    def split_list(lst: list, size: int) -> List[list]:
+        """将列表按指定大小分割为多个子列表。
+
+        :param lst: 列表
+        :param size: 每个子列表的最大大小
+        :return: 分割后的子列表
+        """
+        if lst is None:
+            return []
+        if size <= 0:
+            raise ValueError("分割大小必须大于0")
+        return [lst[i : i + size] for i in range(0, len(lst), size)]
+
+    @staticmethod
+    def edit(coll: Iterable, func: Callable[[Any], Any]) -> list:
+        """对集合中每个元素应用函数并返回新列表。
+
+        :param coll: 可迭代对象
+        :param func: 转换函数
+        :return: 转换后的新列表
+        """
+        if coll is None:
+            return []
+        return [func(item) for item in coll]
+
+    @staticmethod
+    def filter_new(coll: Iterable, predicate: Callable[[Any], bool]) -> list:
+        """过滤并返回新列表（filter 的列表版本）。
+
+        :param coll: 可迭代对象
+        :param predicate: 过滤条件
+        :return: 过滤后的新列表
+        """
+        if coll is None:
+            return []
+        return [item for item in coll if predicate(item)]
+
+    @staticmethod
+    def extract(coll: Iterable, func: Callable[[Any], Any]) -> list:
+        """提取集合中每个元素的某个属性或转换结果。
+
+        :param coll: 可迭代对象
+        :param func: 提取函数
+        :return: 提取结果列表
+        """
+        return CollUtil.edit(coll, func)
+
+    @staticmethod
+    def get_field_values(coll: Iterable, field: str) -> list:
+        """获取集合中每个元素的某个字段值。
+
+        :param coll: 可迭代对象（元素为 dict 或对象）
+        :param field: 字段名
+        :return: 字段值列表
+        """
+
+        def _get(item):
+            if isinstance(item, dict):
+                return item.get(field)
+            return getattr(item, field, None)
+
+        return CollUtil.edit(coll, _get)
+
+    @staticmethod
+    def index_of(coll: Sequence, element: Any) -> int:
+        """查找元素在集合中的索引。
+
+        :param coll: 序列
+        :param element: 要查找的元素
+        :return: 索引，不存在返回 -1
+        """
+        if coll is None:
+            return -1
+        try:
+            return coll.index(element)
+        except ValueError:
+            return -1
+
+    @staticmethod
+    def index_of_all(coll: Sequence, element: Any) -> List[int]:
+        """查找元素在集合中的所有索引。
+
+        :param coll: 序列
+        :param element: 要查找的元素
+        :return: 索引列表
+        """
+        if coll is None:
+            return []
+        return [i for i, x in enumerate(coll) if x == element]
+
+    @staticmethod
+    def add_if_absent(lst: list, element: Any) -> bool:
+        """如果元素不在列表中则添加。
+
+        :param lst: 列表（会被修改）
+        :param element: 要添加的元素
+        :return: 是否添加了新元素
+        """
+        if element not in lst:
+            lst.append(element)
+            return True
+        return False
+
+    @staticmethod
+    def get(coll: Sequence, index: int) -> Any:
+        """安全地获取集合中指定索引的元素。
+
+        :param coll: 序列
+        :param index: 索引
+        :return: 元素，越界返回 None
+        """
+        if coll is None or index < 0 or index >= len(coll):
+            return None
+        return coll[index]
+
+    @staticmethod
+    def get_any(coll: Iterable) -> Any:
+        """获取集合中任意一个元素。
+
+        :param coll: 可迭代对象
+        :return: 任意元素，空集合返回 None
+        """
+        if coll is None:
+            return None
+        try:
+            return next(iter(coll))
+        except StopIteration:
+            return None
+
+    @staticmethod
+    def values_of_keys(coll: Iterable, keys: Iterable) -> list:
+        """获取字典集合中指定键的值。
+
+        :param coll: 字典列表
+        :param keys: 键列表
+        :return: 值列表
+        """
+        result = []
+        for item in coll:
+            if isinstance(item, dict):
+                for key in keys:
+                    if key in item:
+                        result.append(item[key])
+        return result
+
+    @staticmethod
+    def size(coll) -> int:
+        """获取集合大小（None 安全）。
+
+        :param coll: 集合（可为 None）
+        :return: 大小，None 返回 0
+        """
+        if coll is None:
+            return 0
+        return len(coll)
+
+    @staticmethod
+    def is_equal_list(list1: list, list2: list) -> bool:
+        """判断两个列表是否相等（逐元素比较）。
+
+        :param list1: 列表1
+        :param list2: 列表2
+        :return: 是否相等
+        """
+        if list1 is None and list2 is None:
+            return True
+        if list1 is None or list2 is None:
+            return False
+        if len(list1) != len(list2):
+            return False
+        return all(a == b for a, b in zip(list1, list2))
+
 
 class ListUtil:
     """列表工具类"""
@@ -800,3 +1172,128 @@ class ListUtil:
             return getattr(item, prop_name, None)
 
         return sorted(lst, key=_key, reverse=reverse)
+
+    @staticmethod
+    def of(*elements: T) -> List[T]:
+        """从可变参数创建列表。
+
+        :param elements: 元素
+        :return: 新列表
+        """
+        return list(elements)
+
+    @staticmethod
+    def empty() -> list:
+        """返回空列表。
+
+        :return: 空列表
+        """
+        return []
+
+    @staticmethod
+    def set_or_padding(lst: list, index: int, element: Any) -> list:
+        """设置元素到指定索引，越界时自动填充 None。
+
+        :param lst: 列表（会被修改）
+        :param index: 索引
+        :param element: 元素
+        :return: 修改后的列表
+        """
+        if lst is None:
+            lst = []
+        while len(lst) <= index:
+            lst.append(None)
+        lst[index] = element
+        return lst
+
+    @staticmethod
+    def last_index_of(lst: Sequence, element: Any) -> int:
+        """查找元素最后一次出现的索引。
+
+        :param lst: 序列
+        :param element: 要查找的元素
+        :return: 索引，不存在返回 -1
+        """
+        if lst is None:
+            return -1
+        for i in range(len(lst) - 1, -1, -1):
+            if lst[i] == element:
+                return i
+        return -1
+
+    @staticmethod
+    def index_of_all(lst: Sequence, element: Any) -> List[int]:
+        """查找元素的所有索引。
+
+        :param lst: 序列
+        :param element: 要查找的元素
+        :return: 索引列表
+        """
+        return CollUtil.index_of_all(lst, element)
+
+    @staticmethod
+    def swap(lst: list, index1: int, index2: int) -> list:
+        """交换列表中两个位置的元素。
+
+        :param lst: 列表（会被修改）
+        :param index1: 索引1
+        :param index2: 索引2
+        :return: 修改后的列表
+        """
+        if lst is None or len(lst) == 0:
+            return lst
+        lst[index1], lst[index2] = lst[index2], lst[index1]
+        return lst
+
+    @staticmethod
+    def move(lst: list, src_index: int, dest_index: int) -> list:
+        """移动列表中的元素到新位置。
+
+        :param lst: 列表（会被修改）
+        :param src_index: 源索引
+        :param dest_index: 目标索引
+        :return: 修改后的列表
+        """
+        if lst is None or src_index == dest_index:
+            return lst
+        element = lst.pop(src_index)
+        lst.insert(dest_index, element)
+        return lst
+
+    @staticmethod
+    def zip_(lst1: list, lst2: list) -> List[tuple]:
+        """将两个列表压缩为元组列表。
+
+        :param lst1: 列表1
+        :param lst2: 列表2
+        :return: [(a1, b1), (a2, b2), ...]
+        """
+        return list(zip(lst1, lst2))
+
+    @staticmethod
+    def split(lst: list, size: int) -> List[list]:
+        """将列表按指定大小分割。
+
+        :param lst: 列表
+        :param size: 每份大小
+        :return: 分割后的子列表
+        """
+        return CollUtil.split_list(lst, size)
+
+    @staticmethod
+    def split_avg(lst: list, limit: int) -> List[list]:
+        """将列表平均分割为指定份数。
+
+        :param lst: 列表
+        :param limit: 份数
+        :return: 平均分割后的子列表
+        """
+        if lst is None:
+            return []
+        if limit <= 0:
+            raise ValueError("份数必须大于0")
+        n = len(lst)
+        if n == 0:
+            return [[] for _ in range(limit)]
+        size = (n + limit - 1) // limit  # 向上取整
+        return [lst[i : i + size] for i in range(0, n, size)][:limit]

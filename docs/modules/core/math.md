@@ -15,6 +15,16 @@ MathUtil.add(0.1, 0.2)  # Decimal('0.3')
 # 角度与弧度转换
 MathUtil.point_to_radians((1, 1))      # 弧度值
 MathUtil.radians_to_point(3.14159)     # (x, y) 坐标
+
+# 排列数 A(n, m)
+MathUtil.arrangement_count(5, 3)   # 60
+
+# 组合数 C(n, m)
+MathUtil.combination_count(5, 3)   # 10
+
+# 元/分转换
+MathUtil.yuan_to_cent(1.23)        # 123
+MathUtil.cent_to_yuan(123)         # 1.23
 ```
 
 ## BitStatusUtil

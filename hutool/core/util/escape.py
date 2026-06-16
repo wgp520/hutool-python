@@ -119,3 +119,62 @@ class EscapeUtil:
             .replace("&quot;", '"')
             .replace("&#39;", "'")
         )
+
+    @staticmethod
+    def escape_all(content: str) -> str:
+        """转义所有非字母数字字符为 Unicode 转义序列 ``\\uXXXX``。
+
+        :param content: 待转义的字符串
+        :return: 转义后的字符串
+        """
+        if not content:
+            return content or ""
+        result = []
+        for c in content:
+            if c.isalnum():
+                result.append(c)
+            else:
+                result.append(f"\\u{ord(c):04x}")
+        return "".join(result)
+
+    @staticmethod
+    def safe_unescape(content: str) -> str:
+        """安全反转义，失败时返回原串。
+
+        尝试反转义 Unicode 转义序列（``\\uXXXX``），如果解析失败则返回原始字符串。
+
+        :param content: 待反转义的字符串
+        :return: 反转义后的字符串，失败返回原串
+        """
+        if not content:
+            return content or ""
+        try:
+            return EscapeUtil.unescape(content)
+        except Exception:
+            return content
+
+    @staticmethod
+    def unescape(content: str) -> str:
+        """反转义 Unicode 转义序列（``\\uXXXX``）。
+
+        :param content: 包含 ``\\uXXXX`` 转义序列的字符串
+        :return: 反转义后的字符串
+        :raises ValueError: 转义序列格式非法时
+        """
+        if not content:
+            return content or ""
+        result = []
+        i = 0
+        while i < len(content):
+            if content[i] == "\\" and i + 5 < len(content) and content[i + 1] == "u":
+                hex_str = content[i + 2 : i + 6]
+                try:
+                    code_point = int(hex_str, 16)
+                    result.append(chr(code_point))
+                    i += 6
+                    continue
+                except ValueError:
+                    pass
+            result.append(content[i])
+            i += 1
+        return "".join(result)

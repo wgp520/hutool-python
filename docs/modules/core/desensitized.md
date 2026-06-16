@@ -42,4 +42,13 @@ DesensitizedUtil.ipv4("192.168.1.100")  # "192.168.*.*"
 
 # IPv6
 DesensitizedUtil.ipv6("fe80::1")  # "fe80::*"
+
+# 前 N 个字符脱敏
+DesensitizedUtil.first_mask("13800138000", mask_len=4)  # "****0138000"
+
+# 护照号脱敏
+DesensitizedUtil.passport("E12345678")  # "E******8"
+
+# 统一社会信用代码脱敏
+DesensitizedUtil.credit_code("91350100M000100Y43")  # "913501***100Y43"
 ```

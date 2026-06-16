@@ -38,3 +38,25 @@ compressed = ZipUtil.zlib(b"hello world")
 # 解压
 original = ZipUtil.unzlib(compressed)
 ```
+
+### 其他
+
+```python
+# 压缩为字节流
+data = ZipUtil.zip_to_stream("/path/to/dir")
+
+# 压缩并返回条目列表
+entries = ZipUtil.zip_entries("/path/to/dir", "out.zip")
+
+# 向已有 zip 追加文件
+ZipUtil.append("out.zip", "new_file.txt")
+
+# 从字节流解压
+ZipUtil.unzip_stream(data, "/dest/dir")
+
+# 列出 zip 文件中的文件名
+names = ZipUtil.list_file_names("out.zip")
+
+# 读取 zip 中指定条目的内容
+content = ZipUtil.read("out.zip", "test.txt")
+```

@@ -292,3 +292,68 @@ class ObjectUtil:
             if ObjectUtil.is_empty(arg):
                 return False
         return True
+
+    @staticmethod
+    def clone_if_possible(obj):
+        """如果可能则克隆对象。
+
+        对 list/dict 进行深拷贝，其他对象原样返回。
+
+        :param obj: 对象
+        :return: 克隆后的对象
+        """
+        import copy
+
+        if isinstance(obj, (list, dict)):
+            return copy.deepcopy(obj)
+        return obj
+
+    @staticmethod
+    def is_valid_if_number(obj) -> bool:
+        """如果对象是数字则判断是否有效（非 NaN、非 Inf）。
+
+        :param obj: 对象
+        :return: 是否有效
+        """
+        import math
+
+        if isinstance(obj, float):
+            return not (math.isnan(obj) or math.isinf(obj))
+        return True
+
+    @staticmethod
+    def default_if_null_supplier(obj, supplier):
+        """如果对象为 None 则使用 supplier 获取默认值。
+
+        :param obj: 对象
+        :param supplier: 供应函数
+        :return: 对象或供应函数的返回值
+        """
+        return obj if obj is not None else supplier()
+
+    @staticmethod
+    def default_if_empty_supplier(obj, supplier):
+        """如果对象为空则使用 supplier 获取默认值。
+
+        :param obj: 对象
+        :param supplier: 供应函数
+        :return: 对象或供应函数的返回值
+        """
+        if obj is None:
+            return supplier()
+        if isinstance(obj, (str, list, dict, tuple, set)):
+            if len(obj) == 0:
+                return supplier()
+        return obj
+
+    @staticmethod
+    def default_if_blank_supplier(obj: Any, supplier) -> Any:
+        """如果对象为空白字符串则使用 supplier 获取默认值。
+
+        :param obj: 对象
+        :param supplier: 供应函数
+        :return: 对象或供应函数的返回值
+        """
+        if isinstance(obj, str) and not obj.strip():
+            return supplier()
+        return obj if obj is not None else supplier()

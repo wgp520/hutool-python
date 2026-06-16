@@ -251,3 +251,189 @@ class TestCollUtilSafeMinMax:
         result = sorted(CollUtil.disjunction([1, 2, 3], [2, 3, 4]))
         assert result == [1, 4]
         assert CollUtil.disjunction(None, None) == []
+
+    def test_union(self):
+        assert CollUtil.union([1, 2], [3, 4]) == [1, 2, 3, 4]
+        assert CollUtil.union(None, [1]) == [1]
+        assert CollUtil.union() == []
+
+    def test_union_distinct(self):
+        assert CollUtil.union_distinct([1, 2], [2, 3], [3, 4]) == [1, 2, 3, 4]
+        assert CollUtil.union_distinct([1, 2], None, [3]) == [1, 2, 3]
+
+    def test_intersection_distinct(self):
+        assert CollUtil.intersection_distinct([1, 2, 2, 3], [2, 2, 3, 4]) == [2, 3]
+        assert CollUtil.intersection_distinct(None, [1]) == []
+
+    def test_subtract(self):
+        assert CollUtil.subtract([1, 2, 3, 4], [2, 4]) == [1, 3]
+        assert CollUtil.subtract(None, [1]) == []
+        assert CollUtil.subtract([1, 2], None) == [1, 2]
+
+    def test_safe_contains(self):
+        assert CollUtil.safe_contains([1, 2, 3], 2) is True
+        assert CollUtil.safe_contains(None, 1) is False
+        assert CollUtil.safe_contains([1, 2], 5) is False
+
+    def test_contains_by_pred(self):
+        assert CollUtil.contains_by_pred([1, 2, 3], lambda x: x > 2) is True
+        assert CollUtil.contains_by_pred([1, 2], lambda x: x > 5) is False
+        assert CollUtil.contains_by_pred(None, lambda x: True) is False
+
+    def test_count_map(self):
+        result = CollUtil.count_map(["a", "b", "a", "c", "b", "a"])
+        assert result == {"a": 3, "b": 2, "c": 1}
+
+    def test_count_map_with_key_func(self):
+        result = CollUtil.count_map([1, 2, 3, 4, 5], lambda x: "even" if x % 2 == 0 else "odd")
+        assert result == {"odd": 3, "even": 2}
+
+    def test_field_value_map(self):
+        data = [{"name": "a", "id": 1}, {"name": "b", "id": 2}]
+        result = CollUtil.field_value_map(data, "name", "id")
+        assert result == {"a": 1, "b": 2}
+
+    def test_to_map_list(self):
+        data = [1, 2, 3, 4, 5]
+        result = CollUtil.to_map_list(data, lambda x: "even" if x % 2 == 0 else "odd")
+        assert result == {"odd": [1, 3, 5], "even": [2, 4]}
+
+    def test_group(self):
+        data = ["apple", "banana", "avocado", "blueberry"]
+        result = CollUtil.group(data, lambda x: x[0])
+        assert set(result.keys()) == {"a", "b"}
+        assert len(result["a"]) == 2
+
+    def test_group_by_field(self):
+        data = [{"type": "a", "v": 1}, {"type": "b", "v": 2}, {"type": "a", "v": 3}]
+        result = CollUtil.group_by_field(data, "type")
+        assert len(result["a"]) == 2
+
+    def test_sort_page_all(self):
+        result = CollUtil.sort_page_all([3, 1, 2])
+        assert result == [1, 2, 3]
+        result2 = CollUtil.sort_page_all([3, 1, 2], reverse=True)
+        assert result2 == [3, 2, 1]
+
+    def test_pop_part(self):
+        lst = [1, 2, 3, 4, 5]
+        popped = CollUtil.pop_part(lst, 2)
+        assert popped == [1, 2]
+        assert lst == [3, 4, 5]
+
+    def test_split_list(self):
+        result = CollUtil.split_list([1, 2, 3, 4, 5], 2)
+        assert result == [[1, 2], [3, 4], [5]]
+
+    def test_edit(self):
+        assert CollUtil.edit([1, 2, 3], lambda x: x * 2) == [2, 4, 6]
+        assert CollUtil.edit(None, lambda x: x) == []
+
+    def test_filter_new(self):
+        assert CollUtil.filter_new([1, 2, 3, 4], lambda x: x % 2 == 0) == [2, 4]
+        assert CollUtil.filter_new(None, lambda x: True) == []
+
+    def test_extract(self):
+        data = [{"name": "a"}, {"name": "b"}]
+        assert CollUtil.extract(data, lambda x: x["name"]) == ["a", "b"]
+
+    def test_get_field_values(self):
+        data = [{"name": "a", "id": 1}, {"name": "b", "id": 2}]
+        assert CollUtil.get_field_values(data, "name") == ["a", "b"]
+
+    def test_index_of(self):
+        assert CollUtil.index_of([1, 2, 3], 2) == 1
+        assert CollUtil.index_of([1, 2, 3], 5) == -1
+        assert CollUtil.index_of(None, 1) == -1
+
+    def test_index_of_all(self):
+        assert CollUtil.index_of_all([1, 2, 1, 3, 1], 1) == [0, 2, 4]
+        assert CollUtil.index_of_all([1, 2, 3], 5) == []
+
+    def test_add_if_absent(self):
+        lst = [1, 2, 3]
+        assert CollUtil.add_if_absent(lst, 2) is False
+        assert CollUtil.add_if_absent(lst, 4) is True
+        assert 4 in lst
+
+    def test_get(self):
+        assert CollUtil.get([1, 2, 3], 1) == 2
+        assert CollUtil.get([1, 2, 3], 10) is None
+        assert CollUtil.get(None, 0) is None
+        assert CollUtil.get([1, 2], -1) is None
+
+    def test_get_any(self):
+        assert CollUtil.get_any([1, 2, 3]) == 1
+        assert CollUtil.get_any(set()) is None
+        assert CollUtil.get_any(None) is None
+
+    def test_values_of_keys(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "c": 4}]
+        result = CollUtil.values_of_keys(data, ["a", "b"])
+        assert result == [1, 2, 3]
+
+    def test_size(self):
+        assert CollUtil.size([1, 2, 3]) == 3
+        assert CollUtil.size(None) == 0
+        assert CollUtil.size({}) == 0
+
+    def test_is_equal_list(self):
+        assert CollUtil.is_equal_list([1, 2], [1, 2]) is True
+        assert CollUtil.is_equal_list([1, 2], [1, 3]) is False
+        assert CollUtil.is_equal_list(None, None) is True
+        assert CollUtil.is_equal_list(None, [1]) is False
+
+    # ListUtil tests
+
+    def test_list_util_of(self):
+        from hutool.core.coll import ListUtil
+
+        assert ListUtil.of(1, 2, 3) == [1, 2, 3]
+
+    def test_list_util_empty(self):
+        from hutool.core.coll import ListUtil
+
+        assert ListUtil.empty() == []
+
+    def test_set_or_padding(self):
+        from hutool.core.coll import ListUtil
+
+        lst = [1, 2]
+        result = ListUtil.set_or_padding(lst, 4, 99)
+        assert result == [1, 2, None, None, 99]
+
+    def test_last_index_of(self):
+        from hutool.core.coll import ListUtil
+
+        assert ListUtil.last_index_of([1, 2, 1, 3], 1) == 2
+        assert ListUtil.last_index_of([1, 2, 3], 5) == -1
+
+    def test_swap(self):
+        from hutool.core.coll import ListUtil
+
+        lst = [1, 2, 3]
+        ListUtil.swap(lst, 0, 2)
+        assert lst == [3, 2, 1]
+
+    def test_move(self):
+        from hutool.core.coll import ListUtil
+
+        lst = [1, 2, 3, 4]
+        ListUtil.move(lst, 0, 2)
+        assert lst == [2, 3, 1, 4]
+
+    def test_zip(self):
+        from hutool.core.coll import ListUtil
+
+        assert ListUtil.zip_([1, 2], ["a", "b"]) == [(1, "a"), (2, "b")]
+
+    def test_split(self):
+        from hutool.core.coll import ListUtil
+
+        assert ListUtil.split([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]
+
+    def test_split_avg(self):
+        from hutool.core.coll import ListUtil
+
+        result = ListUtil.split_avg([1, 2, 3, 4, 5], 2)
+        assert len(result) == 2

@@ -68,3 +68,34 @@ class TestURLUtil:
     def test_get_params(self):
         result = URLUtil.get_params("http://example.com?a=1&b=2")
         assert result == {"a": "1", "b": "2"}
+
+    def test_normalize_backslash(self):
+        """测试反斜杠替换"""
+        result = URLUtil.normalize("http://example.com\\path\\to")
+        assert "\\" not in result
+        assert result == "http://example.com/path/to"
+
+    def test_normalize_double_slash_merge(self):
+        """测试路径中连续斜杠合并"""
+        result = URLUtil.normalize("http://example.com//path//to")
+        assert result == "http://example.com/path/to"
+
+    def test_get_data_uri_base64(self):
+        """测试构建 base64 Data URI"""
+        result = URLUtil.get_data_uri_base64("image/png", "iVBORw0KGgo=")
+        assert result == "data:image/png;base64,iVBORw0KGgo="
+
+    def test_get_data_uri(self):
+        """测试构建 Data URI"""
+        result = URLUtil.get_data_uri("text/plain", "base64", "SGVsbG8=")
+        assert result == "data:text/plain;base64,SGVsbG8="
+
+    def test_get_data_uri_with_charset(self):
+        """测试带字符集的 Data URI"""
+        result = URLUtil.get_data_uri("text/html", None, "<p>hi</p>", charset="utf-8")
+        assert result == "data:text/html;charset=utf-8,<p>hi</p>"
+
+    def test_get_data_uri_minimal(self):
+        """测试最小 Data URI"""
+        result = URLUtil.get_data_uri(data="hello")
+        assert result == "data:,hello"

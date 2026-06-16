@@ -7,7 +7,19 @@ class BooleanUtil:
     """布尔工具类，对应 Java cn.hutool.core.util.BooleanUtil"""
 
     # 用于字符串解析时判定为 True 的值（小写）
-    _TRUE_STRINGS = frozenset({"true", "yes", "1", "on"})
+    _TRUE_STRINGS = frozenset(
+        {
+            "true",
+            "yes",
+            "1",
+            "on",
+            "y",
+            "t",
+            "ok",
+            "correct",
+            "success",
+        }
+    )
 
     @staticmethod
     def is_true(bool_value: Optional[bool]) -> bool:
@@ -84,12 +96,14 @@ class BooleanUtil:
         return count % 2 == 1
 
     @staticmethod
-    def negate(bool_value: bool) -> bool:
-        """取反。
+    def negate(bool_value: Optional[bool]) -> Optional[bool]:
+        """取反，None 输入返回 None。
 
         :param bool_value: 待取反的布尔值
-        :return: 取反后的结果
+        :return: 取反后的结果，None 返回 None
         """
+        if bool_value is None:
+            return None
         return not bool_value
 
     @staticmethod
@@ -97,14 +111,20 @@ class BooleanUtil:
         bool_value: Optional[bool],
         true_str: str = "true",
         false_str: str = "false",
+        null_str: Optional[str] = None,
     ) -> str:
         """布尔转字符串。
 
-        :param bool_value: 待转换的布尔值，None 视为 False
+        :param bool_value: 待转换的布尔值
         :param true_str: True 对应的字符串，默认为 "true"
         :param false_str: False 对应的字符串，默认为 "false"
+        :param null_str: None 对应的字符串，默认为 None（此时 None 视为 False）
         :return: 对应的字符串
         """
+        if bool_value is None:
+            if null_str is not None:
+                return null_str
+            return false_str
         if bool_value is True:
             return true_str
         return false_str
@@ -226,3 +246,33 @@ class BooleanUtil:
         :return: 条件对应的值
         """
         return true_val if condition else false_val
+
+    @staticmethod
+    def and_of_wrap(*values: Optional[bool]) -> bool:
+        """
+        逻辑与运算，None 视为 False。
+
+        :param values: 一组布尔值（可为 None）
+        :return: 所有非 None 值均为 True 时返回 True
+        """
+        return all(v is True for v in values)
+
+    @staticmethod
+    def or_of_wrap(*values: Optional[bool]) -> bool:
+        """
+        逻辑或运算，None 视为 False。
+
+        :param values: 一组布尔值（可为 None）
+        :return: 任一值为 True 时返回 True
+        """
+        return any(v is True for v in values)
+
+    @staticmethod
+    def is_boolean_class(value: Any) -> bool:
+        """
+        检查值是否为布尔类型。
+
+        :param value: 待检查的值
+        :return: 是否为 bool 类型
+        """
+        return isinstance(value, bool)

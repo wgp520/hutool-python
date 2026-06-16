@@ -52,3 +52,27 @@ class TestPhoneUtil:
         assert PhoneUtil.is_mobile_simple("138001380001") is False  # 12位
         assert PhoneUtil.is_mobile_simple("") is False
         assert PhoneUtil.is_mobile_simple(None) is False
+
+    def test_is_tel(self):
+        assert PhoneUtil.is_tel("010-12345678") is True
+        assert PhoneUtil.is_tel("021-87654321") is True
+        assert PhoneUtil.is_tel("13800138000") is False
+
+    def test_is_tel_400_800(self):
+        assert PhoneUtil.is_tel_400_800("4001234567") is True
+        assert PhoneUtil.is_tel_400_800("8001234567") is True
+        assert PhoneUtil.is_tel_400_800("9001234567") is False
+        assert PhoneUtil.is_tel_400_800(None) is False
+
+    def test_sub_between(self):
+        assert PhoneUtil.sub_between("13800138000", 3, 7) == "0013"
+        assert PhoneUtil.sub_between("", 0, 3) == ""
+
+    def test_sub_tel_before(self):
+        assert PhoneUtil.sub_tel_before("010-12345678") == "010"
+        assert PhoneUtil.sub_tel_before("021-87654321") == "021"
+        assert PhoneUtil.sub_tel_before("") == ""
+
+    def test_sub_tel_after(self):
+        assert PhoneUtil.sub_tel_after("010-12345678") == "12345678"
+        assert PhoneUtil.sub_tel_after("") == ""

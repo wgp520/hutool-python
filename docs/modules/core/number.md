@@ -151,4 +151,51 @@ NumberUtil.parse_number("3.14")  # 3.14（float）
 
 # parseLong
 NumberUtil.parse_long("123456789")  # 123456789
+
+# parseDouble — 带默认值的浮点解析
+NumberUtil.parse_double("3.14")      # 3.14
+NumberUtil.parse_double("abc", 0.0)  # 0.0
+```
+
+### 进制与字节数组
+
+```python
+# 二进制字符串转整数
+NumberUtil.binary_to_long("1010")  # 10
+NumberUtil.binary_to_long("ff", 16)  # 255（十六进制）
+
+# 按指定进制解析
+NumberUtil.new_big_integer("ff", 16)  # 255
+NumberUtil.new_big_integer("77", 8)   # 63
+
+# 无符号字节数组
+NumberUtil.to_unsigned_byte_array(256)           # b'\x01\x00'
+NumberUtil.from_unsigned_byte_array(b'\x01\x00') # 256
+```
+
+### 整数运算
+
+```python
+# 整数平方根（向下取整，避免浮点精度问题）
+NumberUtil.integer_sqrt(10)  # 3
+NumberUtil.integer_sqrt(16)  # 4
+
+# 组合数 C(n, m)
+NumberUtil.process_multiple(5, 2)  # 10
+NumberUtil.process_multiple(6, 3)  # 20
+```
+
+### 空值安全
+
+```python
+# None 转 0
+NumberUtil.null_to_zero(None)  # 0
+NumberUtil.null_to_zero(42)    # 42
+```
+
+### 数字生成
+
+```python
+# 生成随机整数列表
+NumberUtil.generate(5, 1, 100)  # 5个[1,100)范围内的随机整数
 ```

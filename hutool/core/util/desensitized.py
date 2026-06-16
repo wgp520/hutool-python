@@ -192,3 +192,56 @@ class DesensitizedUtil:
         if len(plate) <= 2:
             return plate
         return plate[:2] + "*" * (len(plate) - 2)
+
+    @staticmethod
+    def first_mask(str_val: str, mask_char: str = "*", mask_len: int = 4) -> str:
+        """对字符串前 N 个字符进行脱敏。
+
+        :param str_val: 原始字符串
+        :param mask_char: 替换字符，默认 ``"*"``
+        :param mask_len: 脱敏长度，默认 4
+        :return: 脱敏后的字符串
+        """
+        if not str_val:
+            return ""
+        if len(str_val) <= mask_len:
+            return mask_char * len(str_val)
+        return mask_char * mask_len + str_val[mask_len:]
+
+    @staticmethod
+    def ipv6(ipv6: str) -> str:
+        """IPv6 地址脱敏，保留前两段，后两段替换为 ``*``。
+
+        :param ipv6: IPv6 地址
+        :return: 脱敏后的 IPv6 地址
+        """
+        if not ipv6:
+            return ""
+        parts = ipv6.split(":")
+        if len(parts) <= 2:
+            return ipv6
+        return ":".join(parts[:2]) + ":*:*"
+
+    @staticmethod
+    def passport(passport: str) -> str:
+        """护照号脱敏，保留首位和末位，中间替换为 ``*``。
+
+        :param passport: 护照号
+        :return: 脱敏后的护照号
+        """
+        if not passport or len(passport) <= 2:
+            return passport or ""
+        return passport[0] + "*" * (len(passport) - 2) + passport[-1]
+
+    @staticmethod
+    def credit_code(code: str) -> str:
+        """统一社会信用代码脱敏，保留前 6 位和后 4 位。
+
+        :param code: 统一社会信用代码
+        :return: 脱敏后的代码
+        """
+        if not code:
+            return ""
+        if len(code) <= 10:
+            return code
+        return code[:6] + "*" * (len(code) - 10) + code[-4:]

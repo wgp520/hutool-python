@@ -23,3 +23,30 @@ class TestPageUtil:
     def test_get_start(self):
         assert PageUtil.get_start(1, 10) == 0
         assert PageUtil.get_start(2, 10) == 10
+
+    def test_to_start_index(self):
+        assert PageUtil.to_start_index(1, 10) == 0
+        assert PageUtil.to_start_index(3, 10) == 20
+
+    def test_set_first_page_no(self):
+        PageUtil.set_first_page_no(1)
+        assert PageUtil.get_first_page_no() == 1
+        PageUtil.set_first_page_no(0)
+        assert PageUtil.get_first_page_no() == 0
+        # 恢复
+        PageUtil.set_first_page_no(0)
+
+    def test_get_end(self):
+        assert PageUtil.get_end(1, 10) == 10
+        assert PageUtil.get_end(3, 10) == 30
+
+    def test_trans_to_start_end(self):
+        start, end = PageUtil.trans_to_start_end(2, 10)
+        assert start == 10
+        assert end == 20
+
+    def test_to_segment(self):
+        assert PageUtil.to_segment(100, 10) == 10
+        assert PageUtil.to_segment(101, 10) == 11
+        assert PageUtil.to_segment(0, 10) == 0
+        assert PageUtil.to_segment(100, 0) == 0

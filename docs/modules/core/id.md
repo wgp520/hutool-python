@@ -40,10 +40,24 @@ IdUtil.snowflake_id()      # 1234567890123456789
 ```
 
 雪花 ID 结构：
+
 - 1 位符号位
 - 41 位时间戳（毫秒）
 - 10 位工作机器 ID
 - 12 位序列号
+
+```python
+# 创建雪花 ID 生成器
+worker = IdUtil.create_snowflake(worker_id=1, datacenter_id=1)
+id_val = worker.next_id()
+
+# 获取全局单例雪花生成器
+snowflake = IdUtil.get_snowflake(1, 1)
+
+# 获取下一个雪花 ID
+IdUtil.get_snowflake_next_id(1, 1)       # int
+IdUtil.get_snowflake_next_id_str(1, 1)   # str
+```
 
 ### 选择建议
 

@@ -34,4 +34,17 @@ clean = CharsetUtil.clean_bom("﻿内容")  # "内容"
 CharsetUtil.clean_invalid("hello\x00world")  # "helloworld"
 CharsetUtil.clean_invalid("a\x07b\x08c")     # "abc"（清除 BEL/BS）
 CharsetUtil.clean_invalid("a\tb\nc")          # "a\tb\nc"（保留 TAB/LF/CR）
+
+# 解析字符集名称
+CharsetUtil.parse("GBK")          # "gbk"
+CharsetUtil.parse(None)           # "utf-8"
+
+# 系统字符集
+CharsetUtil.system_charset_name() # "utf-8"
+
+# 检测字节数据字符集（基于 BOM）
+CharsetUtil.detect_charset(b"\xef\xbb\xbfhello")  # "utf-8-sig"
+
+# 转换文件字符集
+CharsetUtil.convert_file("src.txt", "dest.txt", "gbk", "utf-8")
 ```

@@ -246,3 +246,283 @@ class IterUtil:
                 if k not in seen:
                     seen_add(k)
                     yield element
+
+    @staticmethod
+    def is_empty(iterable: Iterable) -> bool:
+        """判断可迭代对象是否为空。
+
+        :param iterable: 可迭代对象
+        :return: 是否为空
+        """
+        if iterable is None:
+            return True
+        try:
+            next(iter(iterable))
+            return False
+        except StopIteration:
+            return True
+
+    @staticmethod
+    def is_not_empty(iterable: Iterable) -> bool:
+        """判断可迭代对象是否不为空。
+
+        :param iterable: 可迭代对象
+        :return: 是否不为空
+        """
+        return not IterUtil.is_empty(iterable)
+
+    @staticmethod
+    def has_null(iterable: Iterable) -> bool:
+        """判断可迭代对象中是否有 None 元素。
+
+        :param iterable: 可迭代对象
+        :return: 是否包含 None
+        """
+        if iterable is None:
+            return False
+        return any(item is None for item in iterable)
+
+    @staticmethod
+    def is_all_null(iterable: Iterable) -> bool:
+        """判断可迭代对象中是否所有元素都为 None。
+
+        :param iterable: 可迭代对象
+        :return: 是否全部为 None
+        """
+        if iterable is None:
+            return True
+        return all(item is None for item in iterable)
+
+    @staticmethod
+    def count_map(iterable: Iterable, key_func: Optional[Callable] = None) -> dict:
+        """统计各元素出现次数。
+
+        :param iterable: 可迭代对象
+        :param key_func: 可选的键函数
+        :return: {元素: 出现次数}
+        """
+        result = {}
+        for item in iterable:
+            key = key_func(item) if key_func else item
+            result[key] = result.get(key, 0) + 1
+        return result
+
+    @staticmethod
+    def field_value_map(iterable: Iterable, key_field: str, value_field: str) -> dict:
+        """将可迭代对象转为 {key_field值: value_field值} 映射。
+
+        :param iterable: 可迭代对象（元素为 dict 或对象）
+        :param key_field: 作为键的字段名
+        :param value_field: 作为值的字段名
+        :return: 字典映射
+        """
+        result = {}
+        for item in iterable:
+            if isinstance(item, dict):
+                k = item.get(key_field)
+                v = item.get(value_field)
+            else:
+                k = getattr(item, key_field, None)
+                v = getattr(item, value_field, None)
+            result[k] = v
+        return result
+
+    @staticmethod
+    def join(iterable: Iterable, separator: str = ",") -> str:
+        """将可迭代对象的元素拼接为字符串。
+
+        :param iterable: 可迭代对象
+        :param separator: 分隔符
+        :return: 拼接后的字符串
+        """
+        return separator.join(str(item) for item in iterable)
+
+    @staticmethod
+    def to_map(iterable: Iterable, key_func: Callable, value_func: Optional[Callable] = None) -> dict:
+        """将可迭代对象转为字典。
+
+        :param iterable: 可迭代对象
+        :param key_func: 键函数
+        :param value_func: 值函数（默认元素本身）
+        :return: 字典
+        """
+        result = {}
+        for item in iterable:
+            key = key_func(item)
+            value = value_func(item) if value_func else item
+            result[key] = value
+        return result
+
+    @staticmethod
+    def to_list(iterable: Iterable) -> list:
+        """将可迭代对象转为列表。
+
+        :param iterable: 可迭代对象
+        :return: 列表
+        """
+        if iterable is None:
+            return []
+        return list(iterable)
+
+    @staticmethod
+    def get(iterable: Iterable, index: int) -> Any:
+        """获取可迭代对象中指定索引的元素。
+
+        :param iterable: 可迭代对象
+        :param index: 索引
+        :return: 元素，越界返回 None
+        """
+        if iterable is None:
+            return None
+        try:
+            for i, item in enumerate(iterable):
+                if i == index:
+                    return item
+        except TypeError:
+            return None
+        return None
+
+    @staticmethod
+    def get_first(iterable: Iterable) -> Any:
+        """获取第一个元素。
+
+        :param iterable: 可迭代对象
+        :return: 第一个元素，为空返回 None
+        """
+        if iterable is None:
+            return None
+        try:
+            return next(iter(iterable))
+        except StopIteration:
+            return None
+
+    @staticmethod
+    def get_first_none_null(iterable: Iterable) -> Any:
+        """获取第一个非 None 的元素。
+
+        :param iterable: 可迭代对象
+        :return: 第一个非 None 元素，全为 None 则返回 None
+        """
+        if iterable is None:
+            return None
+        for item in iterable:
+            if item is not None:
+                return item
+        return None
+
+    @staticmethod
+    def first_match(iterable: Iterable, predicate: Callable[[Any], bool]) -> Any:
+        """获取第一个满足条件的元素。
+
+        :param iterable: 可迭代对象
+        :param predicate: 条件函数
+        :return: 满足条件的第一个元素，无匹配返回 None
+        """
+        if iterable is None:
+            return None
+        for item in iterable:
+            if predicate(item):
+                return item
+        return None
+
+    @staticmethod
+    def get_element_type(iterable: Iterable) -> Optional[type]:
+        """获取可迭代对象中第一个元素的类型。
+
+        :param iterable: 可迭代对象
+        :return: 元素类型，为空返回 None
+        """
+        if iterable is None:
+            return None
+        try:
+            first = next(iter(iterable))
+            return type(first)
+        except StopIteration:
+            return None
+
+    @staticmethod
+    def edit(iterable: Iterable, func: Callable[[Any], Any]) -> list:
+        """对每个元素应用函数。
+
+        :param iterable: 可迭代对象
+        :param func: 转换函数
+        :return: 转换后的列表
+        """
+        if iterable is None:
+            return []
+        return [func(item) for item in iterable]
+
+    @staticmethod
+    def filter_(iterable: Iterable, predicate: Callable[[Any], bool]) -> list:
+        """过滤并返回新列表。
+
+        :param iterable: 可迭代对象
+        :param predicate: 过滤条件
+        :return: 过滤后的列表
+        """
+        if iterable is None:
+            return []
+        return [item for item in iterable if predicate(item)]
+
+    @staticmethod
+    def filter_to_list(iterable: Iterable, predicate: Callable[[Any], bool]) -> list:
+        """过滤并返回新列表（等同于 filter_）。
+
+        :param iterable: 可迭代对象
+        :param predicate: 过滤条件
+        :return: 过滤后的列表
+        """
+        return IterUtil.filter_(iterable, predicate)
+
+    @staticmethod
+    def for_each(iterable: Iterable, func: Callable[[Any], None]) -> None:
+        """对每个元素执行操作。
+
+        :param iterable: 可迭代对象
+        :param func: 操作函数
+        """
+        if iterable is not None:
+            for item in iterable:
+                func(item)
+
+    @staticmethod
+    def to_str(iterable: Iterable, separator: str = ",") -> str:
+        """将可迭代对象转为字符串表示。
+
+        :param iterable: 可迭代对象
+        :param separator: 分隔符
+        :return: 字符串
+        """
+        return IterUtil.join(iterable, separator)
+
+    @staticmethod
+    def size(iterable: Iterable) -> int:
+        """获取可迭代对象的大小。
+
+        :param iterable: 可迭代对象
+        :return: 元素个数
+        """
+        if iterable is None:
+            return 0
+        if hasattr(iterable, "__len__"):
+            return len(iterable)
+        count = 0
+        for _ in iterable:
+            count += 1
+        return count
+
+    @staticmethod
+    def is_equal_list(list1: list, list2: list) -> bool:
+        """判断两个列表是否相等。
+
+        :param list1: 列表1
+        :param list2: 列表2
+        :return: 是否相等
+        """
+        if list1 is None and list2 is None:
+            return True
+        if list1 is None or list2 is None:
+            return False
+        if len(list1) != len(list2):
+            return False
+        return all(a == b for a, b in zip(list1, list2))

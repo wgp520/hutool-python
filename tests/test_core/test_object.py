@@ -61,3 +61,31 @@ class TestObjectUtil:
     def test_to_string(self):
         assert ObjectUtil.to_string(None) == ""
         assert ObjectUtil.to_string(123) == "123"
+
+    def test_clone_if_possible(self):
+        original = [1, 2, 3]
+        cloned = ObjectUtil.clone_if_possible(original)
+        assert cloned == original
+        assert cloned is not original
+        assert ObjectUtil.clone_if_possible("str") == "str"
+
+    def test_is_valid_if_number(self):
+        assert ObjectUtil.is_valid_if_number(1.5) is True
+        assert ObjectUtil.is_valid_if_number(float("nan")) is False
+        assert ObjectUtil.is_valid_if_number(float("inf")) is False
+        assert ObjectUtil.is_valid_if_number(42) is True
+
+    def test_default_if_null_supplier(self):
+        assert ObjectUtil.default_if_null_supplier(None, lambda: "default") == "default"
+        assert ObjectUtil.default_if_null_supplier("val", lambda: "default") == "val"
+
+    def test_default_if_empty_supplier(self):
+        assert ObjectUtil.default_if_empty_supplier(None, lambda: "default") == "default"
+        assert ObjectUtil.default_if_empty_supplier("", lambda: "default") == "default"
+        assert ObjectUtil.default_if_empty_supplier([], lambda: []) == []
+        assert ObjectUtil.default_if_empty_supplier("val", lambda: "default") == "val"
+
+    def test_default_if_blank_supplier(self):
+        assert ObjectUtil.default_if_blank_supplier("   ", lambda: "default") == "default"
+        assert ObjectUtil.default_if_blank_supplier(None, lambda: "default") == "default"
+        assert ObjectUtil.default_if_blank_supplier("hello", lambda: "default") == "hello"

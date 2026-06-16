@@ -26,4 +26,17 @@ PhoneUtil.hide_after("13812345678")     # "1381****"
 # 截取
 PhoneUtil.sub_before("13812345678")     # "138"
 PhoneUtil.sub_after("13812345678")      # "5678"
+
+# 是否为座机号码
+PhoneUtil.is_tel("010-12345678")        # True
+
+# 是否为 400/800 号码
+PhoneUtil.is_tel_400_800("4001234567")  # True
+
+# 截取指定位
+PhoneUtil.sub_between("13800138000", 3, 7)  # "0013"
+
+# 座机区号/号码
+PhoneUtil.sub_tel_before("010-12345678")    # "010"
+PhoneUtil.sub_tel_after("010-12345678")     # "12345678"
 ```

@@ -48,3 +48,29 @@ class TestDesensitizedUtil:
     def test_license_plate(self):
         result = DesensitizedUtil.license_plate("京A12345")
         assert "*" in result
+
+    def test_first_mask(self):
+        result = DesensitizedUtil.first_mask("13800138000", mask_len=4)
+        assert result.startswith("****")
+        assert result.endswith("138000")
+
+    def test_first_mask_short(self):
+        result = DesensitizedUtil.first_mask("abc", mask_len=4)
+        assert result == "***"
+
+    def test_ipv6(self):
+        result = DesensitizedUtil.ipv6("2001:0db8:85a3:0000:0000:8a2e:0370:7334")
+        assert result.startswith("2001:0db8")
+        assert "*" in result
+
+    def test_passport(self):
+        result = DesensitizedUtil.passport("E12345678")
+        assert result[0] == "E"
+        assert result[-1] == "8"
+        assert "*" in result
+
+    def test_credit_code(self):
+        result = DesensitizedUtil.credit_code("91350100M000100Y43")
+        assert result[:6] == "913501"
+        assert result[-4:] == "0Y43"
+        assert "*" in result

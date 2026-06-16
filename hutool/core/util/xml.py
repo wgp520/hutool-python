@@ -156,3 +156,41 @@ class XmlUtil:
             r"\U00010000-\U0010FFFF]"
         )
         return valid_xml_chars.sub("", xml_str)
+
+    @staticmethod
+    def create_xml(root_name: str) -> ET.Element:
+        """创建空 XML 根元素。
+
+        :param root_name: 根元素名称
+        :return: XML 根元素
+        """
+        return ET.Element(root_name)
+
+    @staticmethod
+    def get_root_element(xml_str: str) -> ET.Element:
+        """获取 XML 的根元素。
+
+        :param xml_str: XML 字符串
+        :return: 根元素
+        """
+        return ET.fromstring(xml_str)
+
+    @staticmethod
+    def get_elements(element: ET.Element, tag: str) -> list:
+        """获取所有匹配 tag 的子元素列表。
+
+        :param element: XML 元素
+        :param tag: 子元素标签名
+        :return: 匹配的元素列表
+        """
+        return list(element.iter(tag))
+
+    @staticmethod
+    def get_element(element: ET.Element, tag: str) -> Optional[ET.Element]:
+        """获取第一个匹配 tag 的子元素。
+
+        :param element: XML 元素
+        :param tag: 子元素标签名
+        :return: 匹配的元素，未找到返回 None
+        """
+        return element.find(tag)

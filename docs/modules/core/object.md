@@ -53,3 +53,19 @@ ObjectUtil.length([1, 2, 3])       # 3
 ObjectUtil.contains([1, 2, 3], 2)  # True
 ObjectUtil.to_string(123)          # "123"
 ```
+
+### 其他
+
+```python
+# 克隆（仅 list/dict 深拷贝）
+cloned = ObjectUtil.clone_if_possible([1, 2])
+
+# 数字有效性
+ObjectUtil.is_valid_if_number(1.5)        # True
+ObjectUtil.is_valid_if_number(float("nan"))  # False
+
+# supplier 惰性默认值
+ObjectUtil.default_if_null_supplier(None, lambda: "default")     # "default"
+ObjectUtil.default_if_empty_supplier("", lambda: "default")      # "default"
+ObjectUtil.default_if_blank_supplier("   ", lambda: "default")   # "default"
+```

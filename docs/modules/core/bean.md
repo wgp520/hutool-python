@@ -60,4 +60,11 @@ BeanUtil.desc_for_each({"a": 1, "b": 2}, lambda k, v: result.update({k: v}))
 # 用默认值填充 None 字段
 BeanUtil.fill_bean(user3, lambda key: f"default_{key}")
 # user3.name = "default_name", user3.age = "default_age"
+
+# 去除字符串字段首尾空白
+BeanUtil.trim_str_fields(user)
+# user.name 会被 strip()
+
+# 拷贝为对象列表
+users = BeanUtil.copy_to_list([{"name": "a"}, {"name": "b"}], User)
 ```

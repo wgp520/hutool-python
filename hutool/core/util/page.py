@@ -9,6 +9,8 @@ from typing import List
 class PageUtil:
     """分页工具类，提供分页计算相关的工具方法。"""
 
+    _FIRST_PAGE_NO = 0
+
     @staticmethod
     def total_page(total_count: int, page_size: int) -> int:
         """
@@ -94,3 +96,52 @@ class PageUtil:
         if page_num < 1 or page_size < 1:
             return 0
         return (page_num - 1) * page_size
+
+    @staticmethod
+    def set_first_page_no(first_page_no: int) -> None:
+        """设置第一页的页码（默认为 0，Java 惯例；Python 通常从 1 开始）。
+
+        :param first_page_no: 第一页页码
+        """
+        PageUtil._FIRST_PAGE_NO = first_page_no
+
+    @staticmethod
+    def get_first_page_no() -> int:
+        """获取第一页页码。"""
+        return PageUtil._FIRST_PAGE_NO
+
+    @staticmethod
+    def get_end(page_num: int, page_size: int) -> int:
+        """获取分页结束位置。
+
+        :param page_num: 页码
+        :param page_size: 每页大小
+        :return: 结束位置
+        """
+        return page_num * page_size
+
+    @staticmethod
+    def trans_to_start_end(page_num: int, page_size: int) -> tuple:
+        """将页码转换为起始和结束索引。
+
+        :param page_num: 页码
+        :param page_size: 每页大小
+        :return: (start, end) 元组
+        """
+        start = PageUtil.to_start_index(page_num, page_size)
+        end = start + page_size
+        return (start, end)
+
+    @staticmethod
+    def to_segment(total: int, page_size: int) -> int:
+        """计算总页数。
+
+        :param total: 总记录数
+        :param page_size: 每页大小
+        :return: 总页数
+        """
+        if total <= 0:
+            return 0
+        if page_size <= 0:
+            return 0
+        return (total + page_size - 1) // page_size

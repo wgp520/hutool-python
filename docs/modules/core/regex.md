@@ -86,3 +86,15 @@ ReUtil.del_pre(r"\d+", "abc123def")  # "123def"
 ReUtil.extract_multi_and_del_pre(r"\d+", "abc123def456", 0)
 # ("123", "def456")
 ```
+
+### 其他
+
+```python
+# 获取命名捕获组
+ReUtil.get_all_group_names(r"(?P<year>\d{4})-(?P<month>\d{2})")
+# {"year": 1, "month": 2}
+
+# 正则替换 + 回调函数
+ReUtil.replace_by_func("hello123", r"\d+", lambda m: "[NUM]")
+# "hello[NUM]"
+```

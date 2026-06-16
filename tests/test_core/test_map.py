@@ -139,3 +139,98 @@ class TestMapUtilTopN:
         """测试取前 1 个"""
         result = MapUtil.top_n_keys({"x": 10, "y": 20, "z": 15}, 1)
         assert result == ["y"]
+
+    def test_to_camel_case_map(self):
+        result = MapUtil.to_camel_case_map({"first_name": "John", "last_name": "Doe"})
+        assert result == {"firstName": "John", "lastName": "Doe"}
+
+    def test_to_object_array(self):
+        result = MapUtil.to_object_array({"a": 1, "b": 2})
+        assert result == [["a", 1], ["b", 2]]
+
+    def test_join_ignore_null(self):
+        result = MapUtil.join_ignore_null({"a": 1, "b": None, "c": 3})
+        assert "a=1" in result
+        assert "c=3" in result
+        assert "b" not in result
+
+    def test_edit_map(self):
+        result = MapUtil.edit({"a": 1, "b": 2}, lambda k, v: v * 10)
+        assert result == {"a": 10, "b": 20}
+
+    def test_map_function(self):
+        result = MapUtil.map_({"a": 1, "b": 2}, key_func=str.upper, value_func=lambda v: v * 2)
+        assert result == {"A": 2, "B": 4}
+
+    def test_reverse_map(self):
+        result = MapUtil.reverse({"a": 1, "b": 2})
+        assert result == {1: "a", 2: "b"}
+
+    def test_rename_key(self):
+        m = {"old": 1, "b": 2}
+        MapUtil.rename_key(m, "old", "new")
+        assert m == {"new": 1, "b": 2}
+
+    def test_remove_null_value(self):
+        m = {"a": 1, "b": None, "c": 3}
+        MapUtil.remove_null_value(m)
+        assert m == {"a": 1, "c": 3}
+
+    def test_remove_by_value(self):
+        m = {"a": 1, "b": 2, "c": 1}
+        MapUtil.remove_by_value(m, 1)
+        assert m == {"b": 2}
+
+    def test_remove_if(self):
+        m = {"a": 1, "b": 2, "c": 3}
+        MapUtil.remove_if(m, lambda k, v: v > 1)
+        assert m == {"a": 1}
+
+    def test_get_any(self):
+        m = {"a": 1, "b": 2}
+        assert MapUtil.get_any(m, "x", "b", "a") == 2
+        assert MapUtil.get_any(m, "x", "y") is None
+        assert MapUtil.get_any(None, "a") is None
+
+    def test_get_double(self):
+        m = {"a": 1, "b": "2.5"}
+        assert MapUtil.get_double(m, "a") == 1.0
+        assert MapUtil.get_double(m, "b") == 2.5
+        assert MapUtil.get_double(m, "c", 99.0) == 99.0
+
+    def test_get_long(self):
+        m = {"a": 1.5, "b": "2"}
+        assert MapUtil.get_long(m, "a") == 1
+        assert MapUtil.get_long(m, "b") == 2
+        assert MapUtil.get_long(m, "c", 99) == 99
+
+    def test_entry(self):
+        assert MapUtil.entry("key", "value") == {"key": "value"}
+
+    def test_compute_if_absent(self):
+        m = {"a": 1}
+        result = MapUtil.compute_if_absent(m, "b", lambda k: 42)
+        assert result == 42
+        assert m["b"] == 42
+        # Should not overwrite
+        result2 = MapUtil.compute_if_absent(m, "b", lambda k: 99)
+        assert result2 == 42
+
+    def test_partition_map(self):
+        m = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}
+        result = MapUtil.partition(m, 2)
+        assert len(result) == 3
+        total = {}
+        for part in result:
+            total.update(part)
+        assert total == m
+
+    def test_flatten(self):
+        m = {"a": {"b": 1, "c": {"d": 2}}, "e": 3}
+        result = MapUtil.flatten(m)
+        assert result == {"a.b": 1, "a.c.d": 2, "e": 3}
+
+    def test_values_of_keys(self):
+        m = {"a": 1, "b": 2, "c": 3}
+        result = MapUtil.values_of_keys(m, ["a", "c"])
+        assert result == [1, 3]

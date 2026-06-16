@@ -19,6 +19,9 @@ class PhoneUtil:
     # 座机正则（区号-号码，区号3-4位，号码7-8位）
     _FIXED_PHONE_PATTERN = re.compile(r"^0\d{2,3}-?\d{7,8}$")
 
+    # 座机正则（含 400/800 号码）
+    _TEL_400_800_PATTERN = re.compile(r"^(400|800)\d{7}$")
+
     @staticmethod
     def is_mobile(phone: str) -> bool:
         """是否为中国大陆手机号
@@ -152,3 +155,65 @@ class PhoneUtil:
         if not phone:
             return ""
         return phone.strip()[-4:]
+
+    @staticmethod
+    def is_tel(tel: str) -> bool:
+        """是否为座机号码（含区号）。
+
+        :param tel: 座机号码
+        :return: 是否合法
+        """
+        if not tel:
+            return False
+        return bool(PhoneUtil._FIXED_PHONE_PATTERN.match(tel.strip()))
+
+    @staticmethod
+    def is_tel_400_800(tel: str) -> bool:
+        """是否为 400 或 800 号码。
+
+        :param tel: 电话号码
+        :return: 是否合法
+        """
+        if not tel:
+            return False
+        tel = tel.strip().replace("-", "")
+        return bool(PhoneUtil._TEL_400_800_PATTERN.match(tel))
+
+    @staticmethod
+    def sub_between(phone: str, begin: int, end: int) -> str:
+        """截取手机号指定位之间的内容。
+
+        :param phone: 手机号
+        :param begin: 起始索引（包含）
+        :param end: 结束索引（不包含）
+        :return: 截取的子串
+        """
+        if not phone:
+            return ""
+        return phone.strip()[begin:end]
+
+    @staticmethod
+    def sub_tel_before(tel: str) -> str:
+        """获取座机号码的区号部分。
+
+        :param tel: 座机号码
+        :return: 区号
+        """
+        if not tel:
+            return ""
+        tel = tel.strip()
+        parts = tel.split("-")
+        return parts[0] if parts else ""
+
+    @staticmethod
+    def sub_tel_after(tel: str) -> str:
+        """获取座机号码的号码部分（去掉区号）。
+
+        :param tel: 座机号码
+        :return: 号码部分
+        """
+        if not tel:
+            return ""
+        tel = tel.strip()
+        parts = tel.split("-", 1)
+        return parts[1] if len(parts) > 1 else parts[0]

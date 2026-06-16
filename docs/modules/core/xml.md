@@ -53,4 +53,16 @@ text = XmlUtil.get_element_text(element, "./name")  # "test"
 ```python
 # 清理无效 XML 字符
 clean = XmlUtil.clean_invalid(xml_str)
+
+# 创建空 XML 根元素
+root = XmlUtil.create_xml("root")
+
+# 获取根元素
+root = XmlUtil.get_root_element("<root><child/></root>")
+
+# 获取所有匹配标签的元素
+items = XmlUtil.get_elements(root, "item")
+
+# 获取第一个匹配标签的元素
+child = XmlUtil.get_element(root, "child")
 ```

@@ -213,8 +213,8 @@ StrUtil.concat("a", None, "b", "c")  # "abc"
 # brief — 截断并加省略号（总长度不超过 max_length）
 StrUtil.brief("hello world", 8)  # "hello..."
 
-# maxLength — 强制截断
-StrUtil.max_length("hello world", 5)  # "hello"
+# maxLength — 截断并追加 "..."
+StrUtil.max_length("hello world", 8)  # "hello..."
 
 # fixLength — 填充或截断到固定长度
 StrUtil.fix_length("hi", 5)       # "hi   "
@@ -258,8 +258,8 @@ StrUtil.repeat_by_length("abc", 7)  # "abcabca"
 # replaceIgnoreCase
 StrUtil.replace_ignore_case("Hello HELLO", "hello", "hi")  # "hi hi"
 
-# replaceLast
-StrUtil.replace_last("a.b.c", "\\.", "-")  # "a.b-c"
+# replaceLast — 字面量匹配（非正则）
+StrUtil.replace_last("a.b.c", ".", "-")  # "a.b-c"
 
 # removeAllPrefix / removeAllSuffix
 StrUtil.remove_all_prefix("///path", "/")  # "path"
@@ -302,6 +302,84 @@ StrUtil.desensitized("13812345678", 3, 4)  # "138****5678"
 # compareVersion — 版本号比较
 StrUtil.compare_version("1.2.3", "1.2.4")  # -1
 StrUtil.compare_version("2.0", "1.9.9")    # 1
+```
+
+### Unicode / CodePoint 操作
+
+```python
+# subByCodePoint — 按码点截取（emoji 安全）
+StrUtil.sub_by_code_point("a😀b😂c", 1, 3)  # "😀b"
+
+# subSufByLength — 取最后 N 个字符
+StrUtil.sub_suf_by_length("hello", 3)  # "llo"
+
+# subWithLength — 从指定位置取指定长度
+StrUtil.sub_with_length("hello", 1, 3)  # "ell"
+
+# subPreGbk — 按 GBK 字节长度截断
+StrUtil.sub_pre_gbk("你好世界", 6)  # "你好"（每个中文 2 字节）
+
+# reverseByCodePoint — emoji 安全反转
+StrUtil.reverse_by_code_point("a😀b")  # "b😀a"
+
+# byteLength — 编码后字节长度
+StrUtil.byte_length("你好")  # 6（UTF-8）
+
+# length — null 安全长度
+StrUtil.length(None)   # 0
+StrUtil.length("abc")  # 3
+```
+
+### 分割扩展
+
+```python
+# splitToLong / splitToInt — 分割为数字数组
+StrUtil.split_to_long("1,2,3")  # [1, 2, 3]
+
+# splitByLength — 按固定长度分割
+StrUtil.split_by_length("abcdef", 2)  # ["ab", "cd", "ef"]
+
+# splitIgnoreCase — 忽略大小写分割
+StrUtil.split_ignore_case("aAbBcC", "b")  # ["aA", "", "cC"]
+```
+
+### 高级替换
+
+```python
+# replaceFrom — 从指定位置开始替换
+StrUtil.replace_from("aabbcc", 2, "b", "d")  # "aadbcc"
+
+# replaceByFunc — 正则匹配 + 回调函数
+import re
+StrUtil.replace_by_func("hello123", r"\d+", lambda m: "[NUM]")
+# "hello[NUM]"
+
+# replaceFirst/replaceLast — 支持 ignore_case
+StrUtil.replace_first("Hello HELLO", "hello", "hi", ignore_case=True)
+# "hi HELLO"
+```
+
+### 空值安全查找
+
+```python
+# firstNonNull / firstNonEmpty / firstNonBlank
+StrUtil.first_non_null(None, "b", "c")      # "b"
+StrUtil.first_non_empty("", None, "b")       # "b"
+StrUtil.first_non_blank("  ", None, "b")     # "b"
+```
+
+### 解包裹与字符级比较
+
+```python
+# unwrap — 移除前后缀
+StrUtil.unwrap("[hello]", "[", "]")  # "hello"
+
+# isCharEquals — 所有字符是否相同
+StrUtil.is_char_equals("aaa")  # True
+StrUtil.is_char_equals("aab")  # False
+
+# toString — null 返回 "null"
+StrUtil.to_string(None)  # "null"
 ```
 
 ---

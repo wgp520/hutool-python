@@ -107,3 +107,64 @@ class CharsetUtil:
             return content or ""
         # 保留 \t(0x09) \n(0x0A) \r(0x0D)，清除其余 0x00~0x1F 控制字符
         return "".join(ch for ch in content if ord(ch) >= 0x20 or ch in ("\t", "\n", "\r"))
+
+    @staticmethod
+    def parse(charset_name: str) -> str:
+        """解析字符集名称，None 或空时返回 UTF-8。
+
+        :param charset_name: 字符集名称
+        :return: 字符集名称（小写）
+        """
+        if not charset_name:
+            return CharsetUtil.UTF_8
+        return charset_name.lower().strip()
+
+    @staticmethod
+    def convert_file(src_file: str, dest_file: str, src_charset: str, dest_charset: str) -> str:
+        """转换文件字符集。
+
+        :param src_file: 源文件路径
+        :param dest_file: 目标文件路径
+        :param src_charset: 源字符集
+        :param dest_charset: 目标字符集
+        :return: 目标文件路径
+        """
+        with open(src_file, "rb") as f:
+            content = f.read()
+        converted = CharsetUtil.convert(content, src_charset, dest_charset)
+        with open(dest_file, "wb") as f:
+            f.write(converted)
+        return dest_file
+
+    @staticmethod
+    def system_charset_name() -> str:
+        """获取系统字符集名称。
+
+        :return: 系统字符集名称
+        """
+        return sys.getdefaultencoding() or CharsetUtil.UTF_8
+
+    @staticmethod
+    def default_charset_name() -> str:
+        """获取默认字符集名称（同 system_charset_name）。
+
+        :return: 默认字符集名称
+        """
+        return CharsetUtil.system_charset_name()
+
+    @staticmethod
+    def detect_charset(data: bytes) -> str:
+        """简单检测字节数据的字符集。
+
+        通过检查 BOM 标记判断编码，无法判断时返回 UTF-8。
+
+        :param data: 字节数据
+        :return: 检测到的字符集名称
+        """
+        if data[:3] == b"\xef\xbb\xbf":
+            return "utf-8-sig"
+        if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            return "utf-16"
+        if data[:4] in (b"\xff\xfe\x00\x00", b"\x00\x00\xfe\xff"):
+            return "utf-32"
+        return CharsetUtil.UTF_8

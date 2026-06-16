@@ -40,6 +40,7 @@ from .core.money import MoneyUtil
 from .core.net import Ipv4Util, MaskBit, NetUtil
 from .core.prof import ProfUtil
 from .core.text.csv import CsvUtil
+from .core.text.stop_watch import StopWatch, TaskInfo
 from .core.text.str_builder import StrBuilder
 from .core.text.unicode import UnicodeUtil
 from .core.timing import TimingUtil, timethis
@@ -180,9 +181,11 @@ __all__ = [
     "SensitiveUtil",
     "SettingUtil",
     "SignUtil",
+    "StopWatch",
     "StrBuilder",
     "StrUtil",
     "SystemUtil",
+    "TaskInfo",
     "TemplateUtil",
     "TimedCache",
     "TimingUtil",

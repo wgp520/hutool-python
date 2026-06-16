@@ -240,3 +240,82 @@ class TreeUtil:
             else:
                 queue.extend(node.children)
         return leaves
+
+    @staticmethod
+    def build_single(
+        list_data: List[dict],
+        root_id: Any = None,
+        id_field: str = "id",
+        parent_field: str = "parentId",
+    ) -> Optional[TreeNode]:
+        """从平铺列表构建单根树，返回唯一的根节点。
+
+        :param list_data: 平铺的字典列表
+        :param root_id: 根节点的 parent_id 值
+        :param id_field: 节点 ID 字段名
+        :param parent_field: 父节点 ID 字段名
+        :return: 根节点，如果没有节点则返回 None
+        :raises ValueError: 存在多个根节点时
+        """
+        roots = TreeUtil.build(list_data, root_id, id_field=id_field, parent_field=parent_field)
+        if not roots:
+            return None
+        if len(roots) > 1:
+            raise ValueError(f"存在 {len(roots)} 个根节点，无法构建单根树")
+        return roots[0]
+
+    @staticmethod
+    def get_parents_name(tree_nodes: List[TreeNode], node_id: Any, separator: str = "/") -> str:
+        """获取指定节点的完整路径名称。
+
+        从根节点到目标节点的名称用 separator 连接。
+
+        :param tree_nodes: 根节点列表
+        :param node_id: 目标节点 ID
+        :param separator: 路径分隔符，默认 ``"/"``
+        :return: 完整路径名称，如 ``"根/父/子"``
+        """
+        node_map = TreeUtil.to_map(tree_nodes)
+        node = node_map.get(node_id)
+        if node is None:
+            return ""
+        names = []
+        current = node
+        while current is not None:
+            names.append(current.name)
+            parent_id = current.parent_id
+            current = node_map.get(parent_id) if parent_id is not None else None
+        names.reverse()
+        return separator.join(names)
+
+    @staticmethod
+    def get_parents_id(tree_nodes: List[TreeNode], node_id: Any) -> list:
+        """获取指定节点的所有祖先节点 ID（从根到当前节点）。
+
+        :param tree_nodes: 根节点列表
+        :param node_id: 目标节点 ID
+        :return: 祖先 ID 列表
+        """
+        node_map = TreeUtil.to_map(tree_nodes)
+        node = node_map.get(node_id)
+        if node is None:
+            return []
+        ids = []
+        current = node
+        while current is not None:
+            ids.append(current.id)
+            parent_id = current.parent_id
+            current = node_map.get(parent_id) if parent_id is not None else None
+        ids.reverse()
+        return ids
+
+    @staticmethod
+    def create_empty_node(node_id: Any, name: str = "", parent_id: Any = None) -> TreeNode:
+        """创建一个空的树节点。
+
+        :param node_id: 节点 ID
+        :param name: 节点名称
+        :param parent_id: 父节点 ID
+        :return: 新的 TreeNode 实例
+        """
+        return TreeNode(id=node_id, parent_id=parent_id, name=name)

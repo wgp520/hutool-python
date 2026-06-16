@@ -48,6 +48,78 @@ class MathUtil:
         y = math.sin(radians)
         return (x, y)
 
+    @staticmethod
+    def arrangement_count(n: int, m: int) -> int:
+        """排列数 A(n, m) = n! / (n-m)!
+
+        :param n: 总数
+        :param m: 选取数
+        :return: 排列数
+        """
+        if n < 0 or m < 0 or m > n:
+            return 0
+        result = 1
+        for i in range(m):
+            result *= n - i
+        return result
+
+    @staticmethod
+    def arrangement_select(n: int, m: int) -> int:
+        """排列选取（同 arrangement_count）。
+
+        :param n: 总数
+        :param m: 选取数
+        :return: 排列数
+        """
+        return MathUtil.arrangement_count(n, m)
+
+    @staticmethod
+    def combination_count(n: int, m: int) -> int:
+        """组合数 C(n, m) = n! / (m! * (n-m)!)
+
+        :param n: 总数
+        :param m: 选取数
+        :return: 组合数
+        """
+        if n < 0 or m < 0 or m > n:
+            return 0
+        if m == 0 or m == n:
+            return 1
+        # 优化：取较小的 m
+        m = min(m, n - m)
+        result = 1
+        for i in range(m):
+            result = result * (n - i) // (i + 1)
+        return result
+
+    @staticmethod
+    def combination_select(n: int, m: int) -> int:
+        """组合选取（同 combination_count）。
+
+        :param n: 总数
+        :param m: 选取数
+        :return: 组合数
+        """
+        return MathUtil.combination_count(n, m)
+
+    @staticmethod
+    def yuan_to_cent(yuan: float) -> int:
+        """元转分。
+
+        :param yuan: 元（如 1.23）
+        :return: 分（如 123）
+        """
+        return round(yuan * 100)
+
+    @staticmethod
+    def cent_to_yuan(cent: int) -> float:
+        """分转元。
+
+        :param cent: 分（如 123）
+        :return: 元（如 1.23）
+        """
+        return cent / 100.0
+
 
 class BitStatusUtil:
     """位运算状态工具类，使用位运算管理多状态组合"""

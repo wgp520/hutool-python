@@ -199,3 +199,98 @@ class TestIterUtilUniqueEverseen:
         """测试数字去重"""
         result = list(IterUtil.unique_everseen([3, 1, 2, 1, 3, 2]))
         assert result == [3, 1, 2]
+
+    def test_is_empty(self):
+        assert IterUtil.is_empty([]) is True
+        assert IterUtil.is_empty(None) is True
+        assert IterUtil.is_empty([1]) is False
+        assert IterUtil.is_empty(iter([])) is True
+
+    def test_is_not_empty(self):
+        assert IterUtil.is_not_empty([1]) is True
+        assert IterUtil.is_not_empty([]) is False
+
+    def test_has_null(self):
+        assert IterUtil.has_null([1, None, 3]) is True
+        assert IterUtil.has_null([1, 2, 3]) is False
+        assert IterUtil.has_null(None) is False
+
+    def test_is_all_null(self):
+        assert IterUtil.is_all_null([None, None]) is True
+        assert IterUtil.is_all_null([None, 1]) is False
+        assert IterUtil.is_all_null(None) is True
+
+    def test_count_map(self):
+        result = IterUtil.count_map(["a", "b", "a"])
+        assert result == {"a": 2, "b": 1}
+
+    def test_count_map_with_key_func(self):
+        result = IterUtil.count_map([1, 2, 3, 4], lambda x: "e" if x % 2 == 0 else "o")
+        assert result == {"o": 2, "e": 2}
+
+    def test_field_value_map(self):
+        data = [{"n": "a", "v": 1}, {"n": "b", "v": 2}]
+        result = IterUtil.field_value_map(data, "n", "v")
+        assert result == {"a": 1, "b": 2}
+
+    def test_join(self):
+        assert IterUtil.join([1, 2, 3], "-") == "1-2-3"
+        assert IterUtil.join(["a", "b"]) == "a,b"
+
+    def test_to_map(self):
+        data = [("a", 1), ("b", 2)]
+        result = IterUtil.to_map(data, lambda x: x[0], lambda x: x[1])
+        assert result == {"a": 1, "b": 2}
+
+    def test_to_list(self):
+        assert IterUtil.to_list([1, 2, 3]) == [1, 2, 3]
+        assert IterUtil.to_list(None) == []
+        assert IterUtil.to_list(range(3)) == [0, 1, 2]
+
+    def test_get(self):
+        assert IterUtil.get([10, 20, 30], 1) == 20
+        assert IterUtil.get([10, 20], 10) is None
+        assert IterUtil.get(None, 0) is None
+
+    def test_get_first(self):
+        assert IterUtil.get_first([10, 20]) == 10
+        assert IterUtil.get_first([]) is None
+        assert IterUtil.get_first(None) is None
+
+    def test_get_first_none_null(self):
+        assert IterUtil.get_first_none_null([None, 1, 2]) == 1
+        assert IterUtil.get_first_none_null([None, None]) is None
+
+    def test_first_match(self):
+        assert IterUtil.first_match([1, 2, 3, 4], lambda x: x > 2) == 3
+        assert IterUtil.first_match([1, 2], lambda x: x > 10) is None
+
+    def test_get_element_type(self):
+        assert IterUtil.get_element_type([1, 2, 3]) is int
+        assert IterUtil.get_element_type(["a", "b"]) is str
+        assert IterUtil.get_element_type([]) is None
+
+    def test_edit(self):
+        assert IterUtil.edit([1, 2, 3], lambda x: x * 2) == [2, 4, 6]
+        assert IterUtil.edit(None, lambda x: x) == []
+
+    def test_filter(self):
+        assert IterUtil.filter_([1, 2, 3, 4], lambda x: x % 2 == 0) == [2, 4]
+
+    def test_for_each(self):
+        result = []
+        IterUtil.for_each([1, 2, 3], lambda x: result.append(x))
+        assert result == [1, 2, 3]
+
+    def test_to_str(self):
+        assert IterUtil.to_str([1, 2, 3], "-") == "1-2-3"
+
+    def test_size(self):
+        assert IterUtil.size([1, 2, 3]) == 3
+        assert IterUtil.size(None) == 0
+        assert IterUtil.size(range(5)) == 5
+
+    def test_is_equal_list(self):
+        assert IterUtil.is_equal_list([1, 2], [1, 2]) is True
+        assert IterUtil.is_equal_list([1, 2], [1, 3]) is False
+        assert IterUtil.is_equal_list(None, None) is True

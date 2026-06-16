@@ -291,3 +291,28 @@ class BeanUtil:
             for key in list(obj.__dict__.keys()):
                 if not key.startswith("_") and getattr(obj, key) is None:
                     setattr(obj, key, supplier(key))
+
+    @staticmethod
+    def trim_str_fields(obj: Any) -> None:
+        """对 Bean 中所有字符串字段执行 strip() 去除首尾空白。
+
+        :param obj: Bean 对象
+        """
+        if obj is None:
+            return
+        if hasattr(obj, "__dict__"):
+            for key, value in obj.__dict__.items():
+                if not key.startswith("_") and isinstance(value, str):
+                    setattr(obj, key, value.strip())
+
+    @staticmethod
+    def copy_to_list(source_list: list, clazz: Type[T]) -> List[T]:
+        """将字典列表拷贝为指定类型的对象列表。
+
+        等价于 :meth:`to_bean_list`。
+
+        :param source_list: 字典列表
+        :param clazz: 目标类型
+        :return: 对象列表
+        """
+        return BeanUtil.to_bean_list(source_list, clazz)

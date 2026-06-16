@@ -30,11 +30,7 @@ BooleanUtil.and_(True, True, False)  # False
 BooleanUtil.or_(False, False, True)  # True
 BooleanUtil.xor(True, True)          # False
 BooleanUtil.negate(True)             # False
-```
 
-### 新增方法
-
-```python
 # toBoolean — 万能布尔转换
 BooleanUtil.to_boolean("true")  # True
 BooleanUtil.to_boolean("yes")   # True
@@ -60,4 +56,27 @@ BooleanUtil.exactly_one_true(True, True, False)   # False
 # ifTrue — 三元表达式
 BooleanUtil.if_true(True, "yes", "no")   # "yes"
 BooleanUtil.if_true(False, "yes", "no")  # "no"
+
+# negate — None 安全取反
+BooleanUtil.negate(None)   # None（None 输入返回 None）
+BooleanUtil.negate(True)   # False
+
+# to_str — 带 null_str 参数
+BooleanUtil.to_str(None, "是", "否", "空")  # "空"
+BooleanUtil.to_str(None, "是", "否")         # "否"（默认 None 视为 False）
+
+# 扩展字符串解析（y, t, ok, correct, success 也解析为 True）
+BooleanUtil.parse("y")        # True
+BooleanUtil.parse("ok")       # True
+BooleanUtil.parse("correct")  # True
+BooleanUtil.parse("success")  # True
+
+# and_of_wrap / or_of_wrap — None 视为 False
+BooleanUtil.and_of_wrap(True, None)   # False
+BooleanUtil.or_of_wrap(None, None)    # False
+BooleanUtil.or_of_wrap(True, None)    # True
+
+# is_boolean_class — 类型判断
+BooleanUtil.is_boolean_class(True)    # True
+BooleanUtil.is_boolean_class(1)       # False
 ```

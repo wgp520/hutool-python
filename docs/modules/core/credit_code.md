@@ -26,4 +26,10 @@ CreditCodeUtil.is_valid_credit_code("invalid")               # False
 
 ```{note}
 校验算法基于 GB 32100-2015 标准。
+
+# 简单校验（仅检查长度和字符集）
+CreditCodeUtil.is_credit_code_simple("91350100M000100Y43")  # True
+
+# 生成随机信用代码
+code = CreditCodeUtil.random_credit_code()  # 18位字符串
 ```

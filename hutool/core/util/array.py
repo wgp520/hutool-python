@@ -501,3 +501,258 @@ class ArrayUtil:
         if size < 0:
             raise ValueError(f"大小不能为负数: {size}")
         return [value] * size
+
+    @staticmethod
+    def default_if_empty(arr, default=None):
+        """如果数组为空则返回默认值。
+
+        :param arr: 数组（可为 None）
+        :param default: 默认值
+        :return: 原数组或默认值
+        """
+        if arr is None or len(arr) == 0:
+            return default if default is not None else []
+        return arr
+
+    @staticmethod
+    def first_match(arr, predicate):
+        """返回数组中第一个满足条件的元素。
+
+        :param arr: 数组
+        :param predicate: 条件函数
+        :return: 满足条件的元素，无匹配返回 None
+        """
+        if arr is None:
+            return None
+        for item in arr:
+            if predicate(item):
+                return item
+        return None
+
+    @staticmethod
+    def match_index(arr, predicate):
+        """返回数组中第一个满足条件的元素索引。
+
+        :param arr: 数组
+        :param predicate: 条件函数
+        :return: 索引，无匹配返回 -1
+        """
+        if arr is None:
+            return -1
+        for i, item in enumerate(arr):
+            if predicate(item):
+                return i
+        return -1
+
+    @staticmethod
+    def set_or_append(arr: list, index: int, value) -> list:
+        """设置值到指定索引，越界时追加到末尾。
+
+        :param arr: 列表
+        :param index: 索引
+        :param value: 值
+        :return: 修改后的列表
+        """
+        if arr is None:
+            arr = []
+        if 0 <= index < len(arr):
+            arr[index] = value
+        else:
+            arr.append(value)
+        return arr
+
+    @staticmethod
+    def replace(arr: list, index: int, value) -> Any:
+        """替换指定索引的值并返回旧值。
+
+        :param arr: 列表
+        :param index: 索引
+        :param value: 新值
+        :return: 旧值
+        """
+        old = arr[index]
+        arr[index] = value
+        return old
+
+    @staticmethod
+    def resize(arr: list, new_size: int, fill_value=None) -> list:
+        """调整数组大小。
+
+        :param arr: 列表
+        :param new_size: 新大小
+        :param fill_value: 填充值（当需要扩展时）
+        :return: 调整后的列表
+        """
+        if arr is None:
+            arr = []
+        current = len(arr)
+        if new_size > current:
+            arr.extend([fill_value] * (new_size - current))
+        elif new_size < current:
+            del arr[new_size:]
+        return arr
+
+    @staticmethod
+    def add_all(arr: list, *elements) -> list:
+        """向数组中添加多个元素。
+
+        :param arr: 列表
+        :param elements: 要添加的元素
+        :return: 添加后的列表
+        """
+        if arr is None:
+            arr = []
+        arr.extend(elements)
+        return arr
+
+    @staticmethod
+    def copy(arr, new_size: int = -1):
+        """复制数组。
+
+        :param arr: 原数组
+        :param new_size: 新数组大小，-1 表示与原数组相同
+        :return: 复制后的新数组
+        """
+        if arr is None:
+            return []
+        if new_size < 0:
+            return list(arr)
+        result = list(arr)[:new_size]
+        while len(result) < new_size:
+            result.append(None)
+        return result
+
+    @staticmethod
+    def clone(arr):
+        """浅克隆数组。
+
+        :param arr: 原数组
+        :return: 克隆后的新数组
+        """
+        if arr is None:
+            return []
+        return list(arr)
+
+    @staticmethod
+    def edit(arr, func):
+        """对数组中每个元素应用函数。
+
+        :param arr: 数组
+        :param func: 转换函数
+        :return: 转换后的新数组
+        """
+        if arr is None:
+            return []
+        return [func(item) for item in arr]
+
+    @staticmethod
+    def remove_null(arr: list) -> list:
+        """移除数组中的 None 元素。
+
+        :param arr: 原数组
+        :return: 移除 None 后的新数组
+        """
+        if arr is None:
+            return []
+        return [item for item in arr if item is not None]
+
+    @staticmethod
+    def remove_empty(arr: list) -> list:
+        """移除数组中的空元素（None、空字符串、空列表等）。
+
+        :param arr: 原数组
+        :return: 移除空元素后的新数组
+        """
+        if arr is None:
+            return []
+        return [item for item in arr if item]
+
+    @staticmethod
+    def remove_blank(arr: list) -> list:
+        """移除数组中的空白字符串元素。
+
+        :param arr: 原数组
+        :return: 移除空白字符串后的新数组
+        """
+        if arr is None:
+            return []
+        return [item for item in arr if not isinstance(item, str) or item.strip()]
+
+    @staticmethod
+    def null_to_empty(arr):
+        """None 转空数组。
+
+        :param arr: 数组（可为 None）
+        :return: 原数组或空列表
+        """
+        return arr if arr is not None else []
+
+    @staticmethod
+    def index_of_ignore_case(arr, element: str) -> int:
+        """忽略大小写查找字符串在数组中的索引。
+
+        :param arr: 字符串数组
+        :param element: 要查找的字符串
+        :return: 索引，不存在返回 -1
+        """
+        if arr is None or element is None:
+            return -1
+        for i, item in enumerate(arr):
+            if isinstance(item, str) and item.lower() == element.lower():
+                return i
+        return -1
+
+    @staticmethod
+    def contains_ignore_case(arr, element: str) -> bool:
+        """忽略大小写判断数组是否包含字符串。
+
+        :param arr: 字符串数组
+        :param element: 要查找的字符串
+        :return: 是否包含
+        """
+        return ArrayUtil.index_of_ignore_case(arr, element) >= 0
+
+    @staticmethod
+    def wrap(arr) -> list:
+        """将单个元素包装为数组。
+
+        :param arr: 元素或数组
+        :return: 数组
+        """
+        if arr is None:
+            return []
+        if isinstance(arr, (list, tuple)):
+            return list(arr)
+        return [arr]
+
+    @staticmethod
+    def is_array(obj) -> bool:
+        """判断对象是否为数组（list 或 tuple）。
+
+        :param obj: 对象
+        :return: 是否为数组
+        """
+        return isinstance(obj, (list, tuple))
+
+    @staticmethod
+    def get(arr, index: int):
+        """安全地获取数组中指定索引的元素。
+
+        :param arr: 数组
+        :param index: 索引
+        :return: 元素，越界返回 None
+        """
+        if arr is None or index < 0 or index >= len(arr):
+            return None
+        return arr[index]
+
+    @staticmethod
+    def get_any(arr):
+        """获取数组中任意一个元素。
+
+        :param arr: 数组
+        :return: 任意元素，为空返回 None
+        """
+        if arr is None or len(arr) == 0:
+            return None
+        return arr[0]

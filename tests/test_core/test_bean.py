@@ -124,3 +124,28 @@ class TestBeanUtil:
         BeanUtil.fill_bean(u, lambda key: f"default_{key}")
         assert u.name == "default_name"
         assert u.age == "default_age"
+
+    def test_trim_str_fields(self):
+        class User:
+            def __init__(self):
+                self.name = "  hello  "
+                self.age = 25
+
+        u = User()
+        BeanUtil.trim_str_fields(u)
+        assert u.name == "hello"
+        assert u.age == 25  # 非字符串字段不变
+
+    def test_trim_str_fields_none(self):
+        BeanUtil.trim_str_fields(None)  # 不抛异常
+
+    def test_copy_to_list(self):
+        data = [{"name": "a"}, {"name": "b"}]
+
+        class User:
+            def __init__(self):
+                self.name = None
+
+        result = BeanUtil.copy_to_list(data, User)
+        assert len(result) == 2
+        assert result[0].name == "a"

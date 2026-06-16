@@ -1,5 +1,8 @@
 """十六进制工具类"""
 
+import struct
+from typing import Union
+
 
 class HexUtil:
     """十六进制工具类，对应 Java cn.hutool.core.util.HexUtil"""
@@ -9,11 +12,13 @@ class HexUtil:
     _DIGITS_LOWER = "0123456789abcdef"
 
     @staticmethod
-    def encode_hex_str(data: bytes, lower_case: bool = False) -> str:
+    def encode_hex_str(data: bytes, lower_case: bool = True) -> str:
         """字节数组转十六进制字符串
 
+        默认输出小写。
+
         :param data: 字节数组
-        :param lower_case: 是否使用小写，默认大写
+        :param lower_case: 是否使用小写，默认 True（与 Java 一致）
         :return: 十六进制字符串
         """
         if data is None:
@@ -163,3 +168,140 @@ class HexUtil:
         :return: Unicode 转义序列
         """
         return f"\\u{ord(c):04x}"
+
+    # ------------------------------------------------------------------
+    # 字符串编码/解码
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def encode_hex(data: Union[str, bytes], charset: str = "utf-8", lower_case: bool = True) -> str:
+        """将字符串或字节数组转换为十六进制字符串。
+
+        :param data: 字符串或字节数组
+        :param charset: 字符编码（当 data 为 str 时使用），默认 utf-8
+        :param lower_case: 是否使用小写，默认 True
+        :return: 十六进制字符串
+        """
+        if isinstance(data, str):
+            data = data.encode(charset)
+        return HexUtil.encode_hex_str(data, lower_case)
+
+    @staticmethod
+    def decode_hex_str(hex_str: str, charset: str = "utf-8") -> str:
+        """十六进制字符串解码为普通字符串。
+
+        :param hex_str: 十六进制字符串
+        :param charset: 字符编码，默认 utf-8
+        :return: 解码后的字符串
+        """
+        if not hex_str:
+            return hex_str
+        return HexUtil.decode_hex(hex_str).decode(charset)
+
+    # ------------------------------------------------------------------
+    # 数值类型转换
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def hex_to_long(hex_str: str) -> int:
+        """十六进制字符串转 long（int）。
+
+        :param hex_str: 十六进制字符串（可选 0x 前缀）
+        :return: long 值
+        """
+        hex_str = HexUtil._remove_hex_prefix(hex_str)
+        return int(hex_str, 16)
+
+    @staticmethod
+    def hex_to_float(hex_str: str) -> float:
+        """十六进制字符串转 float（IEEE 754 位重解释）。
+
+        :param hex_str: 十六进制字符串（可选 0x 前缀）
+        :return: float 值
+        """
+        hex_str = HexUtil._remove_hex_prefix(hex_str)
+        bits = int(hex_str, 16)
+        return struct.unpack("!f", struct.pack("!I", bits))[0]
+
+    @staticmethod
+    def hex_to_double(hex_str: str) -> float:
+        """十六进制字符串转 double（IEEE 754 位重解释）。
+
+        :param hex_str: 十六进制字符串（可选 0x 前缀）
+        :return: double 值
+        """
+        hex_str = HexUtil._remove_hex_prefix(hex_str)
+        bits = int(hex_str, 16)
+        return struct.unpack("!d", struct.pack("!Q", bits))[0]
+
+    @staticmethod
+    def to_hex_long(n: int) -> str:
+        """long（int）转十六进制字符串。
+
+        :param n: 整数值
+        :return: 十六进制字符串（小写，无 0x 前缀）
+        """
+        if n == 0:
+            return "0"
+        if n < 0:
+            n = n & 0xFFFFFFFFFFFFFFFF
+        return format(n, "x")
+
+    @staticmethod
+    def to_hex_float(f: float) -> str:
+        """float 转十六进制字符串（IEEE 754 位重解释）。
+
+        :param f: float 值
+        :return: 十六进制字符串
+        """
+        bits = struct.unpack("!I", struct.pack("!f", f))[0]
+        return format(bits, "x")
+
+    @staticmethod
+    def to_hex_double(f: float) -> str:
+        """double 转十六进制字符串（IEEE 754 位重解释）。
+
+        :param f: double 值
+        :return: 十六进制字符串
+        """
+        bits = struct.unpack("!Q", struct.pack("!d", f))[0]
+        return format(bits, "x")
+
+    @staticmethod
+    def append_hex(builder: list, b: int, lower_case: bool = True) -> None:
+        """将单字节转为十六进制追加到列表。
+
+        :param builder: 列表（模拟 StringBuilder）
+        :param b: 字节值（0~255）
+        :param lower_case: 是否使用小写，默认 True
+        """
+        digits = HexUtil._DIGITS_LOWER if lower_case else HexUtil._DIGITS_UPPER
+        builder.append(digits[(b >> 4) & 0x0F])
+        builder.append(digits[b & 0x0F])
+
+    @staticmethod
+    def to_big_integer(hex_str: str) -> int:
+        """十六进制字符串转大整数。
+
+        :param hex_str: 十六进制字符串（可选 0x 前缀）
+        :return: 大整数（Python int）
+        """
+        hex_str = HexUtil._remove_hex_prefix(hex_str)
+        return int(hex_str, 16)
+
+    # ------------------------------------------------------------------
+    # 内部辅助
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _remove_hex_prefix(hex_str: str) -> str:
+        """移除十六进制字符串的 0x/0X 前缀。
+
+        :param hex_str: 十六进制字符串
+        :return: 去除前缀后的字符串
+        """
+        if hex_str:
+            hex_str = hex_str.strip()
+            if hex_str.startswith("0x") or hex_str.startswith("0X"):
+                hex_str = hex_str[2:]
+        return hex_str

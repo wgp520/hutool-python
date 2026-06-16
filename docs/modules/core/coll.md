@@ -68,6 +68,9 @@ CollUtil.none_match([1, 2, 3], lambda x: x > 5)   # True
 
 # 连接
 CollUtil.join([1, 2, 3], ",")  # "1,2,3"
+
+CollUtil.safe_contains(None, 1)  # False
+CollUtil.contains_by_pred([1, 2, 3], lambda x: x > 2)  # True
 ```
 
 ### 工具
@@ -87,6 +90,17 @@ CollUtil.safe_max([3, 1])   # 3
 
 # 查找重复元素
 CollUtil.find_duplicates([1, 2, 2, 3, 3, 3])  # [2, 3]
+
+CollUtil.pop_part([1, 2, 3, 4], 2)  # [1, 2], 原列表变为 [3, 4]
+CollUtil.split_list([1, 2, 3, 4, 5], 2)  # [[1, 2], [3, 4], [5]]
+CollUtil.edit([1, 2, 3], lambda x: x * 2)  # [2, 4, 6]
+CollUtil.filter_new([1, 2, 3, 4], lambda x: x > 2)  # [3, 4]
+CollUtil.get_field_values([{"n": "a"}, {"n": "b"}], "n")  # ["a", "b"]
+CollUtil.index_of([1, 2, 3], 2)  # 1
+CollUtil.add_if_absent([1, 2], 3)  # True（列表变为 [1, 2, 3]）
+CollUtil.get([1, 2, 3], 10)  # None
+CollUtil.size(None)  # 0
+CollUtil.is_equal_list([1, 2], [1, 2])  # True
 ```
 
 ### 集合运算
@@ -101,6 +115,28 @@ CollUtil.intersection([1, 2, 3], [2, 3, 4])  # [2, 3]
 
 # 对称差集
 CollUtil.disjunction([1, 2, 3], [2, 3, 4])  # [1, 4]
+
+# 集合运算（增强）
+CollUtil.union([1, 2], [3, 4])           # [1, 2, 3, 4]（不去重）
+CollUtil.union_distinct([1, 2], [2, 3])  # [1, 2, 3]（去重）
+CollUtil.intersection_distinct([1, 2, 2], [2, 2, 3])  # [2]
+CollUtil.subtract([1, 2, 3, 4], [2, 4])  # [1, 3]
+```
+
+```python
+# 统计
+CollUtil.count_map(["a", "b", "a"])  # {"a": 2, "b": 1}
+CollUtil.field_value_map(
+    [{"name": "a", "id": 1}], "name", "id"
+)  # {"a": 1}
+CollUtil.to_map_list([1, 2, 3, 4], lambda x: "odd" if x % 2 else "even")
+# {"odd": [1, 3], "even": [2, 4]}
+
+# 分组
+CollUtil.group_by_field(
+    [{"type": "a", "v": 1}, {"type": "a", "v": 2}], "type"
+)  # {"a": [{...}, {...}]}
+
 ```
 
 ## ListUtil
@@ -119,4 +155,19 @@ ListUtil.page([1, 2, 3, 4, 5], 1, 2)  # [1, 2]（第1页，每页2条）
 # 空安全
 ListUtil.empty_if_null(None)     # []
 ListUtil.default_if_empty([], [0])  # [0]
+
+ListUtil.of(1, 2, 3)  # [1, 2, 3]
+ListUtil.empty()       # []
+
+ListUtil.set_or_padding([1, 2], 4, 99)  # [1, 2, None, None, 99]
+ListUtil.last_index_of([1, 2, 1, 3], 1)  # 2
+
+lst = [1, 2, 3]
+ListUtil.swap(lst, 0, 2)  # lst 变为 [3, 2, 1]
+
+ListUtil.move([1, 2, 3, 4], 0, 2)  # [2, 3, 1, 4]
+ListUtil.zip_([1, 2], ["a", "b"])  # [(1, "a"), (2, "b")]
+
+ListUtil.split([1, 2, 3, 4, 5], 2)     # [[1, 2], [3, 4], [5]]
+ListUtil.split_avg([1, 2, 3, 4, 5], 2)  # 平均分为2份
 ```

@@ -106,3 +106,47 @@ class CreditCodeUtil:
         expected_char = CreditCodeUtil._CHAR_MAP[expected_index]
 
         return code[17] == expected_char
+
+    @staticmethod
+    def is_credit_code_simple(code: str) -> bool:
+        """简单校验统一社会信用代码（仅检查长度和字符集）。
+
+        :param code: 待校验的代码
+        :return: 是否符合基本格式
+        """
+        if not code or len(code) != 18:
+            return False
+        code = code.upper()
+        for ch in code:
+            if ch not in CreditCodeUtil._CHAR_MAP:
+                return False
+        return True
+
+    @staticmethod
+    def random_credit_code() -> str:
+        """生成一个随机的统一社会信用代码（不一定能通过完整校验）。
+
+        :return: 18 位统一社会信用代码字符串
+        """
+        import secrets
+
+        chars = CreditCodeUtil._CHAR_MAP
+        dept_chars = list(CreditCodeUtil._DEPT_CODES.keys())
+        dept = secrets.choice(dept_chars)
+        type_chars = list(CreditCodeUtil._TYPE_CODES.get(dept, {"1": ""}).keys())
+        type_code = secrets.choice(type_chars) if type_chars else "1"
+        # 6位行政区划码
+        region = "".join(secrets.choice("0123456789") for _ in range(6))
+        # 9位主体标识码
+        body = "".join(secrets.choice(chars) for _ in range(9))
+        # 计算校验码
+        partial = dept + type_code + region + body
+        check_sum = 0
+        for i in range(17):
+            char_index = chars.index(partial[i])
+            check_sum += char_index * CreditCodeUtil._WEIGHT_FACTORS[i]
+        remainder = check_sum % 31
+        if remainder == 0:
+            remainder = 31
+        check_char = chars[31 - remainder]
+        return partial + check_char

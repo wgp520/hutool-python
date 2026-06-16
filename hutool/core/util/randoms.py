@@ -106,19 +106,22 @@ class RandomUtil:
         return random.choice(sequence)
 
     @staticmethod
-    def random_eles(sequence: Sequence[T], count: int) -> List[T]:
+    def random_eles(sequence: Sequence[T], count: int, allow_duplicate: bool = False) -> List[T]:
         """
-        从序列中随机选取指定个数的元素（不重复）。
+        从序列中随机选取指定个数的元素。
 
         :param sequence: 待选取的序列
         :param count: 选取个数
+        :param allow_duplicate: 是否允许重复选取，默认 False（不重复）
         :return: 随机选中的元素列表
-        :raises ValueError: 序列为空、count 为负数或大于序列长度时
+        :raises ValueError: 序列为空、count 为负数或（不允许重复时）大于序列长度
         """
         if not sequence:
             raise ValueError("序列不能为空")
         if count < 0:
             raise ValueError(f"count({count}) 不能为负数")
+        if allow_duplicate:
+            return [random.choice(list(sequence)) for _ in range(count)]
         if count > len(sequence):
             raise ValueError(f"count({count}) 不能大于序列长度({len(sequence)})")
         return random.sample(list(sequence), count)
@@ -152,12 +155,12 @@ class RandomUtil:
     @staticmethod
     def random_string_lower(length: int) -> str:
         """
-        生成随机小写字母字符串。
+        生成随机小写字母+数字字符串
 
         :param length: 字符串长度
         :return: 随机小写字符串
         """
-        return RandomUtil.random_string(length, string.ascii_lowercase)
+        return RandomUtil.random_string(length, string.ascii_lowercase + string.digits)
 
     @staticmethod
     def random_numbers(length: int) -> str:
@@ -328,3 +331,144 @@ class RandomUtil:
             return []
         actual_count = min(count, len(filtered))
         return random.sample(filtered, actual_count)
+
+    # ------------------------------------------------------------------
+    # SecureRandom 工厂方法
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def create_secure_random(seed: Optional[bytes] = None) -> "random.Random":
+        """
+        创建随机数生成器实例。
+
+        :param seed: 随机种子，None 表示使用系统熵
+        :return: random.Random 实例
+        """
+        rng = random.Random()
+        if seed is not None:
+            rng.seed(seed)
+        return rng
+
+    @staticmethod
+    def get_secure_random() -> "random.Random":
+        """
+        获取默认随机数生成器。
+
+        :return: random.Random 实例
+        """
+        return random.Random()
+
+    @staticmethod
+    def get_secure_random_strong() -> "random.Random":
+        """
+        获取强随机数生成器（使用系统熵）。
+
+        :return: random.Random 实例
+        """
+        return random.Random(secrets.token_bytes(32))
+
+    # ------------------------------------------------------------------
+    # 扩展随机数生成
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def random_int_with_bound(
+        min_include: int = 0,
+        max_exclude: int = 100,
+        include_min: bool = True,
+        include_max: bool = False,
+    ) -> int:
+        """
+        带边界控制的随机整数。
+
+        :param min_include: 最小值
+        :param max_exclude: 最大值
+        :param include_min: 是否包含最小值，默认 True
+        :param include_max: 是否包含最大值，默认 False
+        :return: 随机整数
+        """
+        low = min_include if include_min else min_include + 1
+        high = max_exclude if not include_max else max_exclude + 1
+        if low >= high:
+            raise ValueError(f"无效范围: [{low}, {high})")
+        return secrets.randbelow(high - low) + low
+
+    @staticmethod
+    def random_ints_permutation(count: int) -> List[int]:
+        """
+        生成 [0, count) 的随机排列。
+
+        :param count: 数量
+        :return: 随机排列列表
+        """
+        lst = list(range(count))
+        random.shuffle(lst)
+        return lst
+
+    @staticmethod
+    def random_number_char() -> str:
+        """
+        生成随机数字字符（'0'-'9'）。
+
+        :return: 随机数字字符
+        """
+        return str(secrets.randbelow(10))
+
+    @staticmethod
+    def random_char_no_arg() -> str:
+        """
+        从大小写字母+数字中随机取一个字符（无参版本）。
+
+        :return: 随机字符
+        """
+        base = string.ascii_letters + string.digits
+        return secrets.choice(base)
+
+    @staticmethod
+    def random_ele_list(sequence: Sequence[T], count: int) -> List[T]:
+        """
+        从序列中随机选取不重复的元素列表。
+
+        :param sequence: 待选取的序列
+        :param count: 选取个数
+        :return: 不重复的随机元素列表
+        """
+        return RandomUtil.random_eles(sequence, count, allow_duplicate=False)
+
+    @staticmethod
+    def random_ele_set(sequence: Sequence[T], count: int) -> set:
+        """
+        从序列中随机选取不重复的元素集合。
+
+        :param sequence: 待选取的序列
+        :param count: 选取个数
+        :return: 不重复的随机元素集合
+        """
+        return set(RandomUtil.random_eles(sequence, count, allow_duplicate=False))
+
+    @staticmethod
+    def random_ele_from_first_n(sequence: Sequence[T], limit: int) -> T:
+        """
+        从前 limit 个元素中随机选取一个。
+
+        :param sequence: 待选取的序列
+        :param limit: 限制范围
+        :return: 随机元素
+        :raises ValueError: 序列为空或 limit <= 0
+        """
+        if not sequence:
+            raise ValueError("序列不能为空")
+        if limit <= 0:
+            raise ValueError("limit 必须大于 0")
+        actual_limit = min(limit, len(sequence))
+        return random.choice(list(sequence)[:actual_limit])
+
+    @staticmethod
+    def weight_random(pairs: List[Tuple[int, Any]]) -> Any:
+        """
+        创建加权随机生成器（weighted_choice 的别名）。
+
+        :param pairs: 权重-值对列表
+        :return: 随机选中的值
+        """
+        return RandomUtil.weighted_choice(pairs)

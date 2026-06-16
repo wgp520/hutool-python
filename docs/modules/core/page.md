@@ -27,4 +27,18 @@ PageUtil.get_start(3, 10)      # 20（第3页，每页10条）
 
 # 第一页
 PageUtil.first_page()          # 1
+
+# 设置/获取首页页码
+PageUtil.set_first_page_no(1)
+PageUtil.get_first_page_no()       # 1
+
+# 获取结束位置
+PageUtil.get_end(2, 10)            # 20
+
+# 转为 (start, end) 元组
+start, end = PageUtil.trans_to_start_end(2, 10)  # (10, 20)
+
+# 计算总页数
+PageUtil.to_segment(100, 10)       # 10
+PageUtil.to_segment(101, 10)       # 11
 ```

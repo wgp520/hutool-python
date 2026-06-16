@@ -1,7 +1,6 @@
 """
 类型转换工具类
 
-对应 PyHutool Convert.py 的核心功能。
 提供 bytes↔int、通用类型转换等常用类型转换方法。
 """
 

@@ -94,3 +94,23 @@ class TestReUtil:
     def test_extract_multi_and_del_pre(self):
         result = ReUtil.extract_multi_and_del_pre(r"\d+", "a1b2c3")
         assert result == ["1", "2", "3"]
+
+    def test_get_all_group_names(self):
+        """测试获取命名捕获组"""
+        names = ReUtil.get_all_group_names(r"(?P<year>\d{4})-(?P<month>\d{2})")
+        assert names == {"year": 1, "month": 2}
+
+    def test_get_all_group_names_no_names(self):
+        """测试无命名组"""
+        names = ReUtil.get_all_group_names(r"(\d+)")
+        assert names == {}
+
+    def test_replace_by_func(self):
+        """测试正则替换+回调函数"""
+        result = ReUtil.replace_by_func("hello123", r"\d+", lambda m: "[NUM]")
+        assert result == "hello[NUM]"
+
+    def test_replace_by_func_upper(self):
+        """测试回调函数使用匹配内容"""
+        result = ReUtil.replace_by_func("abc def", r"\b\w", lambda m: m.group(0).upper())
+        assert result == "Abc Def"

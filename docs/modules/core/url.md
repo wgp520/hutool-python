@@ -51,4 +51,15 @@ URLUtil.complete_url("https://example.com/a/b", "../c")
 # 解析 URL 参数
 URLUtil.get_params("https://example.com?a=1&b=2")
 # {"a": "1", "b": "2"}
+
+# Data URI
+URLUtil.get_data_uri_base64("image/png", "iVBORw0KGgo=")
+# "data:image/png;base64,iVBORw0KGgo="
+
+URLUtil.get_data_uri("text/plain", "base64", "SGVsbG8=")
+# "data:text/plain;base64,SGVsbG8="
+
+# normalize 改进（自动处理反斜杠、合并连续斜杠）
+URLUtil.normalize("http://example.com\\\\path\\\\to")
+# "http://example.com/path/to"
 ```
