@@ -16,7 +16,7 @@ pip install build twine
 ```
 
 | 工具 | 用途 |
-|------|------|
+| ---- | ---- |
 | `build` | 按 PEP 517 标准构建 sdist 和 wheel |
 | `twine` | 上传分发包到 PyPI |
 
@@ -92,7 +92,7 @@ python -m build
 
 构建完成后 `dist/` 目录下应有 4 个文件：
 
-```
+```text
 dist/
 ├── hutool_python-1.0.0-py3-none-any.whl    # wheel（推荐安装格式）
 ├── hutool_python-1.0.0.tar.gz              # sdist（源码包）
@@ -141,7 +141,7 @@ git push origin v1.0.1
 
 ### 流水线流程
 
-```
+```text
 test  →  build  →  GitHub Release  →  PyPI
 │          │            │                │
 │          │            │                └─ twine upload（需 PYPI_API_TOKEN）
@@ -155,7 +155,7 @@ test  →  build  →  GitHub Release  →  PyPI
 在仓库 **Settings → Secrets and variables → Actions** 中添加：
 
 | Secret 名称 | 说明 |
-|---|---|
+| --- | --- |
 | `PYPI_API_TOKEN` | PyPI API Token，从 <https://pypi.org/manage/account/token/> 创建 |
 
 在仓库 **Settings → Environments** 中创建名为 `pypi` 的环境（可配置审批保护）。

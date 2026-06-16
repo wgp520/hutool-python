@@ -24,7 +24,7 @@ pip install -e .
 Hutool-Python 依赖以下第三方库，安装时会自动处理：
 
 | 依赖 | 用途 |
-|---|---|
+| --- | --- |
 | `pendulum>=3.0` | 日期时间处理（`DateUtil`） |
 | `httpx>=0.27` | HTTP 客户端（`HttpUtil`） |
 | `cryptography>=42.0` | 加密解密（`SecureUtil`、`DigestUtil`） |
@@ -47,7 +47,7 @@ pip install hutool-python[dev]
 额外安装：
 
 | 依赖 | 用途 |
-|---|---|
+| --- | --- |
 | `pytest>=8.0` | 测试框架 |
 | `ruff>=0.4.0` | 代码格式化和检查 |
 

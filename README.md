@@ -13,11 +13,11 @@
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
--------------------------------------------------------------------------------
+---
 
 [**🌎English Version**](README-EN.md)
 
--------------------------------------------------------------------------------
+---
 
 ## 📚 简介
 
@@ -37,7 +37,7 @@
 ## 🛠️ 包含模块
 
 | 模块 | 介绍 | 对应 Java Hutool |
-|------|------|-----------------|
+| ---- | ---- | ----------------- |
 | `core/util/` | 核心工具类：字符串、数字、数组、对象、布尔、随机、ID、正则、哈希、转义、URL、版本、分页等 | `cn.hutool.core.util` |
 | `core/coll.py` | 集合工具：`CollUtil`、`ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map 工具：`MapUtil`、`BiMap`、`DictUtil` | `cn.hutool.core.map` |
@@ -61,10 +61,10 @@
 | `jwt.py` | JWT 工具：`JWTUtil`（基于 PyJWT） | `cn.hutool.jwt` |
 | `setting/` | 配置工具：`SettingUtil`、`YamlUtil`、`PropsUtil` | `cn.hutool.setting` |
 
-#### Python 独有模块
+### Python 独有模块
 
 | 模块 | 介绍 |
-|------|------|
+| ---- | ---- |
 | `core/bank.py` | 银行工具：`BankUtil`（IBAN 校验） |
 | `core/money.py` | 货币工具：`MoneyUtil`（元/分转换、精确计算） |
 | `core/workday.py` | 工作日工具：`WorkdayUtil`（法定节假日） |
@@ -275,7 +275,7 @@ from hutool import JWTUtil
 
 ## 📁 项目结构
 
-```
+```text
 hutool-python/
 ├── hutool/                    # Python 包
 │   ├── __init__.py
@@ -337,7 +337,7 @@ pytest tests/test_core/test_strings.py -v
 ## 🔧 依赖清单
 
 | 依赖库 | 用途 | 对应模块 |
-|--------|------|---------|
+| ------ | ---- | ------- |
 | `pendulum>=3.0` | 日期时间处理 | `core/date.py` |
 | `httpx>=0.27` | HTTP 客户端 | `httpx_client/` |
 | `cryptography>=42.0` | 加密算法 | `crypto/` |
@@ -357,7 +357,7 @@ pytest tests/test_core/test_strings.py -v
 ### 方法名映射规则
 
 | Java Hutool | Hutool-Python | 示例 |
-|------------|---------------|------|
+| ------------ | --------------- | ---- |
 | `StrUtil.isBlank()` | `StrUtil.is_blank()` | 驼峰 → 蛇形 |
 | `DateUtil.offsetDay()` | `DateUtil.offset_day()` | 驼峰 → 蛇形 |
 | `new DateTime()` | `DateTime()` | Python 无 `new` |

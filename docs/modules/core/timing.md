@@ -54,7 +54,7 @@ print(timer.elapsed)
 ### Timer 属性与方法
 
 | 方法/属性 | 说明 |
-|---|---|
+| --- | --- |
 | `start()` | 开始计时（已在运行时抛 `RuntimeError`） |
 | `stop()` | 停止计时（未启动时抛 `RuntimeError`） |
 | `reset()` | 重置累计时间为零 |

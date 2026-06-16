@@ -45,7 +45,7 @@ for user in result:
 ### 查询谓词
 
 | 谓词 | 说明 | 示例 |
-|---|---|---|
+| --- | --- | --- |
 | `gt` / `gte` | 大于 / 大于等于 | `age__gt=18` |
 | `lt` / `lte` | 小于 / 小于等于 | `age__lte=30` |
 | `contains` / `icontains` | 包含 / 包含（忽略大小写） | `name__contains="li"` |

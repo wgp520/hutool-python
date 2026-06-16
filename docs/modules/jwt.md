@@ -61,7 +61,7 @@ payload = JWTUtil.get_payload(token)
 ## 支持的算法
 
 | 算法 | 说明 |
-|------|------|
+| ---- | ---- |
 | HS256 | HMAC-SHA256（默认） |
 | HS384 | HMAC-SHA384 |
 | HS512 | HMAC-SHA512 |

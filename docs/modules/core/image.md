@@ -28,7 +28,7 @@ ImageUtil.detect_image_type(b'random data')  # None
 ### 支持的格式
 
 | 格式 | 返回值 | 魔数 |
-|---|---|---|
+| --- | --- | --- |
 | JPEG | `"jpg"` | `FF D8 FF` |
 | PNG | `"png"` | `89 50 4E 47 0D 0A 1A 0A` |
 | GIF | `"gif"` | `47 49 46 38 37/39 61` |

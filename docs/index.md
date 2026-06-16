@@ -128,7 +128,7 @@ YAML、Properties 配置文件读写
 ## 与 Java Hutool 的对应关系
 
 | Python 模块 | Java Hutool 模块 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | `hutool.core` | `cn.hutool.core` | 核心工具类 |
 | `hutool.httpx_client` | `cn.hutool.http` | HTTP 客户端 |
 | `hutool.json` | `cn.hutool.json` | JSON 工具 |

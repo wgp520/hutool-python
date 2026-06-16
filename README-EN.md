@@ -13,11 +13,11 @@
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
--------------------------------------------------------------------------------
+---
 
 [**🌎中文说明**](README.md)
 
--------------------------------------------------------------------------------
+---
 
 ## 📚 Introduction
 
@@ -35,7 +35,7 @@
 ## 🛠️ Modules
 
 | Module | Description | Java Hutool Equivalent |
-|--------|-------------|----------------------|
+| ------ | ----------- | ---------------------- |
 | `core/util/` | Core utilities: string, number, array, object, boolean, random, ID, regex, hash, escape, URL, version, pagination, etc. | `cn.hutool.core.util` |
 | `core/coll.py` | Collection utilities: `CollUtil`, `ListUtil` | `cn.hutool.core.collection` |
 | `core/map.py` | Map utilities: `MapUtil`, `BiMap`, `DictUtil` | `cn.hutool.core.map` |
@@ -59,10 +59,10 @@
 | `jwt.py` | JWT utilities: `JWTUtil` (powered by PyJWT) | `cn.hutool.jwt` |
 | `setting/` | Configuration: `SettingUtil`, `YamlUtil`, `PropsUtil` | `cn.hutool.setting` |
 
-#### Python-only Modules
+### Python-only Modules
 
 | Module | Description |
-|--------|-------------|
+| ------ | ----------- |
 | `core/bank.py` | Banking utilities: `BankUtil` (IBAN validation) |
 | `core/money.py` | Currency utilities: `MoneyUtil` (yuan/fen conversion, precise calculation) |
 | `core/workday.py` | Workday utilities: `WorkdayUtil` (public holidays) |
@@ -273,7 +273,7 @@ from hutool import JWTUtil
 
 ## 📁 Project Structure
 
-```
+```text
 hutool-python/
 ├── hutool/                    # Python package
 │   ├── __init__.py
@@ -335,7 +335,7 @@ pytest tests/test_core/test_strings.py -v
 ## 🔧 Dependencies
 
 | Library | Purpose | Module |
-|---------|---------|--------|
+| ------- | ------- | ------ |
 | `pendulum>=3.0` | Date/time handling | `core/date.py` |
 | `httpx>=0.27` | HTTP client | `httpx_client/` |
 | `cryptography>=42.0` | Encryption algorithms | `crypto/` |
@@ -355,7 +355,7 @@ pytest tests/test_core/test_strings.py -v
 ### Method Name Mapping
 
 | Java Hutool | Hutool-Python | Rule |
-|------------|---------------|------|
+| ------------ | --------------- | ---- |
 | `StrUtil.isBlank()` | `StrUtil.is_blank()` | camelCase -> snake_case |
 | `DateUtil.offsetDay()` | `DateUtil.offset_day()` | camelCase -> snake_case |
 | `new DateTime()` | `DateTime()` | No `new` in Python |

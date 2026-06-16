@@ -105,7 +105,7 @@ SecureUtil.caesar_decode("Khoor", 3)   # "Hello"
 ## 支持的算法
 
 | 类型 | 算法 |
-|------|------|
+| ---- | ---- |
 | 对称加密 | AES, DES, 3DES |
 | 非对称加密 | RSA |
 | 摘要 | MD5, SHA-1, SHA-256, SHA-384, SHA-512 |

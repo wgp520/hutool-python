@@ -34,7 +34,7 @@ with ProfUtil.profile_context(sort_by="cumtime", limit=10):
 ### 参数说明
 
 | 参数 | 默认值 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | `sort_by` | `"cumtime"` | 排序字段：`"tottime"`（自身时间）、`"cumtime"`（累计时间）、`"calls"` 等 |
 | `limit` | `10` | 打印行数 |
 
