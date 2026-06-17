@@ -23,6 +23,7 @@
 - **`WeakCache`** - 弱引用缓存
 - **`CircleCaptcha`** - 圆干扰验证码
 - **`Struct`** - 字典子类，支持属性访问（`s.name`）+ `Struct.from_dict` 类方法
+- **`SqlUtil`** - SQL 生成工具（SELECT/INSERT/UPDATE/DELETE/备份表，可选 numpy 支持）
 
 #### 现有工具类大幅扩展
 

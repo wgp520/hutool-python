@@ -49,6 +49,7 @@ from .core.memory_repo import MemoryRepo
 from .core.money import MoneyUtil
 from .core.net import Ipv4Util, MaskBit, NetUtil
 from .core.prof import ProfUtil
+from .core.sql import SqlUtil
 from .core.struct import Struct
 from .core.text.csv import CsvUtil
 from .core.text.stop_watch import StopWatch, TaskInfo
@@ -189,6 +190,7 @@ __all__ = [
     "SensitiveUtil",
     "SettingUtil",
     "SignUtil",
+    "SqlUtil",
     "StopWatch",
     "StrBuilder",
     "StrUtil",
