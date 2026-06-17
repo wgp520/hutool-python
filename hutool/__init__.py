@@ -92,7 +92,7 @@ from .core.util.version import VersionUtil
 from .core.util.xml import XmlUtil
 from .core.util.zip import ZipUtil
 from .core.workday import WorkdayUtil
-from .cron import CronPattern, CronUtil
+from .cron import CronPattern, CronUtil, CronValidator
 from .crypto import DigestUtil, SecureUtil, SignUtil
 from .dfa import SensitiveUtil
 from .extra import EmojiUtil, PinyinUtil, QrCodeUtil, TemplateUtil
@@ -130,6 +130,7 @@ __all__ = [
     "CreditCodeUtil",
     "CronPattern",
     "CronUtil",
+    "CronValidator",
     "CsvUtil",
     "DataSizeUtil",
     "DateTime",
