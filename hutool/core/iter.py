@@ -98,7 +98,7 @@ class IterUtil:
             IterUtil.quantify([1, 2, 3, 4], lambda x: x % 2 == 0)  -> 2
 
         :param iterable: 可迭代对象
-        :param pred: 谓词函数，默认为 ``bool``（统计真值个数）
+        :param pred: 谓词函数，默认为 ``bool`` （统计真值个数）
         :return: 满足条件的元素数量
         """
         return sum(1 for item in iterable if pred(item))
@@ -466,7 +466,7 @@ class IterUtil:
 
     @staticmethod
     def filter_to_list(iterable: Iterable, predicate: Callable[[Any], bool]) -> list:
-        """过滤并返回新列表（等同于 filter_）。
+        """过滤并返回新列表（等同于 ``filter_``）。
 
         :param iterable: 可迭代对象
         :param predicate: 过滤条件

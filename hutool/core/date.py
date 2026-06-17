@@ -1777,7 +1777,7 @@ class DateUtil:
         """
         将各种日期格式统一转换为 ``datetime`` 对象。
 
-        支持：``datetime``、``date``、``str``（多种 ISO 格式）。
+        支持：``datetime``、``date``、 ``str`` （多种 ISO 格式）。
 
         :param value: 待转换的值
         :return: datetime 对象，输入为 None/空时返回 None

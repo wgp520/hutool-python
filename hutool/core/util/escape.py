@@ -101,7 +101,7 @@ class EscapeUtil:
         """将常用HTML实体（&lt; &gt; &amp; &quot; &#39;）还原为原始字符。
 
         与 :meth:`unescape_html` 的区别在于本方法仅处理 5 个基本实体，
-        不使用 ``html.unescape``（后者会处理所有 HTML5 实体）。
+        不使用 ``html.unescape`` （后者会处理所有 HTML5 实体）。
 
         Examples::
 

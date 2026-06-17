@@ -5,7 +5,7 @@ from typing import List, Optional, Set
 
 
 class CronPattern:
-    """Cron表达式解析与匹配
+    r"""Cron表达式解析与匹配
 
     支持标准5位cron: 分 时 日 月 周
 
@@ -14,7 +14,7 @@ class CronPattern:
     - ``*`` : 匹配任意值
     - ``,`` : 列举多个值 (如 1,3,5)
     - ``-`` : 范围 (如 1-5)
-    - ``/`` : 步长 (如 */5 表示每5个单位)
+    - ``/`` : 步长 (如 ``\*/5`` 表示每5个单位)
     """
 
     def __init__(self, pattern: str) -> None:

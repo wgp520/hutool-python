@@ -2644,7 +2644,7 @@ class CharSequenceUtil:
         """
         截断 *string* 到 *max_length* 长度，超出时追加 ``"..."``。
 
-        总长度恰好为 *max_length*（含后缀 ``"..."``）。
+        总长度恰好为 *max_length* （含后缀 ``"..."``）。
         与 Java Hutool 行为一致。
 
         :param string: 待截断的字符串
@@ -3742,7 +3742,7 @@ class StrUtil(CharSequenceUtil, StrPool):
         当 ``replacement`` 为空字符串时，去除重复只保留一个；否则用替换串替代重复部分。
 
         :param s: 待处理的字符串
-        :param replacement: 重复部分的替换值，默认 ``""``（去除重复）
+        :param replacement: 重复部分的替换值，默认 ``""`` （去除重复）
         :return: 压缩后的字符串
         """
         if s is None:

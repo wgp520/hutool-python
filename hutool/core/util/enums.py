@@ -216,7 +216,7 @@ class EnumUtil:
     def like_value_of(enum_class: Type[Enum], name: str) -> Optional[Enum]:
         """模糊匹配枚举名（包含匹配）。
 
-        遍历所有成员，返回第一个名称中包含 ``name``（忽略大小写）的成员。
+        遍历所有成员，返回第一个名称中包含 ``name`` （忽略大小写）的成员。
 
         :param enum_class: 枚举类
         :param name: 待匹配的名称片段

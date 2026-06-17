@@ -196,7 +196,7 @@ class CronUtil:
     def set_cron_setting(cls, setting_path: str) -> None:
         """加载 Cron 配置文件。
 
-        配置文件每行格式为 ``cron_pattern=task_name``（暂仅记录路径）。
+        配置文件每行格式为 ``cron_pattern=task_name`` （暂仅记录路径）。
 
         :param setting_path: 配置文件路径
         """

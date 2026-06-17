@@ -910,7 +910,7 @@ class CheckUtil:
         """
         判断字符串中是否包含中文字符。
 
-        与 :meth:`is_chinese`（全部为中文）不同，此方法检测是否包含。
+        与 :meth:`is_chinese` （全部为中文）不同，此方法检测是否包含。
 
         :param value: 待检测的字符串
         :return: 是否包含中文
