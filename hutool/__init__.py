@@ -71,6 +71,7 @@ from .core.util.credit_code import CreditCodeUtil
 from .core.util.desensitized import DesensitizedUtil
 from .core.util.enums import EnumUtil
 from .core.util.escape import EscapeUtil
+from .core.util.func import FuncUtil
 from .core.util.hasher import HashUtil
 from .core.util.hex import HexUtil
 from .core.util.id import IdUtil
@@ -145,6 +146,7 @@ __all__ = [
     "FIFOCache",
     "FileNameUtil",
     "FileUtil",
+    "FuncUtil",
     "FuncOnce",
     "HashUtil",
     "HexUtil",

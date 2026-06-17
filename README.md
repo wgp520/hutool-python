@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
     <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
-    <img src="https://img.shields.io/badge/tests-2559 passed-brightgreen.svg" />
+    <img src="https://img.shields.io/badge/tests-2587 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
