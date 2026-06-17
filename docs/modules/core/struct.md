@@ -9,7 +9,7 @@
 ### 创建 Struct
 
 ```python
-from hutool import Struct, make_struct
+from hutool import Struct
 
 # 直接创建
 s = Struct({"name": "test", "age": 20})
@@ -36,30 +36,6 @@ s.user.tags[0].id # 1
 # 非递归模式
 s = Struct.from_dict({"user": {"name": "test"}}, recursive=False)
 s.user            # {'name': 'test'}（仍是 dict）
-```
-
-### 递归转换
-
-```python
-data = {
-    "user": {
-        "name": "Alice",
-        "address": {"city": "Beijing"}
-    },
-    "tags": [{"id": 1}, {"id": 2}]
-}
-s = make_struct(data)
-s.user.name            # 'Alice'
-s.user.address.city    # 'Beijing'
-s.tags[0].id           # 1
-```
-
-### 非递归模式
-
-```python
-s = make_struct({"user": {"name": "test"}}, recursive=False)
-s.user            # {'name': 'test'}（仍是 dict）
-isinstance(s.user, Struct)  # False
 ```
 
 ---
