@@ -19,6 +19,12 @@ CronUtil.schedule_at_fixed_rate(lambda: print("每10秒"), period_seconds=10)
 # 停止/重启
 CronUtil.stop()
 CronUtil.restart()
+
+# setCronSetting — 加载 Cron 配置文件
+CronUtil.set_cron_setting("/path/to/cron.properties")
+
+# updatePattern — 更新 Cron 表达式
+CronUtil.update_pattern("0 */10 * * *")  # 改为每 10 分钟
 ```
 
 ## CronPattern

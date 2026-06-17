@@ -52,6 +52,29 @@ HashUtil.hf_hash("hello")
 HashUtil.hf_ip_hash("hello")
 ```
 
+### FNV 哈希（增强）
+
+```python
+# fnvHash — FNV-1a 32 位哈希
+HashUtil.fnv_hash(b"hello")    # 32 位哈希值
+HashUtil.fnv_hash("hello")     # 支持字符串输入
+```
+
+### Java 兼容
+
+```python
+# javaDefaultHash — Java hashCode 完全兼容
+HashUtil.java_default_hash("hello")  # 与 Java 的 "hello".hashCode() 一致
+```
+
+### 对象标识哈希
+
+```python
+# identityHashCode — 对象标识哈希（等价于 Python id()）
+obj = [1, 2, 3]
+HashUtil.identity_hash_code(obj)  # 基于对象标识的哈希值
+```
+
 ### MurmurHash / CityHash / MetroHash
 
 ```python

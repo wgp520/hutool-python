@@ -21,6 +21,15 @@ EmojiUtil.unicode_to_emoji("\\U0001F600")  # "😀"
 
 # 移除 Emoji
 EmojiUtil.remove_emojis("hello 😀 world")  # "hello  world"
+
+# removeAllEmojis — 移除所有 Emoji（别名）
+EmojiUtil.remove_all_emojis("hello 😀👍 world")  # "hello  world"
+
+# toHtmlHex — Emoji 转 HTML 十六进制实体
+EmojiUtil.to_html_hex("😀")   # "&#x1F600;"
+
+# toUnicode — Emoji 转 Unicode 表示
+EmojiUtil.to_unicode("😀")    # "\\U0001F600"
 ```
 
 ## PinyinUtil
@@ -60,6 +69,9 @@ result = TemplateUtil.render("{% for i in items %}{{ i }},{% endfor %}",
 engine = TemplateUtil.create_engine("/path/to/templates")
 template = engine.get_template("index.html")
 result = template.render({"title": "test"})
+
+# renderTemplate — render_file 的别名
+result = TemplateUtil.render_template("/path/to/template.html", {"name": "World"})
 ```
 
 ## QrCodeUtil
@@ -80,4 +92,19 @@ image_bytes = QrCodeUtil.generate_as_bytes("https://example.com",
 # 生成并保存到文件
 QrCodeUtil.generate_to_file("https://example.com", "/path/to/qr.png",
                             width=300, height=300)
+```
+
+### ASCII 艺术二维码
+
+```python
+# generateAsAsciiArt — 生成 ASCII 艺术二维码
+ascii_art = QrCodeUtil.generate_as_ascii_art("https://example.com")
+print(ascii_art)
+# ██████████████    ██  ██████
+# ██          ██  ████    ██
+# ██  ██████  ██    ██  ████
+# ...
+
+# toAsciiArt — QR 图片转 ASCII 艺术
+text = QrCodeUtil.to_ascii_art("/path/to/qr.png")
 ```

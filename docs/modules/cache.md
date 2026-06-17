@@ -104,3 +104,102 @@ cache.capacity()              # 容量
 cache.clear()                 # 清空
 cache.is_full()               # 是否已满
 ```
+
+## 缓存装饰器
+
+所有缓存装饰器为 class-based 实现，支持有括号/无括号、同步/协程。
+详见 {doc}`装饰器文档 </modules/core/decorators>`。
+
+### cache_function — 函数缓存
+
+基于字典的函数缓存装饰器，支持 TTL 过期：
+
+```python
+from hutool import CacheFunction, CacheUtil
+
+# class-based（推荐）
+@CacheFunction(ttl=60)
+def expensive(x):
+    return x * 2
+
+# 或者
+@CacheUtil.cache_function(ttl=60)
+def also_expensive(x):
+    return x * 2
+
+expensive(5)   # 计算并缓存
+expensive(5)   # 直接返回缓存值
+
+# 访问内部缓存
+expensive.cache   # {(5,): (10, 1687000000.0)}
+
+# async
+@CacheFunction(ttl=60)
+async def async_expensive(x):
+    return x * 2
+```
+
+### lru_cache — 带 TTL 的 LRU 缓存
+
+结合 `functools.lru_cache` 的 LRU 淘汰策略与 TTL 过期机制：
+
+```python
+from hutool import TtlLruCache, CacheUtil
+
+# class-based（推荐）
+@TtlLruCache(maxsize=128, ttl=300)
+def compute(x):
+    return x ** 2
+
+# 或者
+@CacheUtil.lru_cache(maxsize=128, ttl=300)
+def also_compute(x):
+    return x ** 2
+
+compute(10)   # 计算并缓存
+compute(10)   # 直接返回缓存值（300 秒内）
+
+compute.cache_clear()   # 清空缓存
+compute.cache_info()    # 查看缓存命中信息
+```
+
+### memoize — 记忆化装饰器
+
+与 `cache_function` 相同，语义上用于记忆化重复计算：
+
+```python
+from hutool import Memoize, CacheUtil
+
+@Memoize(ttl=600)
+def fibonacci(n):
+    if n < 2:
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+# 或者
+@CacheUtil.memoize(ttl=600)
+def old_fibonacci(n):
+    ...
+```
+
+### func_once — 单次执行
+
+函数只执行一次，后续调用直接返回首次结果：
+
+```python
+from hutool import FuncOnce, CacheUtil
+
+# class-based（推荐）
+@FuncOnce
+def init():
+    print("初始化...")
+    return "initialized"
+
+# 或者
+@CacheUtil.func_once
+def old_init():
+    return "initialized"
+
+init()   # 打印 "初始化..."，返回 "initialized"
+init()   # 直接返回 "initialized"（不再打印）
+```

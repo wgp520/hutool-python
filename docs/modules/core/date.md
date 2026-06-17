@@ -229,6 +229,12 @@ first, last = DateUtil.get_quarterspan(date(2024, 5, 15))
 # 获取年首末日
 first, last = DateUtil.get_yearspan(date(2024, 6, 15))
 # first=date(2024, 1, 1), last=date(2024, 12, 31)
+
+# getDaySpan — 日跨度
+DateUtil.get_day_span(date(2024, 1, 1), date(2024, 1, 31))  # 30
+
+# getMonthSpan — 月跨度
+DateUtil.get_month_span(date(2024, 1, 1), date(2024, 6, 1))  # 5
 ```
 
 ### 月份加减
@@ -538,4 +544,178 @@ DateUtil.range_contains(
 # 年份+季度
 DateUtil.year_and_quarter(datetime(2024, 3, 15))  # "20241"
 DateUtil.year_and_quarter(datetime(2024, 9, 15))  # "20243"
+```
+
+### AM/PM 判断
+
+```python
+from datetime import datetime
+
+DateUtil.is_am(datetime(2024, 6, 15, 10, 0))  # True
+DateUtil.is_pm(datetime(2024, 6, 15, 14, 0))  # True
+```
+
+### 月内周次与月末日
+
+```python
+from datetime import date
+
+# weekOfMonth — 月内第几周
+DateUtil.week_of_month(date(2024, 6, 15))  # 3
+
+# getLastDayOfMonth — 月末日
+DateUtil.get_last_day_of_month(date(2024, 2, 1))   # 29（闰年）
+DateUtil.get_last_day_of_month(date(2023, 2, 1))   # 28
+DateUtil.get_last_day_of_month(date(2024, 1, 15))  # 31
+```
+
+### 毫秒偏移
+
+```python
+from datetime import datetime
+
+dt = datetime(2024, 6, 15, 12, 0, 0)
+DateUtil.offset_millisecond(dt, 1500)  # 12:00:01.500
+```
+
+### 解析扩展
+
+```python
+# 解析 CST 格式
+DateUtil.parse_cst("Mon Jun 16 12:00:00 CST 2026")
+
+# 解析 UTC 格式
+DateUtil.parse_utc("2024-01-15T10:30:00Z")
+
+# 解析 RFC 2822 格式
+DateUtil.parse_rfc2822("Mon, 15 Jan 2024 10:30:00 +0000")
+
+# 解析今日时间字符串
+DateUtil.parse_time_today("12:30:00")  # 今天 12:30:00
+```
+
+### 日期范围遍历
+
+```python
+from datetime import date
+
+# 日期范围遍历（生成器）
+for d in DateUtil.range_func(date(2024, 1, 1), date(2024, 1, 4)):
+    print(d)
+# 2024-01-01, 2024-01-02, 2024-01-03
+
+# 日期范围消费（回调）
+DateUtil.range_consume(date(2024, 1, 1), date(2024, 1, 4), lambda d: print(d))
+```
+
+### 计时与转换
+
+```python
+import time
+
+# 计时（返回毫秒）
+start = time.time()
+# ... 执行操作 ...
+ms = DateUtil.spend_nt(start)  # 消耗毫秒数
+
+# 转为秒级时间戳
+DateUtil.to_int_second(date(2024, 1, 1))  # 1704067200
+```
+
+### HTTP 日期格式
+
+```python
+from datetime import datetime
+
+DateUtil.format_http_date(datetime(2024, 3, 15, 14, 30, 0))
+# "Fri, 15 Mar 2024 14:30:00 GMT"
+```
+
+### 分组聚合
+
+```python
+from datetime import date
+from hutool import DateUtil
+
+# 按年分组
+dates = [date(2023, 1, 1), date(2023, 6, 15), date(2024, 3, 1)]
+DateUtil.group_by_year(dates)
+# {2023: [date(2023, 1, 1), date(2023, 6, 15)], 2024: [date(2024, 3, 1)]}
+
+# 按月分组
+DateUtil.group_by_month(dates)
+
+# 按季度分组
+DateUtil.group_by_quarter(dates)
+
+# 按周分组
+DateUtil.group_by_week(dates)
+
+# 按日分组
+DateUtil.group_by_day(dates)
+
+# 按小时分组
+DateUtil.group_by_hour([datetime(2024, 1, 1, 10, 0), datetime(2024, 1, 1, 10, 30)])
+```
+
+### 季度操作
+
+```python
+from datetime import date
+
+# getTertial — 获取半年（上/下半年）
+DateUtil.get_tertial(date(2024, 3, 15))  # 1（上半年）
+DateUtil.get_tertial(date(2024, 9, 15))  # 2（下半年）
+
+# tertialAdd — 半年加减
+DateUtil.tertial_add(date(2024, 3, 15), 1)  # 2024-09-15
+```
+
+### 便捷方法
+
+```python
+from datetime import date
+
+# 今天/昨天/明天
+DateUtil.today_str()       # "2024-06-15"
+DateUtil.yesterday_str()   # "2024-06-14"
+DateUtil.tomorrow_str()    # "2024-06-16"
+
+# 周首末日
+DateUtil.week_start(date(2024, 6, 15))  # date(2024, 6, 10)（周一）
+DateUtil.week_end(date(2024, 6, 15))    # date(2024, 6, 16)（周日）
+
+# 日首末时间
+DateUtil.day_start(date(2024, 6, 15))   # datetime(2024, 6, 15, 0, 0, 0)
+DateUtil.day_end(date(2024, 6, 15))     # datetime(2024, 6, 15, 23, 59, 59)
+
+# 月首末日
+DateUtil.month_start(date(2024, 6, 15)) # date(2024, 6, 1)
+DateUtil.month_end(date(2024, 6, 15))   # date(2024, 6, 30)
+```
+
+### 格式化便捷方法
+
+```python
+from datetime import datetime, date
+
+# format_date — 仅日期
+DateUtil.format_date(date(2024, 6, 15))        # "2024-06-15"
+
+# format_datetime — 日期时间
+DateUtil.format_datetime(datetime(2024, 6, 15, 14, 30, 0))
+# "2024-06-15 14:30:00"
+
+# format_time — 仅时间
+DateUtil.format_time(datetime(2024, 6, 15, 14, 30, 45))
+# "14:30:45"
+```
+
+### SimpleFormat 工厂
+
+```python
+# newSimpleFormat — 创建格式化函数
+fmt = DateUtil.new_simple_format("yyyy/MM/dd")
+from datetime import date
+fmt(date(2024, 6, 15))  # "2024/06/15"
 ```

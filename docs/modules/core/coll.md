@@ -171,3 +171,42 @@ ListUtil.zip_([1, 2], ["a", "b"])  # [(1, "a"), (2, "b")]
 ListUtil.split([1, 2, 3, 4, 5], 2)     # [[1, 2], [3, 4], [5]]
 ListUtil.split_avg([1, 2, 3, 4, 5], 2)  # 平均分为2份
 ```
+
+### 分块与去重
+
+```python
+# chunkBySize — 按大小分块
+CollUtil.chunk_by_size([1, 2, 3, 4, 5], 2)  # [[1, 2], [3, 4], [5]]
+
+# findDuplicates — 查找重复元素
+CollUtil.find_duplicates([1, 2, 2, 3, 3, 3])  # [2, 3]
+
+# removeDuplicates — 移除重复元素
+CollUtil.remove_duplicates([1, 2, 2, 3, 3])  # [1, 2, 3]
+```
+
+### 排序转 Map
+
+```python
+# sortToMap — 集合排序后转为有序 Map
+items = [{"name": "c", "val": 3}, {"name": "a", "val": 1}, {"name": "b", "val": 2}]
+CollUtil.sort_to_map(items, lambda x: x["name"], lambda x: x["val"])
+# {"a": 1, "b": 2, "c": 3}
+
+# sortEntryToList — Map 条目排序
+CollUtil.sort_entry_to_list({"b": 2, "a": 1, "c": 3})
+# [("a", 1), ("b", 2), ("c", 3)]
+
+# sortByEntry — 按 entry 排序（返回 OrderedDict）
+from collections import OrderedDict
+result = CollUtil.sort_by_entry({"b": 2, "a": 1})
+# OrderedDict([("a", 1), ("b", 2)])
+```
+
+### 类型转换
+
+```python
+# toCollection — 转为指定集合类型
+CollUtil.to_collection(range(5), list)    # [0, 1, 2, 3, 4]
+CollUtil.to_collection([1, 2, 2], set)    # {1, 2}
+```

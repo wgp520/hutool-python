@@ -1,5 +1,7 @@
 """哈希工具类"""
 
+from typing import Any
+
 
 class HashUtil:
     """哈希工具类，对应 Java cn.hutool.core.util.HashUtil
@@ -771,3 +773,23 @@ class HashUtil:
         for i in range(length):
             hash_val += ord(data[i % 4]) ^ ord(data[i])
         return hash_val
+
+    @staticmethod
+    def fnv_hash(data: bytes) -> int:
+        """FNV-1a 32位哈希（fnv1a 的别名）。
+
+        :param data: 输入字节数据
+        :return: 32位哈希值
+        """
+        return HashUtil.fnv1a(data)
+
+    @staticmethod
+    def identity_hash_code(obj: Any) -> int:
+        """对象标识哈希。
+
+        类似 Java 的 System.identityHashCode()，返回基于对象 id 的哈希值。
+
+        :param obj: 任意对象
+        :return: 哈希值
+        """
+        return id(obj)

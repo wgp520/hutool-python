@@ -146,3 +146,59 @@ class MoneyUtil:
         if rate >= 100:
             raise ValueError(f"税率必须小于 100%，当前值: {tax_rate}")
         return rate
+
+    @staticmethod
+    def netto(amount, tax_rate=None):
+        """从含税价计算不含税价（别名 netto，对应 huTools）。
+
+        :param amount: 含税价金额
+        :param tax_rate: 税率百分比
+        :return: 不含税价（Decimal）
+        """
+        return MoneyUtil.net_price(amount, tax_rate)
+
+    @staticmethod
+    def brutto(amount, tax_rate=None):
+        """从不含税价计算含税价（别名 brutto，对应 huTools）。
+
+        :param amount: 不含税价金额
+        :param tax_rate: 税率百分比
+        :return: 含税价（Decimal）
+        """
+        return MoneyUtil.gross_price(amount, tax_rate)
+
+    @staticmethod
+    def profit_margin(cost, selling_price):
+        """计算利润率。
+
+        公式：利润率 = (售价 - 成本) / 成本 × 100
+
+        :param cost: 成本价
+        :param selling_price: 售价
+        :return: 利润率百分比（Decimal）
+        :raises ValueError: 成本价为 0 时
+        """
+        cost_d = Decimal(str(cost))
+        selling_d = Decimal(str(selling_price))
+        if cost_d == 0:
+            raise ValueError("成本价不能为零")
+        margin = (selling_d - cost_d) / cost_d * 100
+        return margin.quantize(Decimal("0.01"), rounding=ROUND_HALF_DOWN)
+
+    @staticmethod
+    def cent_to_yuan(cent):
+        """分转元（别名，与 fen_to_yuan 等价）。
+
+        :param cent: 分金额
+        :return: 元金额（Decimal）
+        """
+        return MoneyUtil.fen_to_yuan(cent)
+
+    @staticmethod
+    def yuan_to_cent(yuan):
+        """元转分（别名，与 yuan_to_fen 等价）。
+
+        :param yuan: 元金额
+        :return: 分金额（int）
+        """
+        return MoneyUtil.yuan_to_fen(yuan)

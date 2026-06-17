@@ -74,3 +74,18 @@ class TestDesensitizedUtil:
         assert result[:6] == "913501"
         assert result[-4:] == "0Y43"
         assert "*" in result
+
+    def test_clear_mask(self):
+        assert DesensitizedUtil.clear_mask("hello") == "*****"
+
+    def test_clear_to_null(self):
+        assert DesensitizedUtil.clear_to_null("hello") is None
+
+    def test_desensitized(self):
+        assert DesensitizedUtil.desensitized("1234567890", 2, 6) == "12****7890"
+
+    def test_user_id(self):
+        assert DesensitizedUtil.user_id(12345) == "1****"
+
+    def test_user_id_short(self):
+        assert DesensitizedUtil.user_id(5) == "5"

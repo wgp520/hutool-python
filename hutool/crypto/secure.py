@@ -579,3 +579,167 @@ class SecureUtil:
             return hmac_mod.new(secret, sign_str, hash_name).hexdigest()
         else:
             return getattr(hashlib, algo)(sign_str.encode("utf-8")).hexdigest()
+
+    # ------------------------------------------------------------------ #
+    #  加密器工厂
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def aes_encryptor(key: bytes, mode: str = "CBC") -> tuple:
+        """AES 加密器工厂
+
+        返回 ``(encrypt_func, decrypt_func)`` 元组。
+        encrypt_func 接受 ``(data, iv=None)`` 参数。
+        decrypt_func 接受 ``(data, iv=None)`` 参数。
+
+        :param key: AES 密钥（16/24/32 字节）
+        :param mode: 加密模式，支持 CBC / ECB / CTR
+        :return: (encrypt_func, decrypt_func) 元组
+        :rtype: tuple
+        """
+
+        def _encrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.encrypt_aes(data, key, mode=mode, iv=iv)
+
+        def _decrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.decrypt_aes(data, key, mode=mode, iv=iv)
+
+        return _encrypt, _decrypt
+
+    @staticmethod
+    def des_encryptor(key: bytes, mode: str = "CBC") -> tuple:
+        """DES 加密器工厂
+
+        返回 ``(encrypt_func, decrypt_func)`` 元组。
+
+        :param key: DES 密钥（8 字节）
+        :param mode: 加密模式，支持 CBC / ECB
+        :return: (encrypt_func, decrypt_func) 元组
+        :rtype: tuple
+        """
+
+        def _encrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.encrypt_des(data, key, mode=mode, iv=iv)
+
+        def _decrypt(data: bytes, iv: Optional[bytes] = None) -> bytes:
+            return SecureUtil.decrypt_des(data, key, mode=mode, iv=iv)
+
+        return _encrypt, _decrypt
+
+    @staticmethod
+    def rc4_encryptor(key: Union[str, bytes]) -> tuple:
+        """RC4 流密码加密器工厂
+
+        返回 ``(encrypt_func, decrypt_func)`` 元组。
+        RC4 加密和解密使用相同操作，因此两个函数等价。
+
+        :param key: RC4 密钥（任意长度字节或字符串）
+        :return: (encrypt_func, decrypt_func) 元组
+        :rtype: tuple
+        """
+        key_bytes = SecureUtil._ensure_bytes(key)
+
+        def _rc4(data: bytes) -> bytes:
+            """RC4 加密/解密（对称操作）"""
+            S = list(range(256))
+            j = 0
+            for i in range(256):
+                j = (j + S[i] + key_bytes[i % len(key_bytes)]) % 256
+                S[i], S[j] = S[j], S[i]
+            i = 0
+            j = 0
+            result = bytearray()
+            for byte in data:
+                i = (i + 1) % 256
+                j = (j + S[i]) % 256
+                S[i], S[j] = S[j], S[i]
+                k = S[(S[i] + S[j]) % 256]
+                result.append(byte ^ k)
+            return bytes(result)
+
+        return _rc4, _rc4
+
+    @staticmethod
+    def rsa_encryptor(private_key_pem: bytes, public_key_pem: bytes) -> tuple:
+        """RSA 加密器工厂
+
+        返回 ``(encrypt_func, decrypt_func)`` 元组。
+        encrypt_func 使用公钥加密，decrypt_func 使用私钥解密。
+
+        :param private_key_pem: PEM 格式私钥
+        :param public_key_pem: PEM 格式公钥
+        :return: (encrypt_func, decrypt_func) 元组
+        :rtype: tuple
+        """
+
+        def _encrypt(data: bytes) -> bytes:
+            return SecureUtil.encrypt_rsa(data, public_key_pem)
+
+        def _decrypt(data: bytes) -> bytes:
+            return SecureUtil.decrypt_rsa(data, private_key_pem)
+
+        return _encrypt, _decrypt
+
+    @staticmethod
+    def hmac_creator(algorithm: str, key: Union[str, bytes]):
+        """HMAC 创建器
+
+        返回一个可调用的 HMAC 对象，支持多次 ``update(data)`` 后调用
+        ``hexdigest()`` / ``digest()`` 获取结果。
+
+        :param algorithm: 哈希算法名称，如 'md5'、'sha1'、'sha256'
+        :param key: HMAC 密钥
+        :return: HMAC 对象
+        """
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        return hmac_mod.new(key, b"", algorithm.lower())
+
+    @staticmethod
+    def sign_data(
+        data: Union[str, bytes],
+        algorithm: str = "SHA256",
+        private_key_pem: Optional[bytes] = None,
+    ) -> bytes:
+        """数据签名
+
+        若提供私钥则使用 RSA-PSS 签名，否则使用 HMAC 签名。
+
+        :param data: 待签名数据
+        :param algorithm: 签名算法，支持 'SHA256'、'SHA1'、'MD5' 等
+        :param private_key_pem: PEM 格式私钥（可选，不提供则使用 HMAC）
+        :return: 签名 bytes
+        :rtype: bytes
+        """
+        data_bytes = SecureUtil._ensure_bytes(data)
+        algo_upper = algorithm.upper()
+
+        if private_key_pem is not None:
+            private_key = serialization.load_pem_private_key(private_key_pem, password=None, backend=default_backend())
+            hash_algo = getattr(hashes, algo_upper, hashes.SHA256)()
+            signature = private_key.sign(
+                data_bytes,
+                padding.PSS(
+                    mgf=padding.MGF1(hash_algo),
+                    salt_length=padding.PSS.MAX_LENGTH,
+                ),
+                hash_algo,
+            )
+            return signature
+        else:
+            hash_name = algorithm.lower()
+            return hmac_mod.new(b"", data_bytes, hash_name).digest()
+
+    @staticmethod
+    def generate_key_pair(algorithm: str = "RSA", key_size: int = 2048) -> Tuple[bytes, bytes]:
+        """生成密钥对
+
+        :param algorithm: 算法名称，目前仅支持 'RSA'
+        :param key_size: 密钥位数，默认 2048
+        :return: (public_key_pem, private_key_pem) 元组
+        :rtype: tuple
+        """
+        algo_upper = algorithm.upper()
+        if algo_upper == "RSA":
+            return SecureUtil.generate_rsa_key_pair(key_size)
+        raise ValueError(f"不支持的算法: {algorithm}")

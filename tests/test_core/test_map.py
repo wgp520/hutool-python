@@ -272,3 +272,34 @@ class TestMapUtilTopN:
         m = {"a": 1, "b": 2, "c": 3}
         result = MapUtil.values_of_keys(m, ["a", "c"])
         assert result == [1, 3]
+
+    def test_split_by_size_basic(self):
+        m = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}
+        result = MapUtil.split_by_size(m, 2)
+        assert len(result) == 3
+        assert len(result[0]) == 2
+        assert len(result[1]) == 2
+        assert len(result[2]) == 1
+
+    def test_split_by_size_empty(self):
+        assert MapUtil.split_by_size({}, 2) == []
+
+    def test_split_by_size_invalid(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            MapUtil.split_by_size({"a": 1}, 0)
+
+    def test_sort_by_key_basic(self):
+        m = {"b": 2, "a": 1, "c": 3}
+        result = MapUtil.sort_by_key(m)
+        assert list(result.keys()) == ["a", "b", "c"]
+
+    def test_sort_by_key_reverse(self):
+        m = {"b": 2, "a": 1, "c": 3}
+        result = MapUtil.sort_by_key(m, reverse=True)
+        assert list(result.keys()) == ["c", "b", "a"]
+
+    def test_sort_by_key_empty(self):
+        result = MapUtil.sort_by_key({})
+        assert len(result) == 0

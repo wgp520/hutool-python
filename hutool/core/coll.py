@@ -1304,6 +1304,113 @@ class CollUtil:
         """
         return [func(item) for item in coll]
 
+    @staticmethod
+    def sort_to_map(
+        coll: Iterable,
+        key_func: Callable,
+        value_func: Optional[Callable] = None,
+    ) -> dict:
+        """集合排序后转为有序字典。
+
+        先按键排序，再转为字典。Python 3.7+ 字典保持插入顺序。
+
+        :param coll: 可迭代集合
+        :param key_func: 键提取函数
+        :param value_func: 值提取函数，默认为元素本身
+        :return: 排序后的字典
+        """
+        if coll is None:
+            return {}
+        if value_func is None:
+
+            def value_func(x):
+                return x
+
+        items = list(coll)
+        items.sort(key=key_func)
+        return {key_func(item): value_func(item) for item in items}
+
+    @staticmethod
+    def sort_entry_to_list(
+        map_data: dict,
+        reverse: bool = False,
+    ) -> list:
+        """字典条目按 key 排序，返回 [(key, value)] 列表。
+
+        :param map_data: 输入字典
+        :param reverse: 是否降序
+        :return: 排序后的条目列表
+        """
+        if map_data is None:
+            return []
+        return sorted(map_data.items(), key=lambda x: x[0], reverse=reverse)
+
+    @staticmethod
+    def sort_by_entry(
+        map_data: dict,
+        reverse: bool = False,
+    ) -> dict:
+        """按字典 key 排序，返回新字典。
+
+        :param map_data: 输入字典
+        :param reverse: 是否降序
+        :return: 排序后的新字典
+        """
+        if map_data is None:
+            return {}
+        sorted_items = sorted(map_data.items(), key=lambda x: x[0], reverse=reverse)
+        return dict(sorted_items)
+
+    @staticmethod
+    def to_collection(iterable: Iterable, coll_type=None):
+        """转为指定集合类型。
+
+        :param iterable: 可迭代对象
+        :param coll_type: 目标集合类型，默认为 list
+        :return: 指定类型的集合
+        """
+        if coll_type is None:
+            coll_type = list
+        if iterable is None:
+            return coll_type()
+        return coll_type(iterable)
+
+    @staticmethod
+    def chunk_by(lst: list, size: int) -> list:
+        """按大小将列表分块。
+
+        例如 ``[1,2,3,4,5], size=2`` → ``[[1,2],[3,4],[5]]``。
+
+        :param lst: 原列表
+        :param size: 每块大小（必须大于 0）
+        :return: 分块后的嵌套列表
+        """
+        if not lst:
+            return []
+        if size <= 0:
+            raise ValueError("size 必须大于 0")
+        return [lst[i : i + size] for i in range(0, len(lst), size)]
+
+    @staticmethod
+    def remove_duplicates(lst: list) -> list:
+        """移除列表中的重复元素，保持原有顺序。
+
+        :param lst: 原列表
+        :return: 去重后的列表
+        """
+        if not lst:
+            return []
+        seen = set()
+        result = []
+        for item in lst:
+            try:
+                if item not in seen:
+                    seen.add(item)
+                    result.append(item)
+            except TypeError:
+                result.append(item)
+        return result
+
 
 class ListUtil:
     """列表工具类"""
@@ -1611,3 +1718,40 @@ class ListUtil:
         :return: 不可修改的 tuple
         """
         return tuple(lst) if lst is not None else ()
+
+    @staticmethod
+    def chunk_by(lst: list, size: int) -> list:
+        """按大小将列表分块。
+
+        例如 ``[1,2,3,4,5], size=2`` → ``[[1,2],[3,4],[5]]``。
+
+        :param lst: 原列表
+        :param size: 每块大小（必须大于 0）
+        :return: 分块后的嵌套列表
+        """
+        if not lst:
+            return []
+        if size <= 0:
+            raise ValueError("size 必须大于 0")
+        return [lst[i : i + size] for i in range(0, len(lst), size)]
+
+    @staticmethod
+    def remove_duplicates(lst: list) -> list:
+        """移除列表中的重复元素，保持原有顺序。
+
+        :param lst: 原列表
+        :return: 去重后的列表
+        """
+        if not lst:
+            return []
+        seen = set()
+        result = []
+        for item in lst:
+            try:
+                if item not in seen:
+                    seen.add(item)
+                    result.append(item)
+            except TypeError:
+                # 不可哈希元素，直接追加
+                result.append(item)
+        return result

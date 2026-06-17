@@ -245,3 +245,58 @@ class DesensitizedUtil:
         if len(code) <= 10:
             return code
         return code[:6] + "*" * (len(code) - 10) + code[-4:]
+
+    @staticmethod
+    def clear_mask(s: str, replacement: str = "*") -> str:
+        """清空字符串，全部替换为指定字符。
+
+        :param s: 原始字符串
+        :param replacement: 替换字符，默认 '*'
+        :return: 替换后的字符串
+        """
+        if not s:
+            return ""
+        return replacement * len(s)
+
+    @staticmethod
+    def clear_to_null(s: str):
+        """清空字符串，返回 None。
+
+        :param s: 原始字符串
+        :return: None
+        """
+        return None
+
+    @staticmethod
+    def desensitized(s: str, start: int, end: int, replacement: str = "*") -> str:
+        """通用脱敏：将指定区间内的字符替换为指定字符。
+
+        :param s: 原始字符串
+        :param start: 开始位置（包含）
+        :param end: 结束位置（不包含）
+        :param replacement: 替换字符，默认 '*'
+        :return: 脱敏后的字符串
+        """
+        if not s:
+            return ""
+        if start < 0:
+            start = 0
+        if end > len(s):
+            end = len(s)
+        if start >= end:
+            return s
+        return s[:start] + replacement * (end - start) + s[end:]
+
+    @staticmethod
+    def user_id(user_id_val) -> str:
+        """用户 ID 脱敏。
+
+        :param user_id_val: 用户 ID
+        :return: 脱敏后的用户 ID
+        """
+        if user_id_val is None:
+            return ""
+        s = str(user_id_val)
+        if len(s) <= 2:
+            return s
+        return s[0] + "*" * (len(s) - 1)

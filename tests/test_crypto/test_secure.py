@@ -144,3 +144,84 @@ class TestSecureUtil:
         result = SecureUtil.sign_params(params, "secret")
         assert isinstance(result, str)
         assert len(result) > 0
+
+    # ── 加密器工厂 ──────────────────────────────────────────────
+
+    def test_aes_encryptor(self):
+        key = SecureUtil.generate_aes_key(128)
+        enc, dec = SecureUtil.aes_encryptor(key)
+        data = b"AES factory test"
+        encrypted = enc(data)
+        decrypted = dec(encrypted)
+        assert decrypted == data
+
+    def test_des_encryptor(self):
+        key = SecureUtil.generate_des_key()
+        enc, dec = SecureUtil.des_encryptor(key)
+        data = b"DES factory test"
+        encrypted = enc(data)
+        decrypted = dec(encrypted)
+        assert decrypted == data
+
+    def test_rc4_encryptor_roundtrip(self):
+        enc, dec = SecureUtil.rc4_encryptor("mysecretkey")
+        data = b"RC4 stream cipher test"
+        encrypted = enc(data)
+        assert encrypted != data
+        decrypted = dec(encrypted)
+        assert decrypted == data
+
+    def test_rc4_encryptor_symmetry(self):
+        """RC4 加密和解密使用相同操作"""
+        enc, dec = SecureUtil.rc4_encryptor("key")
+        assert enc is dec
+
+    def test_rc4_encryptor_with_bytes_key(self):
+        enc, dec = SecureUtil.rc4_encryptor(b"\x01\x02\x03\x04")
+        data = b"binary key test"
+        assert dec(enc(data)) == data
+
+    def test_rsa_encryptor(self):
+        pub, priv = SecureUtil.generate_rsa_key_pair(2048)
+        enc, dec = SecureUtil.rsa_encryptor(priv, pub)
+        data = b"RSA factory"
+        encrypted = enc(data)
+        decrypted = dec(encrypted)
+        assert decrypted == data
+
+    def test_hmac_creator(self):
+        h = SecureUtil.hmac_creator("sha256", "mykey")
+        h.update(b"hello")
+        h.update(b" world")
+        result = h.hexdigest()
+        assert isinstance(result, str)
+        assert len(result) == 64
+
+    def test_hmac_creator_md5(self):
+        h = SecureUtil.hmac_creator("md5", b"key")
+        h.update(b"data")
+        assert len(h.hexdigest()) == 32
+
+    def test_sign_data_with_rsa(self):
+        _pub, priv = SecureUtil.generate_rsa_key_pair(2048)
+        signature = SecureUtil.sign_data(b"test data", "SHA256", priv)
+        assert isinstance(signature, bytes)
+        assert len(signature) > 0
+
+    def test_sign_data_without_key(self):
+        """无私钥时使用 HMAC 签名"""
+        signature = SecureUtil.sign_data(b"test data", "sha256")
+        assert isinstance(signature, bytes)
+
+    def test_generate_key_pair_rsa(self):
+        pub, priv = SecureUtil.generate_key_pair("RSA", 2048)
+        assert isinstance(pub, bytes)
+        assert isinstance(priv, bytes)
+        assert b"PUBLIC KEY" in pub
+        assert b"PRIVATE KEY" in priv
+
+    def test_generate_key_pair_unsupported(self):
+        import pytest
+
+        with pytest.raises(ValueError, match="不支持的算法"):
+            SecureUtil.generate_key_pair("ECDSA")

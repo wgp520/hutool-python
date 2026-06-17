@@ -129,6 +129,21 @@ class TestNetUtil:
         info = NetUtil.get_dns_info("")
         assert info["ips"] == []
 
+    def test_get_host_name(self):
+        name = NetUtil.get_host_name()
+        assert isinstance(name, str)
+        assert len(name) > 0
+
+    def test_get_host_address(self):
+        addr = NetUtil.get_host_address()
+        assert isinstance(addr, str)
+        assert len(addr) > 0
+        # 应为合法 IP 格式
+        assert "." in addr
+
+    def test_get_host_name_matches_get_localhost(self):
+        assert NetUtil.get_host_name() == NetUtil.get_localhost()
+
 
 class TestIpv4Util:
     def test_format_ip_block(self):

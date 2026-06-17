@@ -186,3 +186,54 @@ class TestArrayUtil:
         result = ArrayUtil.get_any([1, 2, 3])
         assert result == 1
         assert ArrayUtil.get_any([]) is None
+
+    def test_index_of_sub(self):
+        assert ArrayUtil.index_of_sub([1, 2, 3, 4, 5], [3, 4]) == 2
+        assert ArrayUtil.index_of_sub([1, 2, 3], [4, 5]) == -1
+
+    def test_last_index_of_sub(self):
+        assert ArrayUtil.last_index_of_sub([1, 2, 3, 2, 3, 4], [2, 3]) == 3
+
+    def test_is_all_empty(self):
+        assert ArrayUtil.is_all_empty([], [], []) is True
+        assert ArrayUtil.is_all_empty([], [1]) is False
+
+    def test_is_all_not_empty(self):
+        assert ArrayUtil.is_all_not_empty([1], [2]) is True
+        assert ArrayUtil.is_all_not_empty([1], []) is False
+
+    def test_is_all_not_null(self):
+        assert ArrayUtil.is_all_not_null([1], [2]) is True
+        assert ArrayUtil.is_all_not_null(None, [1]) is False
+
+    def test_is_sorted_asc(self):
+        assert ArrayUtil.is_sorted_asc([1, 2, 3]) is True
+        assert ArrayUtil.is_sorted_asc([3, 2, 1]) is False
+
+    def test_is_sorted_desc(self):
+        assert ArrayUtil.is_sorted_desc([3, 2, 1]) is True
+        assert ArrayUtil.is_sorted_desc([1, 2, 3]) is False
+
+    def test_is_sorted_custom(self):
+        # is_sorted checks: comparator(a, b) > 0 means not sorted
+        # 降序比较器：a > b 时返回 -1（sorted），a < b 时返回 1（not sorted）
+        data = ["c", "b", "a"]
+        assert ArrayUtil.is_sorted(data, lambda a, b: (b > a) - (b < a)) is True
+
+    def test_is_sub(self):
+        assert ArrayUtil.is_sub([1, 2, 3, 4, 5], [2, 3, 4]) is True
+        assert ArrayUtil.is_sub([1, 2, 3], [4, 5]) is False
+
+    def test_map_to_set(self):
+        result = ArrayUtil.map_to_set([1, 2, 3], lambda x: x * 2)
+        assert result == {2, 4, 6}
+
+    def test_to_array(self):
+        assert ArrayUtil.to_array((1, 2, 3)) == [1, 2, 3]
+        assert ArrayUtil.to_array(range(3)) == [0, 1, 2]
+
+    def test_zip_arrays(self):
+        result = ArrayUtil.zip_arrays([1, 2], ["a", "b", "c"])
+        assert len(result) == 3
+        assert result[0] == (1, "a")
+        assert result[2] is not None  # fillvalue

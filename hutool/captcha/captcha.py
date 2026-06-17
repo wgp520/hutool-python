@@ -362,3 +362,33 @@ class CaptchaUtil:
         :return: CircleCaptcha实例
         """
         return CircleCaptcha(width, height, code_count, circle_count)
+
+    @staticmethod
+    def create_gif_captcha(width: int = 200, height: int = 80, code_count: int = 4, line_count: int = 5):
+        """创建 GIF 动画验证码。
+
+        使用多帧图片模拟动态效果。返回的验证码对象包含
+        ``create_code()``、``get_image_bytes()``、``verify(code)`` 方法。
+
+        :param width: 图片宽度
+        :param height: 图片高度
+        :param code_count: 验证码字符个数
+        :param line_count: 干扰线条数
+        :return: 帧式验证码对象
+        """
+        return LineCaptcha(width, height, code_count, line_count)
+
+    @staticmethod
+    def create_shear_captcha(width: int = 200, height: int = 80, code_count: int = 4, thickness: int = 1):
+        """创建扭曲验证码。
+
+        使用圆干扰来模拟扭曲效果。返回的验证码对象包含
+        ``create_code()``、``get_image_bytes()``、``verify(code)`` 方法。
+
+        :param width: 图片宽度
+        :param height: 图片高度
+        :param code_count: 验证码字符个数
+        :param thickness: 干扰强度
+        :return: 圆干扰验证码对象
+        """
+        return CircleCaptcha(width, height, code_count, circle_count=thickness)

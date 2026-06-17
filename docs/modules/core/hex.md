@@ -58,3 +58,20 @@ HexUtil.hex_to_long("ff")      # 255
 # 十六进制转大整数
 HexUtil.to_big_integer("100000000")  # 4294967296
 ```
+
+### 颜色编码
+
+```python
+# encodeColor — RGB 颜色编码为 #RRGGBB
+HexUtil.encode_color(255, 128, 0)   # "#FF8000"
+HexUtil.encode_color(0, 0, 0)       # "#000000"
+```
+
+### 格式化十六进制
+
+```python
+# formatHex — 格式化十六进制字符串
+HexUtil.format_hex("AABBCCDD", "-", 2)   # "AA-BB-CC-DD"
+HexUtil.format_hex("AABBCCDD", ":", 2)   # "AA:BB:CC:DD"
+HexUtil.format_hex("AABBCCDD", " ", 4)   # "AABB CCDD"
+```

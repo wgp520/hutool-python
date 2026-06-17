@@ -3,44 +3,16 @@
 """
 
 import time
-from functools import wraps
 from typing import Callable
 
-
-def timethis(func: Callable) -> Callable:
-    """
-    装饰器：统计函数执行耗时并打印到标准输出。
-
-    Examples::
-
-        @timethis
-        def slow_func():
-            import time
-            time.sleep(0.1)
-
-        slow_func()
-        # 打印: slow_func :  耗时 0.100...
-
-    :param func: 被装饰的函数
-    :return: 装饰后的函数
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        elapsed = time.time() - start
-        print(f"{func.__name__} :\t耗时 {elapsed:.6f}")
-        return result
-
-    return wrapper
+from .decorators import TimeThis
 
 
 class TimingUtil:
     """计时工具类，提供精确计时器。"""
 
     # 向后兼容：TimingUtil.timethis 仍可使用
-    timethis = staticmethod(timethis)
+    timethis = staticmethod(TimeThis)
 
     class Timer:
         """

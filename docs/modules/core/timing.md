@@ -4,29 +4,43 @@
 
 性能优化的第一步是测量。`timethis` 装饰器和 `TimingUtil.Timer` 精确计时器方便快速定位性能瓶颈。
 
-## timethis 装饰器
+## TimeThis 装饰器（class-based）
 
-`timethis` 是一个顶层装饰器，可以直接通过 `@timethis` 使用：
+`TimeThis` 是一个 class-based 装饰器，支持有括号/无括号、同步/协程四种用法：
 
 ```python
-from hutool import timethis
+from hutool import TimeThis
 
-@timethis
+# 无括号
+@TimeThis
 def slow_func():
     import time
     time.sleep(0.1)
 
 slow_func()
 # 打印: slow_func :  耗时 0.100...
+
+# 有括号
+@TimeThis()
+def also_slow():
+    time.sleep(0.1)
+
+# async
+@TimeThis
+async def async_slow():
+    await asyncio.sleep(0.1)
 ```
 
-也可以通过 `TimingUtil.timethis` 调用（向后兼容）：
+### 使用TimingUtil调用
+
+`timethis` 和 `TimingUtil.timethis` 仍然可用，指向 `TimeThis` 的实例/类：
 
 ```python
 from hutool import TimingUtil
 
+
 @TimingUtil.timethis
-def another_func():
+def also_old():
     pass
 ```
 

@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
     <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
-    <img src="https://img.shields.io/badge/tests-1864 passed-brightgreen.svg" />
+    <img src="https://img.shields.io/badge/tests-2488 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
@@ -318,7 +318,7 @@ hutool-python/
 
 ```bash
 # Install dev dependencies
-pip install pytest
+pip install pytest ruff
 
 # Run all tests
 pytest tests/ -v
@@ -328,6 +328,27 @@ pytest tests/test_core/ -v
 
 # Run a single module
 pytest tests/test_core/test_strings.py -v
+```
+
+### 🔍 Code Quality (Ruff)
+
+This project uses [Ruff](https://docs.astral.sh/ruff/) for linting and formatting:
+
+```bash
+# Install ruff
+pip install ruff
+
+# Lint check
+ruff check .
+
+# Lint check with auto-fix
+ruff check --fix .
+
+# Format code
+ruff format .
+
+# Run lint + format in one shot (recommended before committing)
+ruff check --fix . && ruff format .
 ```
 
 ---
@@ -347,6 +368,8 @@ pytest tests/test_core/test_strings.py -v
 | `pyjwt>=2.8` | JWT handling | `jwt.py` |
 | `pyyaml>=6.0` | YAML parsing | `setting/yaml.py` |
 | `sortedcontainers>=2.0` | Sorted containers | `cache/` |
+| `pytz>=2023.3` | Timezone handling | `core/date.py` |
+| `bcrypt>=4.0` | bcrypt encryption | `crypto/` |
 
 ---
 
@@ -388,7 +411,8 @@ Contributions are welcome! Please follow these guidelines:
 1. **Follow Hutool style**: PascalCase for class names, snake_case for method names
 2. **Chinese docstrings**: All new methods must include Chinese documentation in Sphinx style (`:param:` / `:return:` / `:raises:`)
 3. **Write tests**: New methods must include pytest test cases
-4. **Minimize dependencies**: Prefer Python standard library; add third-party dependencies only when necessary
+4. **Code quality**: Run `ruff check hutool/ tests/ --fix && ruff format hutool/ tests/` before committing
+5. **Minimize dependencies**: Prefer Python standard library; add third-party dependencies only when necessary
 
 ### Steps
 

@@ -263,3 +263,99 @@ class TestRandomUtil:
         pairs = [(1, "a"), (9, "b")]
         results = {RandomUtil.weight_random(pairs) for _ in range(50)}
         assert "b" in results
+
+    def test_random_datetime_default(self):
+        from datetime import datetime as _dt
+
+        result = RandomUtil.random_datetime()
+        assert isinstance(result, _dt)
+        assert _dt(2000, 1, 1) <= result <= _dt.now()
+
+    def test_random_datetime_range(self):
+        from datetime import datetime as _dt
+
+        start = _dt(2024, 1, 1)
+        end = _dt(2024, 12, 31)
+        for _ in range(50):
+            result = RandomUtil.random_datetime(start, end)
+            assert start <= result <= end
+
+    def test_random_date_obj_default(self):
+        from datetime import date as _date
+
+        result = RandomUtil.random_date_obj()
+        assert isinstance(result, _date)
+        assert _date(2000, 1, 1) <= result <= _date.today()
+
+    def test_random_date_obj_range(self):
+        from datetime import date as _date
+
+        start = _date(2024, 1, 1)
+        end = _date(2024, 12, 31)
+        for _ in range(50):
+            result = RandomUtil.random_date_obj(start, end)
+            assert start <= result <= end
+
+    def test_random_digits_basic(self):
+        result = RandomUtil.random_digits(10)
+        assert len(result) == 10
+        assert result.isdigit()
+
+    def test_random_digits_zero(self):
+        result = RandomUtil.random_digits(0)
+        assert result == ""
+
+    def test_random_digits_negative_raises(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            RandomUtil.random_digits(-1)
+
+    def test_random_alphanumeric_basic(self):
+        result = RandomUtil.random_alphanumeric(20)
+        assert len(result) == 20
+        assert result.isalnum()
+
+    def test_random_upper_ascii_basic(self):
+        result = RandomUtil.random_upper_ascii(10)
+        assert len(result) == 10
+        assert result.isupper() and result.isalpha()
+
+
+class TestWeightedRand:
+    def test_pick_basic(self):
+        from hutool.core.util.randoms import WeightedRand
+
+        wr = WeightedRand([(0, "never"), (1, "always")])
+        for _ in range(100):
+            assert wr.pick() == "always"
+
+    def test_pick_distribution(self):
+        from hutool.core.util.randoms import WeightedRand
+
+        wr = WeightedRand([(1, "a"), (9, "b")])
+        results = {wr.pick() for _ in range(100)}
+        assert "b" in results
+
+    def test_picks(self):
+        from hutool.core.util.randoms import WeightedRand
+
+        wr = WeightedRand([(1, "a"), (1, "b")])
+        result = wr.picks(10)
+        assert len(result) == 10
+
+    def test_empty_pairs_raises(self):
+        import pytest
+
+        from hutool.core.util.randoms import WeightedRand
+
+        with pytest.raises(ValueError, match="pairs 不能为空"):
+            WeightedRand([])
+
+    def test_negative_weight_raises(self):
+        import pytest
+
+        from hutool.core.util.randoms import WeightedRand
+
+        with pytest.raises(ValueError, match="权重不能为负数"):
+            WeightedRand([(-1, "a"), (1, "b")])

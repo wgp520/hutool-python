@@ -104,3 +104,39 @@ RandomUtil.weight_random([(1, "a"), (9, "b")])  # "b" 概率更高
 # 允许重复选取
 RandomUtil.random_eles(items, 5, allow_duplicate=True)  # 可重复
 ```
+
+### 日期时间随机
+
+```python
+from datetime import datetime
+
+# 随机日期时间
+RandomUtil.random_datetime(datetime(2024, 1, 1), datetime(2024, 12, 31))
+
+# 随机日期（仅日期部分）
+RandomUtil.random_date(datetime(2024, 1, 1), datetime(2024, 12, 31))
+```
+
+### 高级随机字符串
+
+```python
+# 纯数字随机字符串
+RandomUtil.random_digits(8)  # "38475612"（8位纯数字）
+
+# 字母+数字随机字符串
+RandomUtil.random_alphanumeric(10)  # "aB3dE5fG7h"
+
+# 大写字母随机字符串
+RandomUtil.random_upper_ascii(6)  # "ABCDEF"
+```
+
+### 加权随机类
+
+```python
+from hutool import WeightedRand
+
+# 创建加权随机选择器
+wr = WeightedRand([("a", 1), ("b", 2), ("c", 3)])
+wr.next()   # 按权重随机返回 "a"/"b"/"c"
+wr.next()
+```

@@ -54,6 +54,27 @@ class TestCsvUtil:
             if os.path.exists(path):
                 os.unlink(path)
 
+    def test_list_to_csv_basic(self):
+        data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+        result = CsvUtil.list_to_csv(data, separator=",")
+        lines = result.strip().replace("\r", "").split("\n")
+        assert lines[0] == "name,age"
+        assert "Alice" in lines[1]
+
+    def test_list_to_csv_tab_separator(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        result = CsvUtil.list_to_csv(data, separator="\t")
+        assert "\t" in result
+
+    def test_list_to_csv_no_header(self):
+        data = [{"a": 1}]
+        result = CsvUtil.list_to_csv(data, include_header=False)
+        assert "a" not in result.split("\n")[0]
+        assert "1" in result
+
+    def test_list_to_csv_empty(self):
+        assert CsvUtil.list_to_csv([]) == ""
+
 
 class TestStrBuilder:
     def test_append(self):

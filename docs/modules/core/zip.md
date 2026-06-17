@@ -60,3 +60,29 @@ names = ZipUtil.list_file_names("out.zip")
 # 读取 zip 中指定条目的内容
 content = ZipUtil.read("out.zip", "test.txt")
 ```
+
+### Zlib 增强
+
+```python
+# zlibCompress — Zlib 压缩（别名）
+compressed = ZipUtil.zlib_compress(b"hello world")
+
+# zlibDecompress — Zlib 解压（别名）
+original = ZipUtil.zlib_decompress(compressed)
+
+# gzipDecompress — Gzip 解压（别名）
+original = ZipUtil.gzip_decompress(gzipped_data)
+```
+
+### 文件转换
+
+```python
+# toZipFile — 路径/文件转为 zip 文件
+ZipUtil.to_zip_file("/path/to/dir", "/path/to/output.zip")
+
+# getZipOutputStream — 获取 ZipFile 写入对象
+zf = ZipUtil.get_zip_output_stream("/path/to/output.zip")
+
+# getZipStream — 获取 zip 读取对象
+zf = ZipUtil.get_zip_stream("/path/to/file.zip")
+```

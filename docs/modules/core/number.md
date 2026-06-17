@@ -199,3 +199,57 @@ NumberUtil.null_to_zero(42)    # 42
 # 生成随机整数列表
 NumberUtil.generate(5, 1, 100)  # 5个[1,100)范围内的随机整数
 ```
+
+### 安全数学运算
+
+```python
+# 安全最小值（空列表返回 None）
+NumberUtil.robust_min([3, 1, 4])   # 1.0
+NumberUtil.robust_min([])           # None
+
+# 安全最大值
+NumberUtil.robust_max([3, 1, 4])   # 4.0
+NumberUtil.robust_max([])           # None
+
+# 安全除法（除数为 0 返回默认值）
+NumberUtil.robust_div(10, 3)        # 3.333...
+NumberUtil.robust_div(10, 0)        # 0.0
+NumberUtil.robust_div(10, 0, -1)    # -1
+
+# 百分比
+NumberUtil.percent(25, 200)         # 12.5
+NumberUtil.percent(1, 0)            # 0.0
+```
+
+### 便捷类型转换
+
+```python
+# 安全转 int（失败返回 0）
+NumberUtil.int_or_0("123")          # 123
+NumberUtil.int_or_0("abc")          # 0
+NumberUtil.int_or_0(None)           # 0
+
+# 安全转 float（失败返回 0.0）
+NumberUtil.float_or_0("3.14")       # 3.14
+NumberUtil.float_or_0("abc")        # 0.0
+
+# 安全转 float（自定义默认值）
+NumberUtil.to_float_safe("3.14")     # 3.14
+NumberUtil.to_float_safe("abc", -1)  # -1
+
+# 是否为有效数字（非 NaN、非 Inf）
+NumberUtil.is_valid_number(123)       # True
+NumberUtil.is_valid_number(float("nan"))  # False
+```
+
+### 动态运算符执行
+
+```python
+# 根据字符串形式的运算符执行比较
+NumberUtil.operator_exec(5, "==", 5)   # True
+NumberUtil.operator_exec(3, "<", 5)    # True
+NumberUtil.operator_exec("abc", "==", "abc")  # True
+
+# 支持 ==、!=、>、>=、<、<=
+NumberUtil.operator_exec(10, ">=", 5)  # True
+```

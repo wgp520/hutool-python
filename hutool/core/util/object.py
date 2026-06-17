@@ -7,6 +7,8 @@ Python port of Java Hutool's ObjectUtil.
 import copy
 from typing import Any, Optional, Sized
 
+from ..decorators import NoneOnException
+
 __all__ = [
     "ObjectUtil",
 ]
@@ -357,3 +359,122 @@ class ObjectUtil:
         if isinstance(obj, str) and not obj.strip():
             return supplier()
         return obj if obj is not None else supplier()
+
+    @staticmethod
+    def empty_count(*objects: Any) -> int:
+        """统计参数中空值的个数。
+
+        空值定义：None、空字符串""、空集合（list/tuple/dict/set 长度为0）。
+
+        :param objects: 待统计的对象列表
+        :return: 空值个数
+        """
+        count = 0
+        for obj in objects:
+            if ObjectUtil.is_empty(obj):
+                count += 1
+        return count
+
+    @staticmethod
+    def get_attr_safe(obj: Any, attr: str, default: Any = None) -> Any:
+        """安全获取对象属性，不存在时返回默认值。
+
+        :param obj: 对象
+        :param attr: 属性名
+        :param default: 默认值
+        :return: 属性值或默认值
+        """
+        if obj is None:
+            return default
+        try:
+            return getattr(obj, attr, default)
+        except Exception:
+            return default
+
+    @staticmethod
+    def unpack_to_dict(
+        obj: Any,
+        fields: Optional[list] = None,
+    ) -> dict:
+        """将对象解包为字典。
+
+        若指定了 ``fields``，则仅提取指定字段。
+
+        :param obj: 对象（支持 dataclass、类实例、dict）
+        :param fields: 指定字段列表，为 None 时提取所有非私有字段
+        :return: 字典
+        """
+        if obj is None:
+            return {}
+        if isinstance(obj, dict):
+            if fields:
+                return {k: v for k, v in obj.items() if k in fields}
+            return dict(obj)
+        # dataclass
+        import dataclasses
+
+        if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+            result = dataclasses.asdict(obj)
+            if fields:
+                return {k: v for k, v in result.items() if k in fields}
+            return result
+        # 普通对象
+        result = {}
+        for name in dir(obj):
+            if name.startswith("_"):
+                continue
+            if fields and name not in fields:
+                continue
+            try:
+                value = getattr(obj, name)
+                if not callable(value):
+                    result[name] = value
+            except Exception:
+                pass
+        return result
+
+    @staticmethod
+    def get_key_fmt(obj: Any, attr: str, fmt: str = "camel", default: Any = None) -> Any:
+        """获取对象属性，支持键名格式转换。
+
+        先尝试 ``attr``，再尝试 camel/snake 互转后的键名。
+
+        :param obj: 对象（dict 或普通对象）
+        :param attr: 属性名
+        :param fmt: 格式类型 ``"camel"`` 或 ``"snake"``，默认 ``"camel"``
+        :param default: 默认值
+        :return: 属性值或默认值
+        """
+        if obj is None:
+            return default
+
+        def _to_camel(s):
+            parts = s.split("_")
+            return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+        def _to_snake(s):
+            import re
+
+            s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", s)
+            s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s)
+            return s.lower()
+
+        # 先尝试原名
+        if isinstance(obj, dict):
+            if attr in obj:
+                return obj[attr]
+            # 尝试格式转换
+            alt = _to_snake(attr) if fmt == "camel" else _to_camel(attr)
+            if alt in obj:
+                return obj[alt]
+            return default
+        else:
+            val = getattr(obj, attr, None)
+            if val is not None:
+                return val
+            alt = _to_snake(attr) if fmt == "camel" else _to_camel(attr)
+            return getattr(obj, alt, default)
+
+
+# 向后兼容别名
+ObjectUtil.none_on_exception = staticmethod(NoneOnException)

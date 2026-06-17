@@ -81,6 +81,8 @@ JSONUtil.is_json('{"key": "value"}')     # True
 JSONUtil.is_json_obj('{"key": "value"}') # True
 JSONUtil.is_json_array('[1, 2, 3]')      # True
 JSONUtil.is_json("not json")             # False
+JSONUtil.is_json(None)                   # False（None/空字符串返回 False）
+JSONUtil.is_json("")                     # False
 ```
 
 ### 格式化
@@ -117,4 +119,29 @@ JSONUtil.convert_keys_to_camel({"user_name": "test"})
 # camelCase → snake_case
 JSONUtil.convert_keys_to_snake({"userName": "test"})
 # {"user_name": "test"}
+```
+
+### JSON 比较
+
+```python
+# jsonEqual — 比较两个 JSON 是否相等
+JSONUtil.json_equal('{"a": 1, "b": 2}', '{"b": 2, "a": 1}')  # True
+
+# jsonKeysEqual — 比较两个 JSON 的键是否相同
+JSONUtil.json_keys_equal('{"a": 1, "b": 2}', '{"a": 3, "b": 4}')  # True
+```
+
+### 有序 JSON
+
+```python
+# getOrderedJson — 获取按键排序的 JSON 字符串
+JSONUtil.get_ordered_json({"b": 2, "a": 1})  # '{"a": 1, "b": 2}'
+```
+
+### XML 转 JSON
+
+```python
+# parseFromXml — 从 XML 解析为 JSON
+data = JSONUtil.parse_from_xml('<root><name>test</name><value>123</value></root>')
+# {"name": "test", "value": "123"}
 ```

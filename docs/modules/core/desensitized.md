@@ -51,4 +51,18 @@ DesensitizedUtil.passport("E12345678")  # "E******8"
 
 # 统一社会信用代码脱敏
 DesensitizedUtil.credit_code("91350100M000100Y43")  # "913501***100Y43"
+
+# clearMask — 全部替换为 *
+DesensitizedUtil.clear_mask("hello")    # "*****"
+DesensitizedUtil.clear_mask("hello", replacement="#")  # "#####"
+
+# clearToNull — 清空返回 None
+DesensitizedUtil.clear_to_null("hello")  # None
+
+# desensitized — 通用脱敏（指定区间替换）
+DesensitizedUtil.desensitized("13812345678", 3, 7)  # "138****5678"
+DesensitizedUtil.desensitized("abcdefghij", 2, 6)   # "ab****ghij"
+
+# userId — 用户 ID 脱敏
+DesensitizedUtil.user_id("1234567890")  # "12345*****"
 ```

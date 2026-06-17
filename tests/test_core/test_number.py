@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+import pytest
+
 from hutool import NumberUtil
 
 
@@ -401,3 +403,158 @@ class TestNumberUtil:
         assert NumberUtil.null_to_zero(None) == 0
         assert NumberUtil.null_to_zero(42) == 42
         assert NumberUtil.null_to_zero(0) == 0
+
+    # ── 安全数学运算（robust 系列）──────────────────────────────────
+
+    def test_robust_min_normal(self):
+        """测试安全取最小值"""
+        assert NumberUtil.robust_min([3, 1, 2]) == 1.0
+
+    def test_robust_min_single(self):
+        assert NumberUtil.robust_min([42]) == 42.0
+
+    def test_robust_min_empty_returns_none(self):
+        """空列表返回 None"""
+        assert NumberUtil.robust_min([]) is None
+
+    def test_robust_min_with_floats(self):
+        assert NumberUtil.robust_min([1.5, 0.1, 2.3]) == 0.1
+
+    def test_robust_max_normal(self):
+        """测试安全取最大值"""
+        assert NumberUtil.robust_max([3, 1, 2]) == 3.0
+
+    def test_robust_max_single(self):
+        assert NumberUtil.robust_max([42]) == 42.0
+
+    def test_robust_max_empty_returns_none(self):
+        """空列表返回 None"""
+        assert NumberUtil.robust_max([]) is None
+
+    def test_robust_max_with_negatives(self):
+        assert NumberUtil.robust_max([-5, -1, -10]) == -1.0
+
+    def test_robust_div_normal(self):
+        """测试安全除法"""
+        assert NumberUtil.robust_div(10, 3) == pytest.approx(10 / 3)
+
+    def test_robust_div_by_zero_returns_default(self):
+        """除数为 0 返回默认值"""
+        assert NumberUtil.robust_div(10, 0) == 0.0
+
+    def test_robust_div_by_zero_custom_default(self):
+        assert NumberUtil.robust_div(10, 0, default=-1.0) == -1.0
+
+    def test_robust_div_zero_dividend(self):
+        assert NumberUtil.robust_div(0, 5) == 0.0
+
+    def test_percent_normal(self):
+        """测试百分比计算"""
+        assert NumberUtil.percent(25, 100) == 25.0
+        assert NumberUtil.percent(1, 3) == pytest.approx(100 / 3)
+
+    def test_percent_zero_total(self):
+        """总值为 0 返回默认值"""
+        assert NumberUtil.percent(1, 0) == 0.0
+
+    def test_percent_zero_total_custom_default(self):
+        assert NumberUtil.percent(1, 0, default=-1.0) == -100.0
+
+    def test_percent_half(self):
+        assert NumberUtil.percent(1, 2) == 50.0
+
+    # ── int_or_0 / float_or_0 别名 ─────────────────────────────────
+
+    def test_int_or_0_normal(self):
+        assert NumberUtil.int_or_0("42") == 42
+
+    def test_int_or_0_invalid_returns_zero(self):
+        assert NumberUtil.int_or_0("abc") == 0
+
+    def test_int_or_0_none_returns_zero(self):
+        assert NumberUtil.int_or_0(None) == 0
+
+    def test_float_or_0_normal(self):
+        assert NumberUtil.float_or_0("3.14") == 3.14
+
+    def test_float_or_0_invalid_returns_zero(self):
+        assert NumberUtil.float_or_0("abc") == 0.0
+
+    def test_float_or_0_none_returns_zero(self):
+        assert NumberUtil.float_or_0(None) == 0.0
+
+    def test_float_or_0_bool(self):
+        """布尔值应正确转换"""
+        assert NumberUtil.float_or_0(True) == 1.0
+
+    def test_is_long_int(self):
+        assert NumberUtil.is_long(42) is True
+
+    def test_is_long_bool(self):
+        assert NumberUtil.is_long(True) is False
+
+    def test_is_long_float(self):
+        assert NumberUtil.is_long(3.14) is False
+
+    def test_is_valid_number_int(self):
+        assert NumberUtil.is_valid_number(42) is True
+
+    def test_is_valid_number_float(self):
+        assert NumberUtil.is_valid_number(3.14) is True
+
+    def test_is_valid_number_str(self):
+        assert NumberUtil.is_valid_number("123") is True
+        assert NumberUtil.is_valid_number("1.5e3") is True
+
+    def test_is_valid_number_nan(self):
+
+        assert NumberUtil.is_valid_number(float("nan")) is False
+
+    def test_is_valid_number_none(self):
+        assert NumberUtil.is_valid_number(None) is False
+
+    def test_is_valid_number_invalid_str(self):
+        assert NumberUtil.is_valid_number("abc") is False
+
+    def test_to_float_safe_normal(self):
+        assert NumberUtil.to_float_safe("3.14") == 3.14
+
+    def test_to_float_safe_none(self):
+        assert NumberUtil.to_float_safe(None) == 0.0
+
+    def test_to_float_safe_invalid(self):
+        assert NumberUtil.to_float_safe("abc", 99.0) == 99.0
+
+    def test_eq(self):
+        assert NumberUtil.operator_exec(5, "==", 5) is True
+        assert NumberUtil.operator_exec(5, "==", 3) is False
+
+    def test_ne(self):
+        assert NumberUtil.operator_exec(5, "!=", 3) is True
+
+    def test_gt(self):
+        assert NumberUtil.operator_exec(5, ">", 3) is True
+        assert NumberUtil.operator_exec(3, ">", 5) is False
+
+    def test_gte(self):
+        assert NumberUtil.operator_exec(5, ">=", 5) is True
+        assert NumberUtil.operator_exec(5, ">=", 3) is True
+
+    def test_lt(self):
+        assert NumberUtil.operator_exec(3, "<", 5) is True
+
+    def test_lte(self):
+        assert NumberUtil.operator_exec(3, "<=", 3) is True
+        assert NumberUtil.operator_exec(3, "<=", 5) is True
+
+    def test_strings(self):
+        assert NumberUtil.operator_exec("apple", "<", "banana") is True
+        assert NumberUtil.operator_exec("abc", "==", "abc") is True
+
+    def test_invalid_operator(self):
+        with pytest.raises(ValueError):
+            NumberUtil.operator_exec(1, "**", 2)
+
+    def test_none_values(self):
+        assert NumberUtil.operator_exec(None, "==", None) is True
+        assert NumberUtil.operator_exec(None, "!=", 1) is True

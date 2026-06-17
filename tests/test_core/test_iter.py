@@ -324,3 +324,97 @@ class TestIterUtilUniqueEverseen:
         assert IterUtil.is_equal_list([1, 2], [1, 2]) is True
         assert IterUtil.is_equal_list([1, 2], [1, 3]) is False
         assert IterUtil.is_equal_list(None, None) is True
+
+    def test_prepend(self):
+        result = list(IterUtil.prepend(0, [1, 2, 3]))
+        assert result == [0, 1, 2, 3]
+
+    def test_prepend_to_empty(self):
+        result = list(IterUtil.prepend(42, []))
+        assert result == [42]
+
+    def test_tabulate(self):
+        import itertools
+
+        result = list(itertools.islice(IterUtil.tabulate(lambda x: x * 2), 5))
+        assert result == [0, 2, 4, 6, 8]
+
+    def test_tabulate_with_start(self):
+        import itertools
+
+        result = list(itertools.islice(IterUtil.tabulate(lambda x: x + 10, start=5), 3))
+        assert result == [15, 16, 17]
+
+    def test_consume(self):
+        it = iter([1, 2, 3, 4, 5])
+        IterUtil.consume(it, 3)
+        assert next(it) == 4
+
+    def test_consume_all(self):
+        it = iter([1, 2])
+        IterUtil.consume(it, 10)
+        # no error even if n > length
+
+    def test_pad_none(self):
+        import itertools
+
+        result = list(itertools.islice(IterUtil.pad_none([1, 2]), 5))
+        assert result == [1, 2, None, None, None]
+
+    def test_n_cycles(self):
+        result = list(IterUtil.n_cycles([1, 2], 3))
+        assert result == [1, 2, 1, 2, 1, 2]
+
+    def test_iter_except(self):
+        s = {1, 2, 3}
+        it = iter(s)
+        result = list(IterUtil.iter_except(lambda: next(it), StopIteration))
+        assert sorted(result) == [1, 2, 3]
+
+    def test_first_true_basic(self):
+        assert IterUtil.first_true([0, None, "hello", "world"]) == "hello"
+
+    def test_first_true_with_predicate(self):
+        assert IterUtil.first_true([1, 2, 3, 4], predicate=lambda x: x > 2) == 3
+
+    def test_first_true_no_match(self):
+        assert IterUtil.first_true([1, 2, 3], predicate=lambda x: x > 10, default=-1) == -1
+
+    def test_random_product(self):
+        result = IterUtil.random_product([1, 2], ["a", "b"])
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+        assert result[0] in [1, 2]
+        assert result[1] in ["a", "b"]
+
+    def test_random_permutation(self):
+        result = IterUtil.random_permutation([1, 2, 3])
+        assert sorted(result) == [1, 2, 3]
+
+    def test_random_permutation_r(self):
+        result = IterUtil.random_permutation([1, 2, 3, 4], r=2)
+        assert len(result) == 2
+
+    def test_random_combination(self):
+        result = IterUtil.random_combination([1, 2, 3, 4], r=2)
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+        assert all(x in [1, 2, 3, 4] for x in result)
+
+    def test_nth_combination(self):
+        result = IterUtil.nth_combination([1, 2, 3, 4], r=2, index=0)
+        assert result == (1, 2)
+
+    def test_nth_combination_last(self):
+        result = IterUtil.nth_combination([1, 2, 3, 4], r=2, index=5)
+        assert result == (3, 4)
+
+    def test_nth_combination_negative_index(self):
+        result = IterUtil.nth_combination([1, 2, 3, 4], r=2, index=-1)
+        assert result == (3, 4)
+
+    def test_nth_combination_out_of_range(self):
+        import pytest
+
+        with pytest.raises(IndexError):
+            IterUtil.nth_combination([1, 2, 3], r=2, index=100)

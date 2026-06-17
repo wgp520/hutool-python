@@ -176,6 +176,24 @@ class TestCollUtil:
         result = CollUtil.trans([1, 2, 3], lambda x: x * 2)
         assert result == [2, 4, 6]
 
+    def test_sort_to_map(self):
+        result = CollUtil.sort_to_map([3, 1, 2], lambda x: x, lambda x: x * 10)
+        assert list(result.keys()) == [1, 2, 3]
+        assert result[1] == 10
+
+    def test_sort_entry_to_list(self):
+        result = CollUtil.sort_entry_to_list({"c": 3, "a": 1, "b": 2})
+        assert result == [("a", 1), ("b", 2), ("c", 3)]
+
+    def test_sort_by_entry(self):
+        result = CollUtil.sort_by_entry({"c": 3, "a": 1, "b": 2})
+        assert list(result.keys()) == ["a", "b", "c"]
+
+    def test_to_collection(self):
+        assert CollUtil.to_collection((1, 2, 3)) == [1, 2, 3]
+        assert CollUtil.to_collection([1, 2], set) == {1, 2}
+        assert CollUtil.to_collection(None) == []
+
 
 class TestListUtil:
     def test_sub(self):
@@ -499,3 +517,34 @@ class TestCollUtilSafeMinMax:
 
         result = ListUtil.split_avg([1, 2, 3, 4, 5], 2)
         assert len(result) == 2
+
+    def test_chunk_by_basic(self):
+        result = CollUtil.chunk_by([1, 2, 3, 4, 5], 2)
+        assert result == [[1, 2], [3, 4], [5]]
+
+    def test_chunk_by_exact(self):
+        result = CollUtil.chunk_by([1, 2, 3, 4], 2)
+        assert result == [[1, 2], [3, 4]]
+
+    def test_chunk_by_empty(self):
+        assert CollUtil.chunk_by([], 2) == []
+
+    def test_chunk_by_invalid_size(self):
+        import pytest
+
+        with pytest.raises(ValueError):
+            CollUtil.chunk_by([1, 2], 0)
+
+    def test_remove_duplicates_basic(self):
+        result = CollUtil.remove_duplicates([1, 2, 2, 3, 3, 1])
+        assert result == [1, 2, 3]
+
+    def test_remove_duplicates_empty(self):
+        assert CollUtil.remove_duplicates([]) == []
+
+    def test_remove_duplicates_none(self):
+        assert CollUtil.remove_duplicates(None) == []
+
+    def test_remove_duplicates_order_preserved(self):
+        result = CollUtil.remove_duplicates([3, 1, 2, 1, 3])
+        assert result == [3, 1, 2]

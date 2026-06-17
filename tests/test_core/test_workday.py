@@ -163,3 +163,55 @@ class TestWorkdayUtil:
         """测试 datetime 输入"""
         result = WorkdayUtil.add_workdays(datetime(2024, 1, 2, 14, 0), 3)
         assert result == date(2024, 1, 5)
+
+    def test_workday_hours_same_day(self):
+        """同一天的工作小时数"""
+        import datetime as _dt
+
+        start = _dt.datetime(2024, 6, 17, 9, 0)  # Monday
+        end = _dt.datetime(2024, 6, 17, 13, 0)  # 4 hours
+        result = WorkdayUtil.workday_hours(start, end)
+        assert result == 4.0
+
+    def test_workday_hours_multi_day(self):
+        """多天工作小时数"""
+        import datetime as _dt
+
+        start = _dt.datetime(2024, 6, 17, 9, 0)  # Monday
+        end = _dt.datetime(2024, 6, 19, 17, 0)  # Wednesday
+        result = WorkdayUtil.workday_hours(start, end)
+        # Mon full (8h) + Tue full (8h) + Wed full (8h) = 24
+        assert result == 24.0
+
+    def test_workday_hours_with_weekend(self):
+        """包含周末的工作小时数"""
+        import datetime as _dt
+
+        start = _dt.datetime(2024, 6, 14, 9, 0)  # Friday
+        end = _dt.datetime(2024, 6, 17, 17, 0)  # Monday
+        result = WorkdayUtil.workday_hours(start, end)
+        # Fri (8h) + Sat (0) + Sun (0) + Mon (8h) = 16
+        assert result == 16.0
+
+    def test_easter_2024(self):
+        """2024 年复活节：3 月 31 日"""
+        result = WorkdayUtil.easter(2024)
+        assert result == date(2024, 3, 31)
+
+    def test_easter_2025(self):
+        """2025 年复活节：4 月 20 日"""
+        result = WorkdayUtil.easter(2025)
+        assert result == date(2025, 4, 20)
+
+    def test_easter_2000(self):
+        """2000 年复活节：4 月 23 日"""
+        result = WorkdayUtil.easter(2000)
+        assert result == date(2000, 4, 23)
+
+    def test_easter_related_holidays(self):
+        """复活节相关节假日列表"""
+        holidays = WorkdayUtil.easter_related_holidays(2024)
+        assert len(holidays) == 6
+        # 复活节当天应在列表中
+        easter_dates = [h[0] for h in holidays]
+        assert date(2024, 3, 31) in easter_dates

@@ -69,3 +69,60 @@ ObjectUtil.default_if_null_supplier(None, lambda: "default")     # "default"
 ObjectUtil.default_if_empty_supplier("", lambda: "default")      # "default"
 ObjectUtil.default_if_blank_supplier("   ", lambda: "default")   # "default"
 ```
+
+### 安全属性获取
+
+```python
+# getAttrSafe — 安全获取对象属性（不存在返回默认值）
+class User:
+    name = "张三"
+
+ObjectUtil.get_attr_safe(User(), "name")          # "张三"
+ObjectUtil.get_attr_safe(User(), "age", 0)        # 0
+ObjectUtil.get_attr_safe(None, "name")             # None
+```
+
+### 键格式化
+
+```python
+# getKeyFmt — 格式化 Map 键
+ObjectUtil.get_key_fmt({"name": "test"}, "name", "key_{}")  # "test"
+ObjectUtil.get_key_fmt({}, "name", "key_{}")                 # "key_name"
+```
+
+### 解包到字典
+
+```python
+# unpackToDict — 将对象属性解包为字典
+class Config:
+    host = "localhost"
+    port = 8080
+
+ObjectUtil.unpack_to_dict(Config())
+# {"host": "localhost", "port": 8080}
+```
+
+### 异常安全
+
+```python
+# noneOnException — 捕获异常返回 None
+ObjectUtil.none_on_exception(lambda: 1 / 0)  # None
+ObjectUtil.none_on_exception(lambda: 100)     # 100
+```
+
+### 空值计数
+
+```python
+# emptyCount — 统计空值数量（None/""/空集合）
+ObjectUtil.empty_count(None, "", [], "abc")   # 3
+ObjectUtil.empty_count(1, 2, 3)               # 0
+```
+
+### 安全相等比较
+
+```python
+# equal — None 安全相等比较
+ObjectUtil.equal(None, None)   # True
+ObjectUtil.equal("abc", "abc") # True
+ObjectUtil.equal(None, "abc")  # False
+```

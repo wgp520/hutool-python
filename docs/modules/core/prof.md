@@ -4,14 +4,20 @@
 
 Python 内置的 `cProfile` 模块功能强大但使用繁琐。`ProfUtil` 提供装饰器和上下文管理器两种方式，一行代码即可对函数或代码块进行性能分析。
 
-## 方法
+## ProfileDeco 装饰器（class-based）
 
-### 装饰器 profile_deco
+`ProfileDeco` 是 class-based 装饰器，支持有括号/无括号、同步/协程：
 
 ```python
-from hutool import ProfUtil
+from hutool import ProfileDeco
 
-@ProfUtil.profile_deco(sort_by="tottime", limit=5)
+# 无括号（默认 cumtime, 10 行）
+@ProfileDeco
+def compute():
+    return sum(range(100000))
+
+# 有括号
+@ProfileDeco(sort_by="tottime", limit=5)
 def slow_func():
     total = 0
     for i in range(100000):
@@ -20,6 +26,27 @@ def slow_func():
 
 slow_func()
 # 打印 cProfile 统计信息（按自身时间排序，前 5 行）
+
+# async
+@ProfileDeco(sort_by="tottime", limit=3)
+async def async_compute():
+    return sum(range(100000))
+```
+
+### 使用ProfUtil调用
+
+`ProfUtil.profile_deco` 和 `ProfUtil.prof_decorator` 仍然可用，指向 `ProfileDeco`：
+
+```python
+from hutool import ProfUtil
+
+@ProfUtil.profile_deco(sort_by="tottime", limit=5)
+def old_style():
+    ...
+
+@ProfUtil.prof_decorator(sort_by="tottime", limit=5)
+def also_old():
+    ...
 ```
 
 ### 上下文管理器 profile_context

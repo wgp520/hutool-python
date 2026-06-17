@@ -106,3 +106,25 @@ class TestIdUtil:
         id_str = IdUtil.get_snowflake_next_id_str(1, 1)
         assert isinstance(id_str, str)
         assert len(id_str) > 0
+
+    def test_unique_machine32(self):
+        id1 = IdUtil.unique_machine32()
+        id2 = IdUtil.unique_machine32()
+        assert isinstance(id1, int)
+        assert id1 != id2
+
+    def test_unique_machine64(self):
+        id1 = IdUtil.unique_machine64()
+        id2 = IdUtil.unique_machine64()
+        assert isinstance(id1, int)
+        assert id1 != id2
+
+    def test_luid_default(self):
+        id1 = IdUtil.luid()
+        assert isinstance(id1, str)
+        assert "-" in id1
+
+    def test_luid_custom_separator(self):
+        id1 = IdUtil.luid(separator=":")
+        assert ":" in id1
+        assert "-" not in id1

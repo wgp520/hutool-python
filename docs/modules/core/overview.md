@@ -35,6 +35,7 @@
 | `ColorUtil` | 颜色格式转换（hex↔rgb） |
 | `ImageUtil` | 图片格式检测（魔数识别） |
 | `UserAgentUtil` | UserAgent 随机生成器 |
+| `Struct` | 结构体（dict 子类，支持属性访问，递归嵌套转换） |
 
 ### 集合与 Map
 
@@ -63,6 +64,7 @@
 | `ExecUtil` | 并发执行（线程池/进程池） |
 | `ProfUtil` | 性能分析（cProfile） |
 | `MemoryRepo` | 内存数据仓库（链式查询） |
+| `TimeThis` / `ProfileDeco` / `CacheFunction` / `Memoize` / `FuncOnce` / `TtlLruCache` / `NoneOnException` | class-based 装饰器（支持有括号/无括号/同步/协程） |
 
 ```{toctree}
 :hidden:
@@ -149,4 +151,6 @@ convert
 color
 image
 user_agent
+struct
+decorators
 ```

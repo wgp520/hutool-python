@@ -22,3 +22,30 @@ class TestProfUtil:
         assert total == sum(range(1000))
         captured = capsys.readouterr()
         assert "ncalls" in captured.out
+
+    def test_prof_decorator_is_callable(self):
+        assert callable(ProfUtil.prof_decorator)
+
+    def test_prof_context_is_callable(self):
+        assert callable(ProfUtil.prof_context)
+
+    def test_prof_decorator_works(self):
+        @ProfUtil.prof_decorator(sort_by="tottime", limit=1)
+        def fast():
+            return 42
+
+        assert fast() == 42
+
+    def test_prof_context_works(self):
+        import io
+        import sys
+
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            with ProfUtil.prof_context(limit=1):
+                pass
+        finally:
+            sys.stdout = old_stdout
+        # 上下文管理器应正常执行
+        assert True

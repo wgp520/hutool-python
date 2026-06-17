@@ -1,6 +1,6 @@
 import time
 
-from hutool import TimingUtil, timethis
+from hutool import TimingUtil
 
 
 class TestTimethis:
@@ -9,7 +9,7 @@ class TestTimethis:
     def test_timethis_preserves_return(self):
         """测试装饰器不改变返回值"""
 
-        @timethis
+        @TimingUtil.timethis
         def add(a, b):
             return a + b
 
@@ -18,7 +18,7 @@ class TestTimethis:
     def test_timethis_preserves_name(self):
         """测试保留函数名"""
 
-        @timethis
+        @TimingUtil.timethis
         def my_func():
             pass
 
@@ -27,7 +27,7 @@ class TestTimethis:
     def test_timethis_prints_output(self, capsys):
         """测试打印耗时输出"""
 
-        @timethis
+        @TimingUtil.timethis
         def slow():
             time.sleep(0.05)
 

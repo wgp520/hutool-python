@@ -90,3 +90,7 @@ class TestCronUtil:
         dates = CronUtil.matched_dates("* * * * *", start, end)
         assert isinstance(dates, list)
         assert len(dates) > 0
+
+    def test_set_cron_setting(self):
+        CronUtil.set_cron_setting("/path/to/cron.properties")
+        assert hasattr(CronUtil, "_setting_path")

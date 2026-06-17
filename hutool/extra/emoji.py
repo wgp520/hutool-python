@@ -137,3 +137,38 @@ class EmojiUtil:
             code_point = ord(char)
             result.append(f"&#x{code_point:X};")
         return "".join(result)
+
+    @staticmethod
+    def remove_all_emojis(text: str) -> str:
+        """移除所有 emoji（与 remove_emojis 相同）。
+
+        :param text: 输入字符串
+        :return: 移除 emoji 后的字符串
+        """
+        return EmojiUtil.remove_emojis(text)
+
+    @staticmethod
+    def to_html_hex(emoji_char: str) -> str:
+        """将 emoji 转为 HTML 十六进制实体（如 &#x1F600;）。
+
+        :param emoji_char: emoji 字符
+        :return: HTML 十六进制实体字符串
+        """
+        result = []
+        for char in emoji_char:
+            code_point = ord(char)
+            result.append(f"&#x{code_point:X};")
+        return "".join(result)
+
+    @staticmethod
+    def to_unicode(emoji_char: str) -> str:
+        """将 emoji 转为 Unicode 表示（如 U+1F600）。
+
+        :param emoji_char: emoji 字符
+        :return: Unicode 表示字符串
+        """
+        result = []
+        for char in emoji_char:
+            code_point = ord(char)
+            result.append(f"U+{code_point:04X}")
+        return "".join(result)

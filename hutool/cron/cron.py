@@ -191,3 +191,27 @@ class CronUtil:
                 result.append(current)
             current += timedelta(minutes=1)
         return result
+
+    @classmethod
+    def set_cron_setting(cls, setting_path: str) -> None:
+        """加载 Cron 配置文件。
+
+        配置文件每行格式为 ``cron_pattern=task_name``（暂仅记录路径）。
+
+        :param setting_path: 配置文件路径
+        """
+        cls._setting_path = setting_path
+
+    @classmethod
+    def update_pattern(cls, task_index: int, new_pattern: str) -> None:
+        """更新已有任务的 Cron 表达式。
+
+        :param task_index: 任务索引（从 0 开始）
+        :param new_pattern: 新的 cron 表达式
+        :raises IndexError: 索引越界时
+        :raises ValueError: 表达式不合法时
+        """
+        with cls._lock:
+            if task_index < 0 or task_index >= len(cls._tasks):
+                raise IndexError(f"任务索引越界: {task_index}")
+            cls._tasks[task_index].pattern = CronPattern(new_pattern)

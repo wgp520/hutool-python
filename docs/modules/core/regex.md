@@ -98,3 +98,15 @@ ReUtil.get_all_group_names(r"(?P<year>\d{4})-(?P<month>\d{2})")
 ReUtil.replace_by_func("hello123", r"\d+", lambda m: "[NUM]")
 # "hello[NUM]"
 ```
+
+### 模式匹配
+
+```python
+# findFirstPattern — 按优先级查找第一个匹配的模式
+ReUtil.find_first_pattern("abc123", [r"\d+", r"[a-z]+"])  # r"\d+"
+ReUtil.find_first_pattern("!!!", [r"\d+", r"[a-z]+"])      # None
+
+# findAllPatterns — 查找所有匹配的模式
+ReUtil.find_all_patterns("Hello123", [r"\d+", r"[a-z]+", r"[A-Z]+"])
+# [r"\d+", r"[a-z]+", r"[A-Z]+"]
+```

@@ -2098,13 +2098,15 @@ class CharSequenceUtil:
         return string.isalpha() and string.islower()  # type: ignore[union-attr]
 
     @staticmethod
-    def only_digits(string: Optional[str]) -> str:
+    def only_digits(string: Optional[str]) -> Optional[str]:
         """
         移除字符串中所有非数字字符，仅保留数字。
 
         :param string: 源字符串
-        :return: 仅包含数字的字符串，输入为 None 时返回空字符串
+        :return: 仅包含数字的字符串，输入为 None 时返回 None
         """
+        if string is None:
+            return None
         if CharSequenceUtil.is_empty(string):
             return ""
         return re.sub(r"[^0-9]", "", string)  # type: ignore[arg-type]
@@ -2123,6 +2125,7 @@ class CharSequenceUtil:
         import unicodedata as _ud
 
         _replacements = {
+            # 德语变音字母
             "ä": "ae",  # ä
             "ö": "oe",  # ö
             "ü": "ue",  # ü
@@ -2130,6 +2133,61 @@ class CharSequenceUtil:
             "Ö": "Oe",  # Ö
             "Ü": "Ue",  # Ü
             "ß": "ss",  # ß
+            # 扩展 Unicode→ASCII 映射
+            "é": "e",
+            "è": "e",
+            "ê": "e",
+            "ë": "e",
+            "É": "E",
+            "È": "E",
+            "Ê": "E",
+            "Ë": "E",
+            "á": "a",
+            "à": "a",
+            "â": "a",
+            "Á": "A",
+            "À": "A",
+            "Â": "A",
+            "ñ": "n",
+            "Ñ": "N",
+            "ç": "c",
+            "Ç": "C",
+            "í": "i",
+            "ì": "i",
+            "î": "i",
+            "ï": "i",
+            "Í": "I",
+            "Ì": "I",
+            "Î": "I",
+            "Ï": "I",
+            "ó": "o",
+            "ò": "o",
+            "ô": "o",
+            "Ó": "O",
+            "Ò": "O",
+            "Ô": "O",
+            "ú": "u",
+            "ù": "u",
+            "û": "u",
+            "Ú": "U",
+            "Ù": "U",
+            "Û": "U",
+            "ý": "y",
+            "ÿ": "y",
+            "Ý": "Y",
+            "Ÿ": "Y",
+            "ð": "d",
+            "Ð": "D",
+            "þ": "th",
+            "Þ": "Th",
+            "ø": "o",
+            "Ø": "O",
+            "å": "a",
+            "Å": "A",
+            "æ": "ae",
+            "Æ": "AE",
+            "œ": "oe",
+            "Œ": "OE",
         }
         for src, dst in _replacements.items():
             text = text.replace(src, dst)
@@ -3300,24 +3358,6 @@ class CharSequenceUtil:
         after = re.sub(escaped, replacement, after, count=1, flags=flags)
         return before + after
 
-    @staticmethod
-    def replace_by_func(
-        string: Optional[str],
-        regex: str,
-        func: "Callable[[re.Match], str]",
-    ) -> Optional[str]:
-        """
-        使用正则表达式匹配并通过回调函数生成替换内容。
-
-        :param string: 源字符串
-        :param regex: 正则表达式
-        :param func: 回调函数，接受 ``re.Match`` 对象，返回替换字符串
-        :return: 替换后的字符串
-        """
-        if CharSequenceUtil.is_empty(string):
-            return string
-        return re.sub(regex, func, string)  # type: ignore[arg-type]
-
     # ------------------------------------------------------------------
     # 大小写转换（null 安全）
     # ------------------------------------------------------------------
@@ -3692,4 +3732,63 @@ class StrUtil(CharSequenceUtil, StrPool):
         if append_dots:
             return result + "..."
 
+        return result
+
+    @staticmethod
+    def shrink_repeated(s: Optional[str], replacement: str = "") -> Optional[str]:
+        """压缩连续重复字符。
+
+        例如 ``"aaa"`` → ``"a"``，``"aabb"`` → ``"ab"``。
+        当 ``replacement`` 为空字符串时，去除重复只保留一个；否则用替换串替代重复部分。
+
+        :param s: 待处理的字符串
+        :param replacement: 重复部分的替换值，默认 ``""``（去除重复）
+        :return: 压缩后的字符串
+        """
+        if s is None:
+            return None
+        if not s:
+            return s
+        result = [s[0]]
+        for ch in s[1:]:
+            if ch != result[-1]:
+                result.append(ch)
+            elif replacement:
+                result.append(replacement)
+        return "".join(result)
+
+    @staticmethod
+    def sub_chinese_punctuations(s: Optional[str]) -> Optional[str]:
+        """将中文标点替换为英文标点。
+
+        替换范围：`，。？！；：""''（）【】《》、`
+
+        :param s: 待处理的字符串
+        :return: 替换后的字符串
+        """
+        if s is None:
+            return None
+        _map = {
+            "，": ",",
+            "。": ".",
+            "？": "?",
+            "！": "!",
+            "；": ";",
+            "：": ":",
+            "“": '"',
+            "”": '"',
+            "‘": "'",
+            "’": "'",
+            "（": "(",
+            "）": ")",
+            "【": "[",
+            "】": "]",
+            "《": "<",
+            "》": ">",
+            "、": ",",
+            "～": "~",
+        }
+        result = s
+        for zh, en in _map.items():
+            result = result.replace(zh, en)
         return result

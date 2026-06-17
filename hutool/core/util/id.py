@@ -215,6 +215,46 @@ class IdUtil:
         """
         return str(IdUtil.get_snowflake_next_id(worker_id, datacenter_id))
 
+    @staticmethod
+    def unique_machine32() -> int:
+        """生成 32 位机器唯一 ID。
+
+        基于 PID + 时间戳 + 计数器组合，在同一进程内唯一。
+
+        :return: 32 位整数 ID
+        """
+        return _machine_id_gen.generate32()
+
+    @staticmethod
+    def unique_machine64() -> int:
+        """生成 64 位机器唯一 ID。
+
+        基于 PID + 主机名哈希 + 时间戳 + 计数器组合，跨机器唯一。
+
+        :return: 64 位整数 ID
+        """
+        return _machine_id_gen.generate64()
+
+    @staticmethod
+    def luid(separator: str = "-") -> str:
+        """基于主机名的全局唯一 ID。
+
+        格式: ``HHHHHHHH-PIDPPPP-TTTTTTTT-CCCC``
+
+        :param separator: 分隔符，默认 ``"-"``
+        :return: 全局唯一 ID 字符串
+        """
+        import hashlib
+        import os
+        import socket
+
+        hostname = socket.gethostname()
+        host_hash = hashlib.md5(hostname.encode()).hexdigest()[:8].upper()
+        pid = format(os.getpid() & 0xFFFF, "04X")
+        ts = format(int(time.time()) & 0xFFFFFFFF, "08X")
+        counter = format(_machine_id_gen._counter & 0xFFFF, "04X")
+        return separator.join([host_hash, f"PID{pid}", ts, counter])
+
 
 class _SnowflakeIdWorker:
     """雪花算法ID生成器内部实现"""
@@ -290,3 +330,48 @@ class _SnowflakeIdWorker:
         while ts <= self._last_timestamp:
             ts = self._current_millis()
         return ts
+
+
+class MachineIdGenerator:
+    """机器唯一 ID 生成器（32/64 位）。
+
+    基于 PID、主机名哈希、时间戳和计数器组合生成唯一 ID。
+    """
+
+    def __init__(self):
+        import hashlib
+        import os
+        import socket
+        import threading
+
+        hostname = socket.gethostname()
+        self._host_hash = int(hashlib.md5(hostname.encode()).hexdigest()[:8], 16)
+        self._pid = os.getpid() & 0xFFFF
+        self._counter = 0
+        self._lock = threading.Lock()
+
+    def generate32(self) -> int:
+        """生成 32 位机器唯一 ID。
+
+        布局: 时间戳（毫秒，12位）+ PID（8位）+ 计数器（12位）
+
+        :return: 32 位整数
+        """
+        with self._lock:
+            self._counter = (self._counter + 1) & 0xFFF  # 12 bits
+            ts = int(time.time() * 1000) & 0xFFF  # 毫秒级，12 bits
+            return ((ts << 20) | ((self._pid & 0xFF) << 12) | self._counter) & 0xFFFFFFFF
+
+    def generate64(self) -> int:
+        """生成 64 位机器唯一 ID。
+
+        :return: 64 位整数
+        """
+        with self._lock:
+            self._counter = (self._counter + 1) & 0xFFFF
+            ts = int(time.time() * 1000) & 0x1FFFFFFFFFF
+            return (ts << 23) | (self._host_hash & 0xFF) << 15 | (self._pid & 0xFF) << 7 | (self._counter & 0x7F)
+
+
+# 模块级单例
+_machine_id_gen = MachineIdGenerator()

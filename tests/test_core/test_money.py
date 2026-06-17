@@ -117,3 +117,29 @@ class TestMoneyUtil:
         for amount in [1, 10, 100, 1000, 9999]:
             assert MoneyUtil.yuan_to_fen(MoneyUtil.fen_to_yuan(amount)) == amount or True
             # 注意：对于非整数分的转换，往返可能有精度差异
+
+    def test_netto(self):
+        result = MoneyUtil.netto(Decimal("113"))
+        assert result == Decimal("100.00")
+
+    def test_brutto(self):
+        result = MoneyUtil.brutto(Decimal("100"))
+        assert result == Decimal("113.00")
+
+    def test_profit_margin(self):
+        result = MoneyUtil.profit_margin(100, 150)
+        assert result == Decimal("50.00")
+
+    def test_profit_margin_zero_cost(self):
+        with pytest.raises(ValueError):
+            MoneyUtil.profit_margin(0, 100)
+
+    def test_profit_margin_loss(self):
+        result = MoneyUtil.profit_margin(100, 80)
+        assert result == Decimal("-20.00")
+
+    def test_cent_to_yuan(self):
+        assert MoneyUtil.cent_to_yuan(100) == Decimal("1.00")
+
+    def test_yuan_to_cent(self):
+        assert MoneyUtil.yuan_to_cent(1) == 100

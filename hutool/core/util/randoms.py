@@ -2,7 +2,7 @@ import random
 import secrets
 import string
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, List, Optional, Sequence, Tuple, TypeVar
 
 T = TypeVar("T")
@@ -472,3 +472,130 @@ class RandomUtil:
         :return: 随机选中的值
         """
         return RandomUtil.weighted_choice(pairs)
+
+    @staticmethod
+    def random_datetime(
+        start: Optional[datetime] = None,
+        end: Optional[datetime] = None,
+    ) -> datetime:
+        """生成指定范围内的随机 datetime。
+
+        :param start: 起始时间，默认 2000-01-01
+        :param end: 结束时间，默认当前时间
+        :return: 随机 datetime 对象
+        """
+        if start is None:
+            start = datetime(2000, 1, 1)
+        if end is None:
+            end = datetime.now()
+        delta = end - start
+        random_seconds = random.uniform(0, delta.total_seconds())
+        return start + timedelta(seconds=random_seconds)
+
+    @staticmethod
+    def random_date_obj(
+        start: Optional[date] = None,
+        end: Optional[date] = None,
+    ) -> date:
+        """生成指定范围内的随机 date。
+
+        :param start: 起始日期，默认 2000-01-01
+        :param end: 结束日期，默认今日
+        :return: 随机 date 对象
+        """
+        if start is None:
+            start = date(2000, 1, 1)
+        if end is None:
+            end = date.today()
+        delta = (end - start).days
+        if delta < 0:
+            raise ValueError("start 必须早于 end")
+        random_days = random.randint(0, delta)
+        return start + timedelta(days=random_days)
+
+    @staticmethod
+    def random_digits(length: int) -> str:
+        """生成指定长度的随机数字字符串。
+
+        :param length: 字符串长度
+        :return: 仅包含数字的随机字符串
+        :raises ValueError: 长度小于 0
+        """
+        if length < 0:
+            raise ValueError("length 必须大于等于 0")
+        return "".join(random.choices("0123456789", k=length))
+
+    @staticmethod
+    def random_alphanumeric(length: int) -> str:
+        """生成指定长度的随机字母数字字符串。
+
+        :param length: 字符串长度
+        :return: 仅包含字母和数字的随机字符串
+        :raises ValueError: 长度小于 0
+        """
+        if length < 0:
+            raise ValueError("length 必须大于等于 0")
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return "".join(random.choices(chars, k=length))
+
+    @staticmethod
+    def random_upper_ascii(length: int) -> str:
+        """生成指定长度的随机大写字母字符串。
+
+        :param length: 字符串长度
+        :return: 仅包含大写字母的随机字符串
+        :raises ValueError: 长度小于 0
+        """
+        if length < 0:
+            raise ValueError("length 必须大于等于 0")
+        return "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=length))
+
+
+class WeightedRand:
+    """加权随机类，支持按概率选取。
+
+    构造时传入权重-值对列表，之后每次调用 ``pick()`` 按权重随机选取一个值。
+
+    ::
+
+        >>> from hutool.core.util.randoms import WeightedRand
+        >>> wr = WeightedRand([(1, "a"), (3, "b"), (6, "c")])
+        >>> wr.pick()  # "a" 概率 10%, "b" 概率 30%, "c" 概率 60%
+    """
+
+    def __init__(self, pairs: List[Tuple[int, Any]]) -> None:
+        """初始化加权随机生成器。
+
+        :param pairs: 权重-值对列表 ``[(weight, value), ...]``
+        """
+        self._values = []  # type: list
+        self._weights = []  # type: list
+        for weight, value in pairs:
+            if weight < 0:
+                raise ValueError("权重不能为负数")
+            self._values.append(value)
+            self._weights.append(weight)
+        if not self._values:
+            raise ValueError("pairs 不能为空")
+        self._total = sum(self._weights)
+
+    def pick(self) -> Any:
+        """按权重随机选取一个值。
+
+        :return: 选中的值
+        """
+        r = random.uniform(0, self._total)
+        cumulative = 0
+        for weight, value in zip(self._weights, self._values):
+            cumulative += weight
+            if r <= cumulative:
+                return value
+        return self._values[-1]
+
+    def picks(self, n: int) -> list:
+        """按权重随机选取 N 个值（可重复）。
+
+        :param n: 选取次数
+        :return: 选中的值列表
+        """
+        return [self.pick() for _ in range(n)]

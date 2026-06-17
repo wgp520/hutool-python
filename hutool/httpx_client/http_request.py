@@ -30,6 +30,10 @@ class HttpRequest:
         self._timeout: int = 30000  # 毫秒
         self._charset: str = "utf-8"
         self._follow_redirects: bool = True
+        self._max_redirects: Optional[int] = None
+        self._http_proxy: Optional[str] = None
+        self._connect_timeout: Optional[int] = None
+        self._read_timeout: Optional[int] = None
         self._params: Optional[Dict[str, str]] = None
         self._body_bytes: Optional[bytes] = None
         self._files: Optional[Dict[str, Any]] = None
@@ -316,4 +320,58 @@ class HttpRequest:
         if self._files is None:
             self._files = {}
         self._files[name] = (filename, file_bytes)
+        return self
+
+    def set_follow_redirects(self, follow: bool) -> "HttpRequest":
+        """设置是否跟随重定向（与 follow_redirects 相同）。
+
+        :param follow: 是否跟随重定向
+        :return: 当前实例，支持链式调用
+        """
+        self._follow_redirects = follow
+        return self
+
+    def set_follow_redirects_cookie(self, follow: bool) -> "HttpRequest":
+        """设置重定向时是否携带 Cookie。
+
+        :param follow: 是否携带 Cookie
+        :return: 当前实例，支持链式调用
+        """
+        self._follow_redirects = follow
+        return self
+
+    def set_max_redirect_count(self, count: int) -> "HttpRequest":
+        """设置最大重定向次数。
+
+        :param count: 最大重定向次数
+        :return: 当前实例，支持链式调用
+        """
+        self._max_redirects = count
+        return self
+
+    def set_http_proxy(self, http_proxy: str) -> "HttpRequest":
+        """设置 HTTP 代理。
+
+        :param http_proxy: 代理地址，如 'http://proxy:8080'
+        :return: 当前实例，支持链式调用
+        """
+        self._http_proxy = http_proxy
+        return self
+
+    def set_connection_timeout(self, timeout_ms: int) -> "HttpRequest":
+        """设置连接超时时间（毫秒）。
+
+        :param timeout_ms: 连接超时毫秒数
+        :return: 当前实例，支持链式调用
+        """
+        self._connect_timeout = timeout_ms
+        return self
+
+    def set_read_timeout(self, timeout_ms: int) -> "HttpRequest":
+        """设置读取超时时间（毫秒）。
+
+        :param timeout_ms: 读取超时毫秒数
+        :return: 当前实例，支持链式调用
+        """
+        self._read_timeout = timeout_ms
         return self

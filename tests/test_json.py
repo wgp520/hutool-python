@@ -180,3 +180,31 @@ class TestJSONUtil:
     def test_get_list(self):
         assert JSONUtil.get_list({"items": [1, 2]}, "items") == [1, 2]
         assert JSONUtil.get_list({}, "missing", []) == []
+
+    def test_get_ordered_json(self):
+        result = JSONUtil.get_ordered_json('{"b":2,"a":1}')
+        assert result == '{"a": 1, "b": 2}'
+
+    def test_json_equal_same_order(self):
+        assert JSONUtil.json_equal('{"a":1,"b":2}', '{"a":1,"b":2}') is True
+
+    def test_json_equal_different_order(self):
+        assert JSONUtil.json_equal('{"a":1,"b":2}', '{"b":2,"a":1}') is True
+
+    def test_json_equal_not_equal(self):
+        assert JSONUtil.json_equal('{"a":1}', '{"a":2}') is False
+
+    def test_json_keys_equal_true(self):
+        assert JSONUtil.json_keys_equal('{"a":1,"b":2}', '{"b":3,"a":4}') is True
+
+    def test_json_keys_equal_false(self):
+        assert JSONUtil.json_keys_equal('{"a":1}', '{"b":1}') is False
+
+    def test_json_keys_equal_non_dict(self):
+        """非字典输入返回 False"""
+        assert JSONUtil.json_keys_equal("[1,2]", '{"a":1}') is False
+
+    def test_parse_from_xml(self):
+        xml = "<root><name>test</name><value>123</value></root>"
+        result = JSONUtil.parse_from_xml(xml)
+        assert isinstance(result, dict)

@@ -374,3 +374,30 @@ class ReUtil:
         :return: 替换后的字符串
         """
         return re.sub(pattern, func, content)
+
+    @staticmethod
+    def find_first_pattern(content: str, patterns: List[str]) -> Optional[str]:
+        """按优先级（列表顺序）查找第一个匹配的正则模式。
+
+        :param content: 待检查的字符串
+        :param patterns: 正则表达式列表
+        :return: 第一个匹配的模式字符串，无匹配返回 ``None``
+        """
+        if not content:
+            return None
+        for pattern in patterns:
+            if re.search(pattern, content):
+                return pattern
+        return None
+
+    @staticmethod
+    def find_all_patterns(content: str, patterns: List[str]) -> List[str]:
+        """查找所有匹配的正则模式。
+
+        :param content: 待检查的字符串
+        :param patterns: 正则表达式列表
+        :return: 所有匹配的模式列表
+        """
+        if not content:
+            return []
+        return [p for p in patterns if re.search(p, content)]

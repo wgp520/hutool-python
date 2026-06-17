@@ -1,3 +1,4 @@
+from ..core.decorators import CacheFunction, FuncOnce, Memoize, TtlLruCache
 from .fifo_cache import FIFOCache
 from .lfu_cache import LFUCache
 from .lru_cache import LRUCache
@@ -57,3 +58,10 @@ class CacheUtil:
         :return: WeakCache实例
         """
         return WeakCache(capacity)
+
+
+# 别名：class-based 装饰器
+CacheUtil.cache_function = staticmethod(CacheFunction)
+CacheUtil.memoize = staticmethod(Memoize)
+CacheUtil.func_once = staticmethod(FuncOnce)
+CacheUtil.lru_cache = staticmethod(TtlLruCache)

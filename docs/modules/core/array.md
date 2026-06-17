@@ -88,3 +88,75 @@ ArrayUtil.max([3, 1, 4])              # 4
 ArrayUtil.swap([1, 2, 3], 0, 2)      # [3, 2, 1]
 ArrayUtil.filter([1, 2, 3, 4], lambda x: x > 2)  # [3, 4]
 ```
+
+### 子数组查找
+
+```python
+# indexOfSub — 子数组首次出现索引
+ArrayUtil.index_of_sub([1, 2, 3, 4, 5], [2, 3])  # 1
+ArrayUtil.index_of_sub([1, 2, 3, 4, 5], [3, 4])  # 2
+
+# lastIndexOfSub — 子数组最后出现索引
+ArrayUtil.last_index_of_sub([1, 2, 3, 2, 3], [2, 3])  # 3
+```
+
+### 批量判空
+
+```python
+# isAllEmpty — 是否全部为空
+ArrayUtil.is_all_empty([], None)       # True
+ArrayUtil.is_all_empty([], [1])        # False
+
+# isAllNotEmpty — 是否全部非空
+ArrayUtil.is_all_not_empty([1], [2])   # True
+ArrayUtil.is_all_not_empty([1], [])    # False
+
+# isAllNotNull — 是否全部非 None
+ArrayUtil.is_all_not_null([1], [2])    # True
+ArrayUtil.is_all_not_null([1], None)   # False
+```
+
+### 排序检查
+
+```python
+# isSorted — 是否已排序
+ArrayUtil.is_sorted([1, 2, 3], cmp=lambda a, b: (a > b) - (a < b))  # True
+
+# isSortedAsc — 是否升序
+ArrayUtil.is_sorted_asc([1, 2, 3])    # True
+ArrayUtil.is_sorted_asc([1, 3, 2])    # False
+
+# isSortedDesc — 是否降序
+ArrayUtil.is_sorted_desc([3, 2, 1])   # True
+```
+
+### 子数组判断
+
+```python
+# isSub — 是否为子数组
+ArrayUtil.is_sub([2, 3], [1, 2, 3, 4])   # True
+ArrayUtil.is_sub([2, 4], [1, 2, 3, 4])   # False
+```
+
+### 映射与转换
+
+```python
+# mapToSet — 数组映射为集合
+ArrayUtil.map_to_set([1, 2, 3], lambda x: x * 2)  # {2, 4, 6}
+
+# toArray — 转为列表
+ArrayUtil.to_array((1, 2, 3))    # [1, 2, 3]
+ArrayUtil.to_array(range(5))     # [0, 1, 2, 3, 4]
+```
+
+### 数组合并
+
+```python
+# zipArrays — 数组交错合并
+ArrayUtil.zip_arrays([1, 2, 3], ["a", "b", "c"])
+# [(1, "a"), (2, "b"), (3, "c")]
+
+# 长度不等时用 None 填充
+ArrayUtil.zip_arrays([1, 2], ["a", "b", "c"])
+# [(1, "a"), (2, "b"), (None, "c")]
+```

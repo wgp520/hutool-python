@@ -1,4 +1,5 @@
-from datetime import date, datetime
+import time as _time
+from datetime import date, datetime, timedelta
 
 from hutool import DateTime, DateUtil
 
@@ -386,6 +387,351 @@ class TestDateUtil:
             result = DateUtil.convert_to_datetime(fmt)
             assert result is not None, f"Failed to parse: {fmt}"
             assert result.year == 2024
+
+    def test_week_of_month(self):
+        from datetime import date
+
+        # 2024-06-01 是周六，属于第 1 周
+        assert DateUtil.week_of_month(date(2024, 6, 1)) >= 1
+        # 2024-06-10 是周一，属于第 2 周
+        assert DateUtil.week_of_month(date(2024, 6, 10)) >= 2
+
+    def test_week_of_month_with_datetime(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0)
+        result = DateUtil.week_of_month(dt)
+        assert 1 <= result <= 6
+
+    def test_get_last_day_of_month(self):
+        assert DateUtil.get_last_day_of_month(datetime(2024, 2, 1)) == 29  # 闰年
+        assert DateUtil.get_last_day_of_month(datetime(2023, 2, 1)) == 28  # 非闰年
+        assert DateUtil.get_last_day_of_month(datetime(2024, 1, 15)) == 31
+        assert DateUtil.get_last_day_of_month(datetime(2024, 4, 10)) == 30
+
+    def test_get_last_day_of_month_with_date(self):
+        assert DateUtil.get_last_day_of_month(date(2024, 12, 25)) == 31
+
+    def test_new_simple_format(self):
+        fmt_func = DateUtil.new_simple_format("yyyy-MM-dd")
+        dt = datetime(2024, 6, 15)
+        result = fmt_func(dt)
+        assert result == "2024-06-15"
+
+    def test_new_simple_format_with_time(self):
+        fmt_func = DateUtil.new_simple_format("yyyy/MM/dd HH:mm:ss")
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = fmt_func(dt)
+        assert result == "2024/06/15 14:30:45"
+
+    def test_offset_millisecond(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0, 0)
+        result = DateUtil.offset_millisecond(dt, 500)
+        assert result.to_datetime().microsecond == 500000
+
+    def test_offset_millisecond_negative(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0, 500000)
+        result = DateUtil.offset_millisecond(dt, -500)
+        assert result.to_datetime().microsecond == 0
+
+    def test_parse_time_today(self):
+        result = DateUtil.parse_time_today("12:30:00")
+        assert result.hour() == 12
+        assert result.minute() == 30
+        assert result.second() == 0
+        today = datetime.now()
+        assert result.to_datetime().date() == today.date()
+
+    def test_parse_time_today_custom_format(self):
+        result = DateUtil.parse_time_today("14:30", fmt="%H:%M")
+        assert result.hour() == 14
+        assert result.minute() == 30
+
+    def test_range_func(self):
+        start = datetime(2024, 6, 1)
+        end = datetime(2024, 6, 4)
+        result = list(DateUtil.range_func(start, end))
+        assert len(result) == 3
+        assert result[0].day == 1
+        assert result[2].day == 3
+
+    def test_range_func_week(self):
+        start = datetime(2024, 6, 1)
+        end = datetime(2024, 6, 22)
+        result = list(DateUtil.range_func(start, end, "week"))
+        assert len(result) == 3
+
+    def test_range_consume(self):
+        consumed = []
+        start = datetime(2024, 6, 1)
+        end = datetime(2024, 6, 4)
+        result = DateUtil.range_consume(start, end, consumer=lambda d: consumed.append(d.day))
+        assert len(result) == 3
+        assert consumed == [1, 2, 3]
+
+    def test_range_consume_no_consumer(self):
+        start = datetime(2024, 6, 1)
+        end = datetime(2024, 6, 3)
+        result = DateUtil.range_consume(start, end)
+        assert len(result) == 2
+
+    def test_range_not_contains_overlap(self):
+        r1 = (datetime(2024, 6, 1), datetime(2024, 6, 10))
+        r2 = (datetime(2024, 6, 5), datetime(2024, 6, 15))
+        assert DateUtil.range_not_contains(r1, r2) is False
+
+    def test_range_not_contains_no_overlap(self):
+        r1 = (datetime(2024, 6, 1), datetime(2024, 6, 5))
+        r2 = (datetime(2024, 6, 10), datetime(2024, 6, 15))
+        assert DateUtil.range_not_contains(r1, r2) is True
+
+    def test_range_not_contains_adjacent(self):
+        r1 = (datetime(2024, 6, 1), datetime(2024, 6, 5))
+        r2 = (datetime(2024, 6, 5), datetime(2024, 6, 10))
+        # 相邻但不重叠（e1 <= s2）
+        assert DateUtil.range_not_contains(r1, r2) is True
+
+    def test_spend_nt(self):
+        start = _time.perf_counter_ns()
+        # 做一些耗时操作
+        sum(range(10000))
+        elapsed = DateUtil.spend_nt(start)
+        assert elapsed >= 0
+        assert isinstance(elapsed, int)
+
+    def test_to_int_second(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0)
+        result = DateUtil.to_int_second(dt)
+        assert isinstance(result, int)
+        assert result > 0
+
+    def test_to_int_second_with_date(self):
+        d = date(2024, 6, 15)
+        result = DateUtil.to_int_second(d)
+        assert isinstance(result, int)
+
+    def test_format_http_date(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0)
+        result = DateUtil.format_http_date(dt)
+        assert isinstance(result, str)
+        assert "GMT" in result or "UTC" in result
+        assert "2024" in result
+
+    def test_format_http_date_default(self):
+        result = DateUtil.format_http_date()
+        assert isinstance(result, str)
+
+    def test_format_between_enhanced_second(self):
+        begin = datetime(2024, 6, 15, 12, 0, 0)
+        end = datetime(2024, 6, 15, 12, 0, 5)
+        result = DateUtil.format_between_enhanced(begin, end, "second")
+        assert "5秒" in result
+
+    def test_format_between_enhanced_millisecond(self):
+        begin = datetime(2024, 6, 15, 12, 0, 0, 0)
+        end = datetime(2024, 6, 15, 12, 0, 0, 500000)
+        result = DateUtil.format_between_enhanced(begin, end, "millisecond")
+        assert "500毫秒" in result
+
+    def test_convert_timezone_enhanced(self):
+        dt = datetime(2024, 6, 15, 12, 0, 0)
+        result = DateUtil.convert_timezone_enhanced(dt, "Asia/Shanghai", "UTC")
+        assert result.hour == 4  # 上海 12:00 = UTC 04:00
+
+    def test_convert_timezone_enhanced_with_pendulum(self):
+        # 用原生 datetime（naive），假设为上海时间 12:00
+        dt = datetime(2024, 6, 15, 12, 0, 0)
+        result = DateUtil.convert_timezone_enhanced(dt, "Asia/Shanghai", "UTC")
+        assert result.hour == 4
+
+    def test_today_date(self):
+        from datetime import date as _date
+
+        result = DateUtil.today_date()
+        assert isinstance(result, _date)
+        assert result == _date.today()
+
+    def test_yesterday_date(self):
+        from datetime import date as _date
+
+        result = DateUtil.yesterday_date()
+        assert isinstance(result, _date)
+        assert result == _date.today() - timedelta(days=1)
+
+    def test_tomorrow_date(self):
+        from datetime import date as _date
+
+        result = DateUtil.tomorrow_date()
+        assert isinstance(result, _date)
+        assert result == _date.today() + timedelta(days=1)
+
+    def test_week_start_default(self):
+        result = DateUtil.week_start()
+        assert result.weekday() == 0  # Monday
+
+    def test_week_start_with_date(self):
+        d = date(2024, 6, 19)  # Wednesday
+        result = DateUtil.week_start(d)
+        assert result == date(2024, 6, 17)  # Monday
+
+    def test_week_end_default(self):
+        result = DateUtil.week_end()
+        assert result.weekday() == 6  # Sunday
+
+    def test_week_end_with_date(self):
+        d = date(2024, 6, 19)  # Wednesday
+        result = DateUtil.week_end(d)
+        assert result == date(2024, 6, 23)  # Sunday
+
+    def test_day_start_default(self):
+        result = DateUtil.day_start()
+        assert result.hour == 0
+        assert result.minute == 0
+        assert result.second == 0
+
+    def test_day_start_with_datetime(self):
+        dt = datetime(2024, 6, 15, 14, 30, 45)
+        result = DateUtil.day_start(dt)
+        assert result == datetime(2024, 6, 15, 0, 0, 0)
+
+    def test_day_end_default(self):
+        result = DateUtil.day_end()
+        assert result.hour == 23
+        assert result.minute == 59
+
+    def test_day_end_with_date(self):
+        d = date(2024, 6, 15)
+        result = DateUtil.day_end(d)
+        assert result.hour == 23
+        assert result.microsecond == 999999
+
+    def test_month_start_default(self):
+        result = DateUtil.month_start()
+        assert result.day == 1
+
+    def test_month_start_with_date(self):
+        d = date(2024, 6, 15)
+        assert DateUtil.month_start(d) == date(2024, 6, 1)
+
+    def test_month_end_june(self):
+        d = date(2024, 6, 15)
+        assert DateUtil.month_end(d) == date(2024, 6, 30)
+
+    def test_month_end_feb_leap(self):
+        d = date(2024, 2, 1)
+        assert DateUtil.month_end(d) == date(2024, 2, 29)
+
+    def test_month_end_feb_non_leap(self):
+        d = date(2023, 2, 1)
+        assert DateUtil.month_end(d) == date(2023, 2, 28)
+
+    def test_is_between_dates_true(self):
+        d = date(2024, 6, 15)
+        assert DateUtil.is_between_dates(d, date(2024, 6, 1), date(2024, 6, 30)) is True
+
+    def test_is_between_dates_boundary(self):
+        d = date(2024, 6, 1)
+        assert DateUtil.is_between_dates(d, date(2024, 6, 1), date(2024, 6, 30)) is True
+
+    def test_is_between_dates_false(self):
+        d = date(2024, 7, 1)
+        assert DateUtil.is_between_dates(d, date(2024, 6, 1), date(2024, 6, 30)) is False
+
+    def test_get_weekday_name_zh(self):
+        d = date(2024, 6, 17)  # Monday
+        assert DateUtil.get_weekday_name(d) == "星期一"
+
+    def test_get_weekday_name_en(self):
+        d = date(2024, 6, 17)  # Monday
+        assert DateUtil.get_weekday_name(d, locale="en") == "Monday"
+
+    def test_get_month_name_zh(self):
+        d = date(2024, 6, 1)
+        assert DateUtil.get_month_name(d) == "六月"
+
+    def test_get_month_name_en(self):
+        d = date(2024, 6, 1)
+        assert DateUtil.get_month_name(d, locale="en") == "June"
+
+    def test_get_tertial(self):
+        assert DateUtil.get_tertial(date(2024, 1, 1)) == 1
+        assert DateUtil.get_tertial(date(2024, 4, 30)) == 1
+        assert DateUtil.get_tertial(date(2024, 5, 1)) == 2
+        assert DateUtil.get_tertial(date(2024, 8, 31)) == 2
+        assert DateUtil.get_tertial(date(2024, 9, 1)) == 3
+        assert DateUtil.get_tertial(date(2024, 12, 31)) == 3
+
+    def test_tertial_add(self):
+        d = date(2024, 1, 15)
+        result = DateUtil.tertial_add(d, 1)
+        assert result == date(2024, 5, 15)
+
+    def test_tertial_add_negative(self):
+        d = date(2024, 6, 15)
+        result = DateUtil.tertial_add(d, -1)
+        assert result == date(2024, 2, 15)
+
+    def test_get_tertial_span_q1(self):
+        d = date(2024, 3, 15)
+        start, end = DateUtil.get_tertial_span(d)
+        assert start == date(2024, 1, 1)
+        assert end == date(2024, 4, 30)
+
+    def test_get_tertial_span_q2(self):
+        d = date(2024, 6, 15)
+        start, end = DateUtil.get_tertial_span(d)
+        assert start == date(2024, 5, 1)
+        assert end == date(2024, 8, 31)
+
+    def test_group_by_day(self):
+        data = [
+            (datetime(2024, 6, 15, 10, 0), "a"),
+            (datetime(2024, 6, 15, 14, 0), "b"),
+            (datetime(2024, 6, 16, 9, 0), "c"),
+        ]
+        result = DateUtil.group_by_day(data)
+        assert len(result) == 2
+        assert len(result[date(2024, 6, 15)]) == 2
+        assert len(result[date(2024, 6, 16)]) == 1
+
+    def test_group_by_week(self):
+        data = [
+            (datetime(2024, 6, 17, 10, 0), "a"),  # Mon
+            (datetime(2024, 6, 18, 10, 0), "b"),  # Tue
+            (datetime(2024, 6, 24, 10, 0), "c"),  # next Mon
+        ]
+        result = DateUtil.group_by_week(data)
+        assert len(result) == 2
+
+    def test_group_by_month(self):
+        data = [
+            (datetime(2024, 6, 15), "a"),
+            (datetime(2024, 6, 20), "b"),
+            (datetime(2024, 7, 1), "c"),
+        ]
+        result = DateUtil.group_by_month(data)
+        assert len(result) == 2
+        assert len(result[(2024, 6)]) == 2
+
+    def test_group_by_quarter(self):
+        data = [
+            (datetime(2024, 2, 1), "a"),
+            (datetime(2024, 4, 1), "b"),
+            (datetime(2024, 10, 1), "c"),
+        ]
+        result = DateUtil.group_by_quarter(data)
+        assert len(result) == 3
+        assert (2024, 1) in result
+        assert (2024, 2) in result
+        assert (2024, 4) in result
+
+    def test_group_by_year(self):
+        data = [
+            (datetime(2023, 6, 1), "a"),
+            (datetime(2024, 1, 1), "b"),
+            (datetime(2024, 12, 31), "c"),
+        ]
+        result = DateUtil.group_by_year(data)
+        assert len(result) == 2
+        assert len(result[2024]) == 2
 
 
 class TestDateTime:

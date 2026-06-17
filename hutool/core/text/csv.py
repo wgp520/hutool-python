@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import List
+from typing import Any, Dict, List
 
 
 class CsvUtil:
@@ -52,3 +52,55 @@ class CsvUtil:
         writer = csv.writer(f)
         writer.writerows(data)
         return f.getvalue()
+
+    @staticmethod
+    def list_to_csv(
+        data: List[Dict[str, Any]],
+        separator: str = "\t",
+        include_header: bool = True,
+    ) -> str:
+        """将 list of dict 转为 CSV 字符串。
+
+        以第一个 dict 的键作为表头。
+
+        :param data: 字典列表
+        :param separator: 分隔符，默认制表符 ``\\t``
+        :param include_header: 是否包含表头行，默认 True
+        :return: CSV 格式字符串
+
+        ::
+
+            data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+            csv_str = CsvUtil.list_to_csv(data, separator=",")
+            assert "name,age" in csv_str
+        """
+        if not data:
+            return ""
+        headers = list(data[0].keys())
+        f = io.StringIO()
+        writer = csv.writer(f, delimiter=separator)
+        if include_header:
+            writer.writerow(headers)
+        for row in data:
+            writer.writerow([row.get(h, "") for h in headers])
+        return f.getvalue()
+
+    @staticmethod
+    def write_list_to_csv(
+        file_path: str,
+        data: List[Dict[str, Any]],
+        separator: str = ",",
+        charset: str = "utf-8",
+        include_header: bool = True,
+    ) -> None:
+        """将 list of dict 写入 CSV 文件。
+
+        :param file_path: 目标文件路径
+        :param data: 字典列表
+        :param separator: 分隔符
+        :param charset: 文件编码
+        :param include_header: 是否包含表头行
+        """
+        csv_str = CsvUtil.list_to_csv(data, separator=separator, include_header=include_header)
+        with open(file_path, "w", encoding=charset, newline="") as f:
+            f.write(csv_str)

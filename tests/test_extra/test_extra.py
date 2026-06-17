@@ -42,6 +42,18 @@ class TestEmojiUtil:
         result = EmojiUtil.to_html("A")
         assert "A" in result or "&#x" in result
 
+    def test_remove_all_emojis(self):
+        assert EmojiUtil.remove_all_emojis("hello 😀 world 🌍") == "hello  world "
+
+    def test_to_html_hex(self):
+        result = EmojiUtil.to_html_hex("😀")
+        assert result.startswith("&#x")
+        assert result.endswith(";")
+
+    def test_to_unicode(self):
+        result = EmojiUtil.to_unicode("A")
+        assert result == "U+0041"
+
 
 class TestPinyinUtil:
     def test_get_pinyin(self):
@@ -101,6 +113,9 @@ class TestTemplateUtil:
     def test_render_missing_key(self):
         with pytest.raises(jinja2.exceptions.UndefinedError):
             TemplateUtil.render("{{ missing }}", {})
+
+    def test_render_template_alias(self):
+        assert callable(TemplateUtil.render_template)
 
 
 class TestQrCodeUtil:

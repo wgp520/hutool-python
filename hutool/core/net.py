@@ -450,6 +450,29 @@ class NetUtil:
         return socket.gethostname()
 
     @staticmethod
+    def get_host_name() -> str:
+        """获取本机主机名（``get_localhost`` 别名，hutoolpy 兼容）。
+
+        :return: 主机名字符串
+        """
+        return socket.gethostname()
+
+    @staticmethod
+    def get_host_address() -> str:
+        """获取本机 IP 地址。
+
+        通过 UDP socket 探测获取可达的本机 IP，失败时返回 ``"127.0.0.1"``。
+
+        :return: 本机 IP 地址字符串
+        """
+        try:
+            with socket.socket(AF_INET, SOCK_DGRAM) as s:
+                s.connect(("8.8.8.8", 80))
+                return s.getsockname()[0]
+        except Exception:
+            return "127.0.0.1"
+
+    @staticmethod
     def get_mac_address() -> str:
         """
         获取本机MAC地址

@@ -65,6 +65,32 @@ response = (HttpRequest.post("https://httpbin.org/post")
     .execute())
 ```
 
+### 其他
+
+```python
+# 设置跟随重定向
+req = HttpRequest.get("https://example.com")
+req.set_follow_redirects(True)
+
+# 重定向携带 Cookie
+req.set_follow_redirects_cookie(True)
+
+# 最大重定向次数
+req.set_max_redirect_count(5)
+
+# 设置代理
+req.set_http_proxy("http://proxy:8080")
+
+# 连接超时（毫秒）
+req.set_connection_timeout(5000)
+
+# 读取超时（毫秒）
+req.set_read_timeout(10000)
+
+# 分别设置三种超时
+req.timeout(connect_ms=3000, read_ms=10000, write_ms=5000)
+```
+
 ## HttpResponse
 
 ```python
@@ -76,6 +102,18 @@ response.body            # 响应体（字符串）
 response.is_ok()         # 状态码是否为 2xx
 response.to_bytes()      # 响应体（字节）
 response.to_json()       # 解析为 JSON
+response.get_status()    # 获取状态码（别名）
+response.sync_read()     # 同步读取 body
+```
+
+### HttpResponse 流式读取
+
+```python
+response = HttpRequest.get("https://httpbin.org/get").execute()
+
+# 响应体流（返回 iterator）
+for chunk in response.body_stream():
+    process(chunk)
 ```
 
 ## HtmlUtil

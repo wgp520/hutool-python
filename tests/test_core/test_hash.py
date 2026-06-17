@@ -163,3 +163,16 @@ class TestHashUtil:
     def test_hf_hash_empty(self):
         assert HashUtil.hf_hash("") == 0
         assert HashUtil.hf_ip_hash("") == 0
+
+    def test_fnv_hash(self):
+        result = HashUtil.fnv_hash(b"hello")
+        assert isinstance(result, int)
+        # fnv_hash should be same as fnv1a
+        assert result == HashUtil.fnv1a(b"hello")
+
+    def test_identity_hash_code(self):
+        obj = object()
+        h = HashUtil.identity_hash_code(obj)
+        assert isinstance(h, int)
+        # Same object should have same identity hash
+        assert HashUtil.identity_hash_code(obj) == h

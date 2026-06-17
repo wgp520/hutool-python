@@ -120,3 +120,55 @@ class QrCodeUtil:
         if decoded:
             return decoded[0].data.decode("utf-8")
         return ""
+
+    @staticmethod
+    def generate_as_ascii_art(content: str, width: int = 0, height: int = 0) -> str:
+        """生成 ASCII 艺术二维码。
+
+        将二维码转为文本形式的 ASCII art。
+
+        :param content: 二维码内容
+        :param width: 图片宽度（像素），0 表示使用默认值
+        :param height: 图片高度（像素），0 表示使用默认值
+        :return: ASCII 艺术字符串
+        """
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=1,
+            border=1,
+        )
+        qr.add_data(content)
+        qr.make(fit=True)
+        matrix = qr.get_matrix()
+        lines = []
+        for row in matrix:
+            line = ""
+            for cell in row:
+                line += "██" if cell else "  "
+            lines.append(line)
+        return "\n".join(lines)
+
+    @staticmethod
+    def to_ascii_art(image) -> str:
+        """将 QR 图片转为 ASCII 艺术。
+
+        :param image: PIL Image 对象或图片文件路径
+        :return: ASCII 艺术字符串
+        """
+        if isinstance(image, str):
+            image = Image.open(image)
+        # 转为灰度并缩小
+        image = image.convert("L")
+        image = image.resize((80, 40))
+        chars = " .:-=+*#%@"
+        pixels = list(image.getdata())
+        lines = []
+        for y in range(40):
+            line = ""
+            for x in range(80):
+                pixel = pixels[y * 80 + x]
+                idx = min(len(chars) - 1, pixel * (len(chars) - 1) // 255)
+                line += chars[idx] * 2
+            lines.append(line)
+        return "\n".join(lines)

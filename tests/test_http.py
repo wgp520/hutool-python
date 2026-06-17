@@ -172,6 +172,31 @@ class TestHttpResponse:
         finally:
             os.unlink(path)
 
+    def test_get_status(self):
+        resp = self._make_response()
+        assert resp.get_status() == 200
+
+    def test_get_status_property_consistency(self):
+        """get_status() 与 status 属性结果一致"""
+        resp = self._make_response()
+        assert resp.get_status() == resp.status
+
+    def test_sync_read(self):
+        resp = self._make_response(content=b"sync read data")
+        assert resp.sync_read() == b"sync read data"
+
+    def test_body_stream(self):
+        resp = self._make_response(content=b"stream test data here")
+        chunks = list(resp.body_stream(chunk_size=5))
+        combined = b"".join(chunks)
+        assert combined == b"stream test data here"
+
+    def test_body_stream_default_chunk(self):
+        resp = self._make_response(content=b"small")
+        chunks = list(resp.body_stream())
+        assert len(chunks) == 1
+        assert chunks[0] == b"small"
+
 
 class TestHttpUtil:
     def test_is_http(self):

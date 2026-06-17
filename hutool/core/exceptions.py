@@ -102,6 +102,23 @@ class IllegalStateException(UtilException):
         super().__init__(message, *args)
 
 
+class ValidateException(IllegalArgumentException):
+    """校验异常。
+
+    对应 Java cn.hutool.core.lang.Validator.ValidateException。
+    在校验方法（validate_*）失败时抛出。
+    """
+
+    def __init__(self, message: str, *args):
+        """
+        构造校验异常。
+
+        :param message: 异常消息
+        :param args: 格式化参数
+        """
+        super().__init__(message, *args)
+
+
 class UnsupportedOperationException(UtilException):
     """不支持的操作异常。"""
 

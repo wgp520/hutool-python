@@ -812,14 +812,6 @@ class TestStrUtil:
     def test_replace_from_none(self):
         assert StrUtil.replace_from(None, 0, "a", "b") is None
 
-    def test_replace_by_func(self):
-
-        result = StrUtil.replace_by_func("hello123world456", r"\d+", lambda m: "[NUM]")
-        assert result == "hello[NUM]world[NUM]"
-
-    def test_replace_by_func_none(self):
-        assert StrUtil.replace_by_func(None, r"\d+", lambda m: "x") is None
-
     # ── 大小写转换（null 安全）────────────────────────────────
 
     def test_to_lower_case(self):
@@ -877,6 +869,38 @@ class TestStrUtil:
         assert StrUtil.to_string(None) == "null"
         assert StrUtil.to_string("abc") == "abc"
 
+    # ── de_umlau ──────────────────────────────────────
+
+    def test_german_umlauts(self):
+        assert StrUtil.de_umlaut("ä ö ü ß") == "ae oe ue ss"
+
+    def test_french_accents(self):
+        result = StrUtil.de_umlaut("café résumé")
+        assert "e" in result
+        assert "é" not in result
+
+    def test_spanish_enye(self):
+        result = StrUtil.de_umlaut("España")
+        assert "n" in result
+        assert "ñ" not in result
+
+    def test_portuguese_cedilla(self):
+        result = StrUtil.de_umlaut("ação")
+        assert "c" in result
+        assert "ç" not in result
+
+    def test_scandinavian(self):
+        result = StrUtil.de_umlaut("Åland Ørsted Ærø")
+        assert "å" not in result
+        assert "ø" not in result
+        assert "æ" not in result
+
+    def test_empty(self):
+        assert StrUtil.de_umlaut("") == ""
+
+    def test_pure_ascii(self):
+        assert StrUtil.de_umlaut("hello") == "hello"
+
 
 class TestStrUtilOnlyDigits:
     """测试 only_digits 方法"""
@@ -899,7 +923,7 @@ class TestStrUtilOnlyDigits:
 
     def test_only_digits_none(self):
         """测试 None"""
-        assert StrUtil.only_digits(None) == ""
+        assert StrUtil.only_digits(None) is None
 
     def test_only_digits_special_chars(self):
         """测试特殊字符"""
@@ -1000,3 +1024,30 @@ class TestStrUtilBehaviorFixes:
 
     def test_replace_last_special_chars(self):
         assert StrUtil.replace_last("a+b+c", "+", "-") == "a+b-c"
+
+    def test_shrink_repeated_basic(self):
+        assert StrUtil.shrink_repeated("aaabbbccc") == "abc"
+
+    def test_shrink_repeated_no_repeats(self):
+        assert StrUtil.shrink_repeated("abc") == "abc"
+
+    def test_shrink_repeated_none(self):
+        assert StrUtil.shrink_repeated(None) is None
+
+    def test_shrink_repeated_empty(self):
+        assert StrUtil.shrink_repeated("") == ""
+
+    def test_shrink_repeated_with_replacement(self):
+        result = StrUtil.shrink_repeated("aaa", replacement="x")
+        assert "a" in result
+
+    def test_sub_chinese_punctuations_basic(self):
+        result = StrUtil.sub_chinese_punctuations("你好，世界！")
+        assert "," in result
+        assert "!" in result
+
+    def test_sub_chinese_punctuations_none(self):
+        assert StrUtil.sub_chinese_punctuations(None) is None
+
+    def test_sub_chinese_punctuations_no_chinese(self):
+        assert StrUtil.sub_chinese_punctuations("hello") == "hello"

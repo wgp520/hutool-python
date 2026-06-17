@@ -929,6 +929,43 @@ class MapUtil:
         """
         return {}
 
+    @staticmethod
+    def split_by_size(data: dict, size: int) -> list:
+        """按大小分割字典为多个子字典。
+
+        :param data: 原字典
+        :param size: 每个子字典的最大大小
+        :return: 子字典列表
+        """
+        if not data:
+            return []
+        if size <= 0:
+            raise ValueError("size 必须大于 0")
+        result = []
+        current = {}
+        for k, v in data.items():
+            current[k] = v
+            if len(current) >= size:
+                result.append(current)
+                current = {}
+        if current:
+            result.append(current)
+        return result
+
+    @staticmethod
+    def sort_by_key(data: dict, reverse: bool = False) -> dict:
+        """按 key 排序字典，返回 OrderedDict。
+
+        :param data: 原字典
+        :param reverse: 是否倒序
+        :return: 排序后的字典
+        """
+        from collections import OrderedDict
+
+        if not data:
+            return OrderedDict()
+        return OrderedDict(sorted(data.items(), key=lambda item: item[0], reverse=reverse))
+
 
 # ====================================================================
 # MapWrapper

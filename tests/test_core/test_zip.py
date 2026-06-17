@@ -116,3 +116,65 @@ class TestZipUtil:
             names = ZipUtil.list_file_names(zip_path)
             assert "a.txt" in names
             assert "b.txt" in names
+
+    # ── to_zip_file ────────────────────────────────────────────
+
+    def test_to_zip_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "test.txt")
+            with open(src, "w") as f:
+                f.write("to zip file")
+            result = ZipUtil.to_zip_file(src)
+            assert result.endswith(".zip")
+            assert os.path.exists(result)
+            # 验证内容
+            content = ZipUtil.read(result, "test.txt")
+            assert content == b"to zip file"
+
+    def test_to_zip_file_custom_dest(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "test.txt")
+            with open(src, "w") as f:
+                f.write("custom dest")
+            dest = os.path.join(tmpdir, "custom.zip")
+            result = ZipUtil.to_zip_file(src, dest)
+            assert result == os.path.abspath(dest)
+            assert os.path.exists(result)
+
+    def test_to_zip_file_not_found(self):
+        import pytest
+
+        with pytest.raises(FileNotFoundError):
+            ZipUtil.to_zip_file("/nonexistent/path")
+
+    # ── get_zip_output_stream ──────────────────────────────────
+
+    def test_get_zip_output_stream(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            zip_path = os.path.join(tmpdir, "out.zip")
+            zf = ZipUtil.get_zip_output_stream(zip_path)
+            try:
+                zf.writestr("test.txt", "hello from stream")
+            finally:
+                zf.close()
+            assert os.path.exists(zip_path)
+            content = ZipUtil.read(zip_path, "test.txt")
+            assert content == b"hello from stream"
+
+    # ── get_zip_stream ─────────────────────────────────────────
+
+    def test_get_zip_stream(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "test.txt")
+            with open(src, "w") as f:
+                f.write("stream read test")
+            zip_path = os.path.join(tmpdir, "test.zip")
+            ZipUtil.zip(src, zip_path)
+            zf = ZipUtil.get_zip_stream(zip_path)
+            try:
+                names = zf.namelist()
+                assert "test.txt" in names
+                data = zf.read("test.txt")
+                assert data == b"stream read test"
+            finally:
+                zf.close()

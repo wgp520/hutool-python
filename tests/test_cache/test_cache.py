@@ -203,3 +203,102 @@ class TestCacheUtil:
     def test_new_weak_cache(self):
         cache = CacheUtil.new_weak_cache(10)
         assert isinstance(cache, WeakCache)
+
+    def test_basic(self):
+        call_count = 0
+
+        @CacheUtil.lru_cache(maxsize=16, ttl=60)
+        def add(a, b):
+            nonlocal call_count
+            call_count += 1
+            return a + b
+
+        assert add(1, 2) == 3
+        assert add(1, 2) == 3
+        assert call_count == 1
+
+    def test_different_args(self):
+        @CacheUtil.lru_cache(maxsize=16, ttl=60)
+        def double(x):
+            return x * 2
+
+        assert double(5) == 10
+        assert double(3) == 6
+
+    def test_ttl_expiry(self):
+        import time
+
+        call_count = 0
+
+        @CacheUtil.lru_cache(maxsize=16, ttl=1)
+        def compute(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
+
+        assert compute(5) == 10
+        assert call_count == 1
+        time.sleep(1.1)
+        assert compute(5) == 10
+        assert call_count == 2
+
+    def test_has_cache_clear(self):
+        @CacheUtil.lru_cache(maxsize=16, ttl=60)
+        def f(x):
+            return x
+
+        assert hasattr(f, "cache_clear")
+
+    def test_has_cache_info(self):
+        @CacheUtil.lru_cache(maxsize=16, ttl=60)
+        def f(x):
+            return x
+
+        assert hasattr(f, "cache_info")
+
+    def test_cache_function(self):
+        call_count = 0
+
+        @CacheUtil.cache_function(ttl=60)
+        def add(a, b):
+            nonlocal call_count
+            call_count += 1
+            return a + b
+
+        assert add(1, 2) == 3
+        assert add(1, 2) == 3
+        assert call_count == 1  # only called once
+
+    def test_cache_function_kwargs(self):
+        @CacheUtil.cache_function(ttl=60)
+        def greet(name="world"):
+            return f"hello {name}"
+
+        assert greet(name="test") == "hello test"
+        assert greet(name="test") == "hello test"
+
+    def test_memoize(self):
+        call_count = 0
+
+        @CacheUtil.memoize(ttl=60)
+        def double(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
+
+        assert double(5) == 10
+        assert double(5) == 10
+        assert call_count == 1
+
+    def test_func_once(self):
+        call_count = 0
+
+        @CacheUtil.func_once
+        def init():
+            nonlocal call_count
+            call_count += 1
+            return "initialized"
+
+        assert init() == "initialized"
+        assert init() == "initialized"
+        assert call_count == 1

@@ -57,6 +57,28 @@ WorkdayUtil.add_workdays(date(2024, 1, 1), 5)   # date(2024, 1, 8)
 WorkdayUtil.add_workdays(date(2024, 1, 8), -3)  # date(2024, 1, 3)
 ```
 
+### 复活节计算
+
+```python
+# Easter — 计算复活节日期
+WorkdayUtil.easter(2024)  # date(2024, 3, 31)
+WorkdayUtil.easter(2025)  # date(2025, 4, 20)
+
+# easterRelatedHolidays — 复活节相关假日（耶稣受难日、复活节周一等）
+holidays = WorkdayUtil.easter_related_holidays(2024)
+# {"good_friday": date(2024, 3, 29), "easter_monday": date(2024, 4, 1), ...}
+```
+
+### 工作小时数
+
+```python
+from datetime import date
+
+# workdayHours — 两个日期间的工作小时数
+WorkdayUtil.workday_hours(date(2024, 1, 1), date(2024, 1, 5))
+# 24（3 个工作日 x 8 小时）
+```
+
 ---
 
 ```{note}

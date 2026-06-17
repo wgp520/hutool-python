@@ -4,6 +4,32 @@ import xml.etree.ElementTree as ET
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 
+def _element_to_dict(element: ET.Element):
+    """递归将 XML Element 转为字典。
+
+    :param element: XML 元素
+    :return: 转换后的字典或字符串
+    """
+    result = {}
+    if element.text and element.text.strip():
+        if len(element) == 0:
+            return element.text.strip()
+        result["#text"] = element.text.strip()
+    for child in element:
+        child_data = _element_to_dict(child)
+        if child.tag in result:
+            existing = result[child.tag]
+            if not isinstance(existing, list):
+                result[child.tag] = [existing]
+            result[child.tag].append(child_data)
+        else:
+            result[child.tag] = child_data
+    if element.attrib:
+        for key, val in element.attrib.items():
+            result[f"@{key}"] = val
+    return result
+
+
 class JSONUtil:
     """JSON工具类，提供 JSON 的解析、序列化、校验、路径操作等功能。"""
 
@@ -217,6 +243,11 @@ class JSONUtil:
         :param str_val: 待检查的字符串
         :return: 是否为有效JSON
         """
+        if not str_val or not isinstance(str_val, str):
+            return False
+        str_val = str_val.strip()
+        if not str_val:
+            return False
         try:
             json.loads(str_val)
             return True
@@ -231,6 +262,11 @@ class JSONUtil:
         :param str_val: 待检查的字符串
         :return: 是否为JSON对象
         """
+        if not str_val or not isinstance(str_val, str):
+            return False
+        str_val = str_val.strip()
+        if not str_val:
+            return False
         try:
             return isinstance(json.loads(str_val), dict)
         except (json.JSONDecodeError, TypeError):
@@ -244,6 +280,11 @@ class JSONUtil:
         :param str_val: 待检查的字符串
         :return: 是否为JSON数组
         """
+        if not str_val or not isinstance(str_val, str):
+            return False
+        str_val = str_val.strip()
+        if not str_val:
+            return False
         try:
             return isinstance(json.loads(str_val), list)
         except (json.JSONDecodeError, TypeError):
@@ -656,3 +697,49 @@ class JSONUtil:
         if isinstance(value, list):
             return value
         return default
+
+    @staticmethod
+    def parse_from_xml(xml_str: str) -> dict:
+        """将 XML 字符串解析为字典。
+
+        :param xml_str: XML 字符串
+        :return: 解析后的字典
+        """
+        root = ET.fromstring(xml_str)
+        return _element_to_dict(root)
+
+    @staticmethod
+    def get_ordered_json(s: str) -> str:
+        """获取排序键名后的 JSON 字符串（用于比较）。
+
+        :param s: JSON 字符串
+        :return: 排序键名后的 JSON 字符串
+        """
+        obj = json.loads(s)
+        return json.dumps(obj, sort_keys=True, ensure_ascii=False)
+
+    @staticmethod
+    def json_equal(s1: str, s2: str) -> bool:
+        """比较两个 JSON 是否语义相等（忽略键顺序）。
+
+        :param s1: JSON 字符串 1
+        :param s2: JSON 字符串 2
+        :return: 是否相等
+        """
+        obj1 = json.loads(s1)
+        obj2 = json.loads(s2)
+        return obj1 == obj2
+
+    @staticmethod
+    def json_keys_equal(s1: str, s2: str) -> bool:
+        """比较两个 JSON 的键集合是否相等（仅对象类型）。
+
+        :param s1: JSON 字符串 1
+        :param s2: JSON 字符串 2
+        :return: 键集合是否相等
+        """
+        obj1 = json.loads(s1)
+        obj2 = json.loads(s2)
+        if not isinstance(obj1, dict) or not isinstance(obj2, dict):
+            return False
+        return set(obj1.keys()) == set(obj2.keys())

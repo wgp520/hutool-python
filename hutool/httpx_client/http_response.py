@@ -210,6 +210,35 @@ class HttpResponse:
         else:
             return dest.write(data)
 
+    def get_status(self) -> int:
+        """获取 HTTP 状态码。
+
+        与 ``status`` 属性相同，提供方法风格的访问方式。
+
+        :return: HTTP 状态码，如 200、404 等
+        """
+        return self._response.status_code
+
+    def sync_read(self) -> bytes:
+        """同步读取响应体全部内容。
+
+        对于流式响应，此方法会阻塞直到所有数据接收完毕。
+
+        :return: 响应体字节数据
+        """
+        return self._response.content
+
+    def body_stream(self, chunk_size: int = 8192):
+        """以迭代器方式按块读取响应体。
+
+        适用于大文件下载等场景，避免一次性加载到内存。
+
+        :param chunk_size: 每次读取的字节数，默认 8192
+        :return: 响应体字节块的迭代器
+        :rtype: Iterator[bytes]
+        """
+        return self._response.iter_bytes(chunk_size=chunk_size)
+
     def get_filename_from_disposition(self) -> Optional[str]:
         """从Content-Disposition头获取文件名
 

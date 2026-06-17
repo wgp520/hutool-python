@@ -80,3 +80,23 @@ BooleanUtil.or_of_wrap(True, None)    # True
 BooleanUtil.is_boolean_class(True)    # True
 BooleanUtil.is_boolean_class(1)       # False
 ```
+
+### 批量布尔运算
+
+```python
+# booleanAnd — 批量 AND 运算
+BooleanUtil.boolean_and(True, True, True)   # True
+BooleanUtil.boolean_and(True, False, True)  # False
+
+# booleanOr — 批量 OR 运算
+BooleanUtil.boolean_or(False, False, True)  # True
+BooleanUtil.boolean_or(False, False, False) # False
+```
+
+### 中文输出
+
+```python
+# to_string_yes_no — 布尔转中文字符串
+BooleanUtil.to_string_yes_no(True)   # "是"
+BooleanUtil.to_string_yes_no(False)  # "否"
+```

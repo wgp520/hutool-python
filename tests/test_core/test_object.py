@@ -89,3 +89,85 @@ class TestObjectUtil:
         assert ObjectUtil.default_if_blank_supplier("   ", lambda: "default") == "default"
         assert ObjectUtil.default_if_blank_supplier(None, lambda: "default") == "default"
         assert ObjectUtil.default_if_blank_supplier("hello", lambda: "default") == "hello"
+
+    def test_get_attr_safe_normal(self):
+        class Obj:
+            x = 42
+
+        assert ObjectUtil.get_attr_safe(Obj(), "x") == 42
+
+    def test_get_attr_safe_missing(self):
+        class Obj:
+            pass
+
+        assert ObjectUtil.get_attr_safe(Obj(), "missing", "default") == "default"
+
+    def test_get_attr_safe_none(self):
+        assert ObjectUtil.get_attr_safe(None, "x", "default") == "default"
+
+    def test_unpack_to_dict_from_dict(self):
+        d = {"a": 1, "b": 2}
+        result = ObjectUtil.unpack_to_dict(d)
+        assert result == d
+
+    def test_unpack_to_dict_with_fields(self):
+        d = {"a": 1, "b": 2, "c": 3}
+        result = ObjectUtil.unpack_to_dict(d, fields=["a", "c"])
+        assert result == {"a": 1, "c": 3}
+
+    def test_unpack_to_dict_none(self):
+        assert ObjectUtil.unpack_to_dict(None) == {}
+
+    def test_none_on_exception_normal(self):
+        @ObjectUtil.none_on_exception
+        def ok():
+            return 42
+
+        assert ok() == 42
+
+    def test_none_on_exception_error(self):
+        @ObjectUtil.none_on_exception
+        def fail():
+            raise ValueError("oops")
+
+        assert fail() is None
+
+    def test_empty_count(self):
+        assert ObjectUtil.empty_count(None, "", [], "hello") == 3
+
+    def test_empty_count_no_empty(self):
+        assert ObjectUtil.empty_count("a", [1], 42) == 0
+
+    def test_empty_count_all_empty(self):
+        assert ObjectUtil.empty_count(None, "", {}, set()) == 4
+
+    def test_get_key_fmt_dict_camel(self):
+        data = {"user_name": "test"}
+        result = ObjectUtil.get_key_fmt(data, "userName", fmt="camel")
+        assert result == "test"
+
+    def test_get_key_fmt_dict_snake(self):
+        data = {"userName": "test"}
+        result = ObjectUtil.get_key_fmt(data, "user_name", fmt="snake")
+        assert result == "test"
+
+    def test_get_key_fmt_dict_direct(self):
+        data = {"name": "test"}
+        result = ObjectUtil.get_key_fmt(data, "name")
+        assert result == "test"
+
+    def test_get_key_fmt_dict_default(self):
+        data = {"name": "test"}
+        result = ObjectUtil.get_key_fmt(data, "missing", default="N/A")
+        assert result == "N/A"
+
+    def test_get_key_fmt_none(self):
+        assert ObjectUtil.get_key_fmt(None, "x", default="N/A") == "N/A"
+
+    def test_get_key_fmt_object(self):
+        class User:
+            def __init__(self):
+                self.user_name = "test"
+
+        result = ObjectUtil.get_key_fmt(User(), "user_name")
+        assert result == "test"

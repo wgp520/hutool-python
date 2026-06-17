@@ -1,5 +1,6 @@
 """数组工具类，对应 Java cn.hutool.core.util.ArrayUtil"""
 
+import itertools
 from typing import Any, Callable
 
 
@@ -380,24 +381,6 @@ class ArrayUtil:
         return max(array)
 
     @staticmethod
-    def empty_count(*args) -> int:
-        """空值数量
-
-        空值定义：None、空字符串、空列表/元组/字典/集合等。
-
-        :param args: 任意数量的参数
-        :return: 空值的个数
-        """
-        count = 0
-        for arg in args:
-            if arg is None:
-                count += 1
-            elif isinstance(arg, (str, list, tuple, dict, set, frozenset, bytes)):
-                if len(arg) == 0:
-                    count += 1
-        return count
-
-    @staticmethod
     def has_empty(*args) -> bool:
         """是否有空值
 
@@ -756,3 +739,181 @@ class ArrayUtil:
         if arr is None or len(arr) == 0:
             return None
         return arr[0]
+
+    # ==================== 子数组查找 ====================
+
+    @staticmethod
+    def index_of_sub(array, sub_array) -> int:
+        """查找子数组在数组中第一次出现的起始索引。
+
+        :param array: 主数组
+        :param sub_array: 子数组
+        :return: 第一次出现的起始索引，未找到返回 -1
+        """
+        if array is None or sub_array is None:
+            return -1
+        if len(sub_array) == 0:
+            return 0
+        if len(sub_array) > len(array):
+            return -1
+        for i in range(len(array) - len(sub_array) + 1):
+            if array[i : i + len(sub_array)] == list(sub_array):
+                return i
+        return -1
+
+    @staticmethod
+    def last_index_of_sub(array, sub_array) -> int:
+        """查找子数组在数组中最后一次出现的起始索引。
+
+        :param array: 主数组
+        :param sub_array: 子数组
+        :return: 最后一次出现的起始索引，未找到返回 -1
+        """
+        if array is None or sub_array is None:
+            return -1
+        if len(sub_array) == 0:
+            return len(array)
+        if len(sub_array) > len(array):
+            return -1
+        for i in range(len(array) - len(sub_array), -1, -1):
+            if array[i : i + len(sub_array)] == list(sub_array):
+                return i
+        return -1
+
+    # ==================== 多数组判断 ====================
+
+    @staticmethod
+    def is_all_empty(*arrays) -> bool:
+        """判断所有数组是否都为空。
+
+        :param arrays: 一个或多个数组
+        :return: 所有数组均为空（None 或长度为 0）时返回 True
+        """
+        for arr in arrays:
+            if arr is not None and len(arr) != 0:
+                return False
+        return True
+
+    @staticmethod
+    def is_all_not_empty(*arrays) -> bool:
+        """判断所有数组是否都不为空。
+
+        :param arrays: 一个或多个数组
+        :return: 所有数组均非空时返回 True
+        """
+        for arr in arrays:
+            if arr is None or len(arr) == 0:
+                return False
+        return True
+
+    @staticmethod
+    def is_all_not_null(*arrays) -> bool:
+        """判断所有数组是否都不为 None。
+
+        :param arrays: 一个或多个数组
+        :return: 所有数组均不为 None 时返回 True
+        """
+        for arr in arrays:
+            if arr is None:
+                return False
+        return True
+
+    # ==================== 排序判断 ====================
+
+    @staticmethod
+    def is_sorted(array, comparator=None) -> bool:
+        """判断数组是否已排序。
+
+        :param array: 待检查的数组
+        :param comparator: 自定义比较函数，接受两个参数，返回负数/0/正数；为 None 时使用默认升序比较
+        :return: 是否已排序
+        """
+        if array is None or len(array) <= 1:
+            return True
+        if comparator is not None:
+            for i in range(len(array) - 1):
+                if comparator(array[i], array[i + 1]) > 0:
+                    return False
+        else:
+            for i in range(len(array) - 1):
+                if array[i] > array[i + 1]:
+                    return False
+        return True
+
+    @staticmethod
+    def is_sorted_asc(array) -> bool:
+        """判断数组是否为升序排列。
+
+        :param array: 待检查的数组
+        :return: 是否为升序排列
+        """
+        return ArrayUtil.is_sorted(array)
+
+    @staticmethod
+    def is_sorted_desc(array) -> bool:
+        """判断数组是否为降序排列。
+
+        :param array: 待检查的数组
+        :return: 是否为降序排列
+        """
+        if array is None or len(array) <= 1:
+            return True
+        for i in range(len(array) - 1):
+            if array[i] < array[i + 1]:
+                return False
+        return True
+
+    # ==================== 子序列判断 ====================
+
+    @staticmethod
+    def is_sub(array, sub_array) -> bool:
+        """判断 sub_array 是否为 array 的子序列（元素按顺序出现，不要求连续）。
+
+        :param array: 主数组
+        :param sub_array: 待检查的子序列
+        :return: 是否为子序列
+        """
+        if sub_array is None or len(sub_array) == 0:
+            return True
+        if array is None:
+            return False
+        it = iter(array)
+        return all(item in it for item in sub_array)
+
+    # ==================== 转换 ====================
+
+    @staticmethod
+    def map_to_set(array, func) -> set:
+        """对数组中每个元素应用函数，并将结果收集到集合中。
+
+        :param array: 输入数组
+        :param func: 映射函数，接受单个元素并返回结果
+        :return: 映射结果组成的集合
+        """
+        if array is None:
+            return set()
+        return {func(item) for item in array}
+
+    @staticmethod
+    def to_array(iterable) -> list:
+        """将可迭代对象转换为列表。
+
+        :param iterable: 可迭代对象
+        :return: 列表，iterable 为 None 时返回空列表
+        """
+        if iterable is None:
+            return []
+        if isinstance(iterable, list):
+            return iterable
+        return list(iterable)
+
+    @staticmethod
+    def zip_arrays(*arrays) -> list:
+        """将多个数组按对应位置打包为元组列表，长度不足的部分用 None 填充。
+
+        :param arrays: 一个或多个数组
+        :return: 打包后的元组列表
+        """
+        if not arrays:
+            return []
+        return list(itertools.zip_longest(*arrays))

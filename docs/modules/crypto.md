@@ -111,3 +111,57 @@ SecureUtil.caesar_decode("Khoor", 3)   # "Hello"
 | 摘要 | MD5, SHA-1, SHA-256, SHA-384, SHA-512 |
 | 消息认证码 | HMAC-MD5, HMAC-SHA1, HMAC-SHA256 |
 | 密码哈希 | BCrypt |
+
+## 其他
+
+### 加密器工厂
+
+```python
+from hutool import SecureUtil
+
+# AES 加密器
+enc = SecureUtil.aes_encryptor(key)
+encrypted = enc.encrypt(b"hello")
+decrypted = enc.decrypt(encrypted)
+
+# DES 加密器
+enc = SecureUtil.des_encryptor(key)
+
+# RC4 加密器
+enc = SecureUtil.rc4_encryptor(key)
+
+# RSA 加密器
+enc = SecureUtil.rsa_encryptor(private_key, public_key)
+```
+
+### HMAC 创建器
+
+```python
+# hmacCreator — 创建 HMAC 实例
+hmac = SecureUtil.hmac_creator("HmacSHA256", b"secret_key")
+result = hmac.digest(b"hello")
+```
+
+### 签名
+
+```python
+# signData — 数字签名
+signature = SecureUtil.sign_data(b"data", "SHA256withRSA", private_key)
+```
+
+### 密钥生成
+
+```python
+# generateKeyPair — 生成密钥对
+private_key, public_key = SecureUtil.generate_key_pair("RSA", 2048)
+
+# generateKey — 生成对称密钥
+key = SecureUtil.generate_key("AES", 128)
+```
+
+### PBKDF2
+
+```python
+# pbkdf2 — 密码派生函数
+derived = SecureUtil.pbkdf2("password", b"salt", iterations=10000, key_length=32)
+```

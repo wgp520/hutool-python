@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" />
     <a href="https://pypi.org/project/hutool-python/"><img src="https://img.shields.io/pypi/v/hutool-python.svg" /></a>
     <img src="https://img.shields.io/badge/license-MulanPSL2-blue.svg" />
-    <img src="https://img.shields.io/badge/tests-1864 passed-brightgreen.svg" />
+    <img src="https://img.shields.io/badge/tests-2488 passed-brightgreen.svg" />
     <a href="https://wgp520.github.io/hutool-python/"><img src="https://img.shields.io/badge/docs-online-blueviolet.svg" /></a>
 </p>
 
@@ -320,7 +320,7 @@ hutool-python/
 
 ```bash
 # 安装开发依赖
-pip install pytest
+pip install pytest ruff
 
 # 运行全部测试
 pytest tests/ -v
@@ -330,6 +330,27 @@ pytest tests/test_core/ -v
 
 # 运行单个模块测试
 pytest tests/test_core/test_strings.py -v
+```
+
+### 🔍 代码质量检查（Ruff）
+
+本项目使用 [Ruff](https://docs.astral.sh/ruff/) 进行代码风格检查和格式化：
+
+```bash
+# 安装 ruff
+pip install ruff
+
+# 代码风格检查
+ruff check .
+
+# 代码风格检查并自动修复
+ruff check --fix .
+
+# 代码格式化
+ruff format .
+
+# 一键执行检查 + 格式化（推荐提交前运行）
+ruff check --fix . && ruff format .
 ```
 
 ---
@@ -349,6 +370,8 @@ pytest tests/test_core/test_strings.py -v
 | `pyjwt>=2.8` | JWT 处理 | `jwt.py` |
 | `pyyaml>=6.0` | YAML 解析 | `setting/yaml.py` |
 | `sortedcontainers>=2.0` | 有序容器 | `cache/` |
+| `pytz>=2023.3` | 时区处理 | `core/date.py` |
+| `bcrypt>=4.0` | bcrypt 加密 | `crypto/` |
 
 ---
 
@@ -390,7 +413,8 @@ md5 = DigestUtil.md5_hex("hello")
 1. **保持 Hutool 风格**：类名使用 PascalCase，方法名使用 snake_case
 2. **中文注释**：所有新增方法须包含中文文档注释，格式为 Sphinx 风格（`:param:` / `:return:` / `:raises:`）
 3. **编写测试**：新增方法须附带 pytest 测试用例
-4. **不引入额外依赖**：尽量使用 Python 标准库，仅在必要时引入第三方依赖
+4. **代码检查**：提交前运行 `ruff check hutool/ tests/ --fix && ruff format hutool/ tests/` 确保代码风格一致
+5. **不引入额外依赖**：尽量使用 Python 标准库，仅在必要时引入第三方依赖
 
 ### 贡献步骤
 

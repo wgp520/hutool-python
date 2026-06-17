@@ -44,6 +44,8 @@ setup(
         "pyyaml>=6.0",
         "watchdog>=4.0",
         "sortedcontainers>=2.0",
+        "pytz>=2023.3",
+        "bcrypt>=4.0",
     ],
     extras_require={
         "dev": ["pytest>=8.0", "ruff>=0.4.0"],

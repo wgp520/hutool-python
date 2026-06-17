@@ -294,3 +294,96 @@ class WorkdayUtil:
             if cls.is_workday(day):
                 remaining -= 1
         return day
+
+    @classmethod
+    def workday_hours(
+        cls,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        workday_hours_per_day: int = 8,
+    ) -> float:
+        """计算两个 datetime 之间的工作小时数。
+
+        仅计算工作日的工作时间（每天 ``workday_hours_per_day`` 小时，从 09:00 开始）。
+        非工作日不计入。
+
+        :param start: 起始时间
+        :param end: 结束时间
+        :param workday_hours_per_day: 每日工作小时数，默认 8
+        :return: 工作小时数
+        """
+        if start > end:
+            start, end = end, start
+
+        total_hours = 0.0
+        current = start
+        while current.date() <= end.date():
+            if cls.is_workday(current.date()):
+                if current.date() == start.date() and current.date() == end.date():
+                    # 同一天
+                    hours = (end - start).total_seconds() / 3600
+                    total_hours += min(hours, workday_hours_per_day)
+                elif current.date() == start.date():
+                    # 起始日：从 start 到当天结束
+                    day_end = current.replace(hour=17, minute=0, second=0)
+                    if start < day_end:
+                        total_hours += (day_end - start).total_seconds() / 3600
+                elif current.date() == end.date():
+                    # 结束日：从当天 09:00 到 end
+                    day_start = current.replace(hour=9, minute=0, second=0)
+                    if end > day_start:
+                        total_hours += (end - day_start).total_seconds() / 3600
+                else:
+                    # 中间全天工作日
+                    total_hours += workday_hours_per_day
+            current += timedelta(days=1)
+
+        return min(total_hours, workday_hours_per_day * cls.workdays(start.date(), end.date()))
+
+    @staticmethod
+    def easter(year: int) -> date:
+        """计算复活节日期（Meeus/Jones/Butcher 算法，适用于 1900-2099）。
+
+        :param year: 年份
+        :return: 复活节 date 对象
+
+        ::
+
+            >>> WorkdayUtil.easter(2024)
+            date(2024, 3, 31)
+        """
+        a = year % 19
+        b = year // 100
+        c = year % 100
+        d = b // 4
+        e = b % 4
+        f = (b + 8) // 25
+        g = (b - f + 1) // 3
+        h = (19 * a + b - d - g + 15) % 30
+        i = c // 4
+        k = c % 4
+        l_ = (32 + 2 * e + 2 * i - h - k) % 7
+        m = (a + 11 * h + 22 * l_) // 451
+        month = (h + l_ - 7 * m + 114) // 31
+        day = ((h + l_ - 7 * m + 114) % 31) + 1
+        return date(year, month, day)
+
+    @staticmethod
+    def easter_related_holidays(year: int) -> List[Tuple[date, str]]:
+        """获取复活节相关节假日列表。
+
+        包括：圣灰星期三、棕枝主日、耶稳升天节、五旬节、基督圣体节。
+
+        :param year: 年份
+        :return: ``(日期, 节日名)`` 列表
+        """
+        easter_date = WorkdayUtil.easter(year)
+        holidays = [
+            (easter_date - timedelta(days=46), "圣灰星期三"),
+            (easter_date - timedelta(days=7), "棕枝主日"),
+            (easter_date, "复活节"),
+            (easter_date + timedelta(days=39), "耶稳升天节"),
+            (easter_date + timedelta(days=49), "五旬节"),
+            (easter_date + timedelta(days=60), "基督圣体节"),
+        ]
+        return holidays

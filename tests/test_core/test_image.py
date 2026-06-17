@@ -63,3 +63,45 @@ class TestImageUtil:
     def test_detect_invalid_type(self):
         with pytest.raises(TypeError):
             ImageUtil.detect_image_type(12345)
+
+    def _make_png_bytes(self, width=10, height=10, color=(255, 0, 0)):
+        """创建测试用 PNG 图片字节"""
+        try:
+            import io
+
+            from PIL import Image
+
+            img = Image.new("RGB", (width, height), color)
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            return buf.getvalue()
+        except ImportError:
+            pytest.skip("Pillow not installed")
+
+    def test_resize_image(self):
+        data = self._make_png_bytes(20, 20)
+        result = ImageUtil.resize_image(data, 10, 10)
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_replace_color(self):
+        data = self._make_png_bytes(5, 5, (255, 0, 0))
+        result = ImageUtil.replace_color(data, (255, 0, 0), (0, 255, 0))
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_add_watermark(self):
+        data = self._make_png_bytes(100, 100)
+        result = ImageUtil.add_watermark(data, "TEST")
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_face_detect_no_face(self):
+        data = self._make_png_bytes(100, 100, (0, 0, 0))
+        try:
+            result = ImageUtil.face_detect(data)
+            assert isinstance(result, list)
+        except ImportError as e:
+            if "opencv-python" in str(e):
+                pytest.skip("opencv-python not installed")
+            raise

@@ -768,6 +768,30 @@ class NumberUtil:
             return default
 
     @staticmethod
+    def int_or_0(data: Any) -> int:
+        """
+        安全转 int，失败返回 ``0``。
+
+        等价于 ``int_or_default(data, 0)``，提供与 huTools 兼容的命名。
+
+        :param data: 待转换的值
+        :return: int 值，转换失败返回 ``0``
+        """
+        return NumberUtil.int_or_default(data, 0)
+
+    @staticmethod
+    def float_or_0(data: Any) -> float:
+        """
+        安全转 float，失败返回 ``0.0``。
+
+        等价于 ``float_or_default(data, 0.0)``，提供与 huTools 兼容的命名。
+
+        :param data: 待转换的值
+        :return: float 值，转换失败返回 ``0.0``
+        """
+        return NumberUtil.float_or_default(data, 0.0)
+
+    @staticmethod
     def avg(data: Iterable) -> float:
         """
         计算数值列表的平均值。
@@ -799,6 +823,64 @@ class NumberUtil:
         if n % 2 == 1:
             return float(items[n // 2])
         return (items[n // 2 - 1] + items[n // 2]) / 2.0
+
+    @staticmethod
+    def robust_min(data: Iterable) -> Optional[float]:
+        """
+        安全取最小值，空列表返回 ``None``。
+
+        与 ``CollUtil.safe_min`` 不同，本方法对空输入返回 ``None`` 而非抛出异常。
+
+        :param data: 数值可迭代对象
+        :return: 最小值，空列表返回 ``None``
+        """
+        items = list(data)
+        if not items:
+            return None
+        return float(min(items))
+
+    @staticmethod
+    def robust_max(data: Iterable) -> Optional[float]:
+        """
+        安全取最大值，空列表返回 ``None``。
+
+        与 ``CollUtil.safe_max`` 不同，本方法对空输入返回 ``None`` 而非抛出异常。
+
+        :param data: 数值可迭代对象
+        :return: 最大值，空列表返回 ``None``
+        """
+        items = list(data)
+        if not items:
+            return None
+        return float(max(items))
+
+    @staticmethod
+    def robust_div(a: float, b: float, default: float = 0.0) -> float:
+        """
+        安全除法，除数为 0 时返回默认值（默认 ``0.0``）。
+
+        :param a: 被除数
+        :param b: 除数
+        :param default: 除数为 0 时的返回值，默认 ``0.0``
+        :return: 除法结果或默认值
+        """
+        if b == 0:
+            return default
+        return a / b
+
+    @staticmethod
+    def percent(part: float, total: float, default: float = 0.0) -> float:
+        """
+        百分比计算，``total`` 为 0 时返回默认值。
+
+        计算公式：``(part / total) * 100``。
+
+        :param part: 部分值
+        :param total: 总值
+        :param default: ``total`` 为 0 时的返回值，默认 ``0.0``
+        :return: 百分比值（如 25.0 表示 25%）
+        """
+        return NumberUtil.robust_div(part, total, default) * 100
 
     @staticmethod
     def num_encode(n: int) -> str:
@@ -1185,3 +1267,78 @@ class NumberUtil:
         :return: n 为 None 时返回 0，否则返回原值
         """
         return 0 if n is None else n
+
+    @staticmethod
+    def is_long(value: Any) -> bool:
+        """判断值是否为长整数类型（Python int 类型）。
+
+        :param value: 待检查的值
+        :return: 是否为 int 类型（排除 bool）
+        """
+        return isinstance(value, int) and not isinstance(value, bool)
+
+    @staticmethod
+    def is_valid_number(value: Any) -> bool:
+        """判断值是否为有效数字（支持科学计数法）。
+
+        None、非数字类型返回 False。NaN 和 Inf 返回 False。
+
+        :param value: 待检查的值
+        :return: 是否为有效数字
+        """
+        if value is None:
+            return False
+        if isinstance(value, (int, float)):
+            return not (isinstance(value, float) and (math.isnan(value) or math.isinf(value)))
+        if isinstance(value, Decimal):
+            return value.is_finite()
+        if isinstance(value, str):
+            try:
+                float(value)
+                return True
+            except (ValueError, TypeError):
+                return False
+        return False
+
+    @staticmethod
+    def to_float_safe(value: Any, default: float = 0.0) -> float:
+        """安全地将值转为 float，失败返回默认值。
+
+        :param value: 待转换的值
+        :param default: 转换失败时的默认值，默认 0.0
+        :return: float 值
+        """
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return float(value)
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def operator_exec(left: Any, operator: str, right: Any) -> bool:
+        """执行运算符比较操作。
+
+        支持 ``==``、``!=``、``>``、``>=``、``<``、``<=`` 六种比较运算符。
+        用于需要动态指定比较运算符的场景。
+
+        :param left: 左操作数
+        :param operator: 运算符字符串（``"=="``、``"!="``、``">"``、``">="``、``"<"``、``"<="``）
+        :param right: 右操作数
+        :return: 比较结果
+        :raises ValueError: 不支持的运算符时
+        """
+        _ops = {
+            "==": lambda a, b: a == b,
+            "!=": lambda a, b: a != b,
+            ">": lambda a, b: a > b,
+            ">=": lambda a, b: a >= b,
+            "<": lambda a, b: a < b,
+            "<=": lambda a, b: a <= b,
+        }
+        op_func = _ops.get(operator)
+        if op_func is None:
+            raise ValueError(f"不支持的运算符: {operator}，支持: {', '.join(_ops.keys())}")
+        return op_func(left, right)

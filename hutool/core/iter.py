@@ -579,3 +579,164 @@ class IterUtil:
         """
         if lst is not None:
             lst.clear()
+
+    @staticmethod
+    def prepend(value: Any, iterable: Iterable) -> Iterable:
+        """在迭代器前插入一个元素。
+
+        :param value: 要插入的值
+        :param iterable: 可迭代对象
+        :return: 迭代器
+        """
+        return itertools.chain([value], iterable)
+
+    @staticmethod
+    def tabulate(func: Callable[[int], Any], start: int = 0) -> Iterable:
+        """从函数生成迭代器 ``func(start), func(start+1), ...``。
+
+        :param func: 接受 int 参数的函数
+        :param start: 起始索引，默认 ``0``
+        :return: 无限迭代器
+        """
+        return (func(i) for i in itertools.count(start))
+
+    @staticmethod
+    def consume(iterator: Iterable, n: int) -> None:
+        """消耗迭代器的前 N 个元素（无返回值）。
+
+        :param iterator: 迭代器
+        :param n: 要消耗的元素数量
+        """
+        collections.deque(itertools.islice(iterator, n), maxlen=0)
+
+    @staticmethod
+    def pad_none(iterable: Iterable) -> Iterable:
+        """迭代器结束后无限返回 ``None``。
+
+        :param iterable: 可迭代对象
+        :return: 无限迭代器
+        """
+        return itertools.chain(iterable, itertools.repeat(None))
+
+    @staticmethod
+    def n_cycles(iterable: Iterable, n: int) -> Iterable:
+        """将迭代器重复 N 次。
+
+        :param iterable: 可迭代对象
+        :param n: 重复次数
+        :return: 重复后的迭代器
+        """
+        return itertools.chain.from_iterable(itertools.repeat(tuple(iterable), n))
+
+    @staticmethod
+    def iter_except(
+        func: Callable,
+        exception: type = Exception,
+        first: Any = None,
+    ) -> Iterable:
+        """迭代直到抛出异常。
+
+        常用于集合迭代，当迭代结束时会抛出 ``exception``。
+
+        :param func: 无参数的调用函数（每次调用返回下一个元素）
+        :param exception: 终止异常类型，默认 ``Exception``
+        :param first: 首次调用的默认值（不使用）
+        :return: 迭代器
+        """
+        try:
+            yield func()
+        except exception:
+            return
+        while True:
+            try:
+                yield func()
+            except exception:
+                break
+
+    @staticmethod
+    def first_true(
+        iterable: Iterable,
+        predicate: Optional[Callable[[Any], bool]] = None,
+        default: Any = None,
+    ) -> Any:
+        """返回第一个使谓词为 True 的元素。
+
+        :param iterable: 可迭代对象
+        :param predicate: 判断函数，默认 ``bool``
+        :param default: 无匹配时的默认值
+        :return: 第一个满足条件的元素，或默认值
+        """
+        if predicate is None:
+            predicate = bool
+        return next(filter(predicate, iterable), default)
+
+    @staticmethod
+    def random_product(*iterables: Iterable, repeat: int = 1) -> tuple:
+        """从多个迭代器中随机选取组合。
+
+        :param iterables: 多个可迭代对象
+        :param repeat: 重复次数，默认 ``1``
+        :return: 随机选取的元组
+        """
+        import random as _random
+
+        pools = [tuple(pool) for pool in iterables] * repeat
+        return tuple(_random.choice(pool) for pool in pools)
+
+    @staticmethod
+    def random_permutation(iterable: Iterable, r: Optional[int] = None) -> list:
+        """随机排列。
+
+        :param iterable: 可迭代对象
+        :param r: 选取元素数量，默认为全部
+        :return: 随机排列的列表
+        """
+        import random as _random
+
+        pool = list(iterable)
+        r = r if r is not None else len(pool)
+        return _random.sample(pool, r)
+
+    @staticmethod
+    def random_combination(iterable: Iterable, r: int) -> tuple:
+        """随机组合（无放回，无序）。
+
+        :param iterable: 可迭代对象
+        :param r: 选取元素数量
+        :return: 随机组合的元组
+        """
+        import random as _random
+
+        pool = tuple(iterable)
+        indices = sorted(_random.sample(range(len(pool)), r))
+        return tuple(pool[i] for i in indices)
+
+    @staticmethod
+    def nth_combination(iterable: Iterable, r: int, index: int) -> tuple:
+        """返回第 N 个组合（等价于 ``itertools.combinations`` 的第 ``index`` 个结果）。
+
+        :param iterable: 可迭代对象
+        :param r: 组合长度
+        :param index: 组合索引
+        :return: 第 N 个组合的元组
+        """
+        pool = tuple(iterable)
+        n = len(pool)
+        if r < 0 or r > n:
+            raise ValueError("r must be in range [0, n)")
+        c = 1
+        k = min(r, n - r)
+        for i in range(1, k + 1):
+            c = c * (n - k + i) // i
+        if index < 0:
+            index += c
+        if index < 0 or index >= c:
+            raise IndexError("combination index out of range")
+        result = []
+        while r:
+            c, n, r = c * r // n, n - 1, r - 1
+            while index >= c:
+                index -= c
+                c, n = c * (n - r) // n, n - 1
+            result.append(pool[len(pool) - 1 - n])
+        return tuple(result)

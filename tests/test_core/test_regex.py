@@ -114,3 +114,21 @@ class TestReUtil:
         """测试回调函数使用匹配内容"""
         result = ReUtil.replace_by_func("abc def", r"\b\w", lambda m: m.group(0).upper())
         assert result == "Abc Def"
+
+    def test_find_first_pattern(self):
+        patterns = [r"\d+", r"[a-z]+"]
+        result = ReUtil.find_first_pattern("abc123", patterns)
+        # 两个都匹配，返回第一个匹配的（\d+ 索引0）
+        assert result == r"\d+"
+
+    def test_find_first_pattern_none(self):
+        assert ReUtil.find_first_pattern("!!!", [r"\d+", r"[a-z]+"]) is None
+
+    def test_find_all_patterns(self):
+        patterns = [r"\d+", r"[a-z]+", r"[A-Z]+"]
+        result = ReUtil.find_all_patterns("Hello123", patterns)
+        assert r"\d+" in result
+        assert r"[A-Z]+" in result
+
+    def test_find_all_patterns_none(self):
+        assert ReUtil.find_all_patterns("!!!", [r"\d+", r"[a-z]+"]) == []

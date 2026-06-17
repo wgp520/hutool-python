@@ -124,3 +124,23 @@ bi_map.put("b", 2)
 bi_map.get("a")          # 1
 bi_map.inverse().get(1)  # "a"
 ```
+
+### 分割与排序
+
+```python
+# splitBySize — 按大小分割 Map
+MapUtil.split_by_size({"a": 1, "b": 2, "c": 3, "d": 4}, 2)
+# [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
+
+# sortByKey — 按键排序
+MapUtil.sort_by_key({"b": 2, "a": 1, "c": 3})
+# {"a": 1, "b": 2, "c": 3}
+```
+
+### 值分组
+
+```python
+# toMapList — 按值分组（返回 list）
+MapUtil.to_map_list({"a": 1, "b": 2, "c": 1}, lambda k, v: v)
+# {1: ["a", "c"], 2: ["b"]}
+```

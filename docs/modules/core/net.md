@@ -84,3 +84,15 @@ from hutool import Ipv4Util, MaskBit
 MaskBit.get_mask(24)         # "255.255.255.0"
 MaskBit.get_mask_bit("255.255.255.0")  # 24
 ```
+
+### 主机信息
+
+```python
+from hutool import NetUtil
+
+# 获取本机主机名（与 get_localhost 相同）
+NetUtil.get_host_name()       # "DESKTOP-ABC123"
+
+# 获取本机 IP 地址（通过 UDP 探测）
+NetUtil.get_host_address()    # "192.168.1.100"
+```

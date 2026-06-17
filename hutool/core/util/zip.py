@@ -249,3 +249,61 @@ class ZipUtil:
         """
         with zipfile.ZipFile(zip_file, "r") as zf:
             return zf.namelist()
+
+    @staticmethod
+    def to_zip_file(src_path: str, dest_path: Optional[str] = None) -> str:
+        """将文件或目录转换为 zip 文件。
+
+        与 ``zip`` 方法类似，但默认目标路径为源路径加 ``.zip`` 后缀。
+
+        :param src_path: 源文件或目录路径
+        :param dest_path: 目标 zip 文件路径，默认为源路径加 .zip 后缀
+        :return: 生成的 zip 文件路径
+        :rtype: str
+        """
+        if not os.path.exists(src_path):
+            raise FileNotFoundError(f"源路径不存在: {src_path}")
+
+        if dest_path is None:
+            dest_path = src_path + ".zip"
+
+        dest_path = os.path.abspath(dest_path)
+        src_path = os.path.abspath(src_path)
+
+        with zipfile.ZipFile(dest_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            if os.path.isfile(src_path):
+                zf.write(src_path, os.path.basename(src_path))
+            elif os.path.isdir(src_path):
+                for root, dirs, files in os.walk(src_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, src_path)
+                        zf.write(file_path, arcname)
+            else:
+                raise ValueError(f"不支持的路径类型: {src_path}")
+
+        return dest_path
+
+    @staticmethod
+    def get_zip_output_stream(file_path: str) -> zipfile.ZipFile:
+        """获取 zip 写入流
+
+        返回一个可写入的 ``ZipFile`` 对象，调用者负责关闭。
+
+        :param file_path: zip 文件路径
+        :return: 可写入的 ZipFile 对象
+        :rtype: zipfile.ZipFile
+        """
+        return zipfile.ZipFile(file_path, "w", zipfile.ZIP_DEFLATED)
+
+    @staticmethod
+    def get_zip_stream(file_path: str) -> zipfile.ZipFile:
+        """获取 zip 读取流
+
+        返回一个可读取的 ``ZipFile`` 对象，调用者负责关闭。
+
+        :param file_path: zip 文件路径
+        :return: 可读取的 ZipFile 对象
+        :rtype: zipfile.ZipFile
+        """
+        return zipfile.ZipFile(file_path, "r")

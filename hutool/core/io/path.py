@@ -1,9 +1,11 @@
 """路径工具模块"""
 
+import mimetypes
 import os
 import shutil
+import tempfile
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import Callable, Generator, List, Optional, Union
 
 
 class PathUtil:
@@ -245,3 +247,239 @@ class PathUtil:
         :return: 匹配返回 True
         """
         return str(path).replace("\\", "/").endswith(suffix.replace("\\", "/"))
+
+    @staticmethod
+    def copy_content(
+        src_path: Union[str, Path],
+        dest_path: Union[str, Path],
+        is_override: bool = True,
+    ) -> Path:
+        """复制路径内容
+
+        本方法是 :meth:`copy` 的别名。
+
+        :param src_path: 源路径
+        :param dest_path: 目标路径
+        :param is_override: 是否覆盖已存在的目标，默认 True
+        :return: 目标路径的 Path 对象
+        :raises FileExistsError: 目标已存在且 is_override 为 False 时抛出
+        :raises FileNotFoundError: 源路径不存在时抛出
+        """
+        return PathUtil.copy(src_path, dest_path, is_override)
+
+    @staticmethod
+    def copy_file(src_path: Union[str, Path], dest_path: Union[str, Path]) -> Path:
+        """复制文件
+
+        仅用于复制文件，若源路径为目录则抛出异常。
+
+        :param src_path: 源文件路径
+        :param dest_path: 目标文件路径
+        :return: 目标路径的 Path 对象
+        :raises FileNotFoundError: 源文件不存在时抛出
+        :raises IsADirectoryError: 源路径为目录时抛出
+        """
+        src_p = Path(src_path)
+        dest_p = Path(dest_path)
+        if not src_p.exists():
+            raise FileNotFoundError(f"源路径不存在: {src_path}")
+        if src_p.is_dir():
+            raise IsADirectoryError(f"源路径是目录而非文件: {src_path}")
+        dest_p.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_p, dest_p)
+        return dest_p
+
+    @staticmethod
+    def create_temp_file(
+        prefix: str = "hutool",
+        suffix: str = ".tmp",
+        dir_path: Optional[Union[str, Path]] = None,
+    ) -> Path:
+        """创建临时文件
+
+        :param prefix: 文件名前缀，默认 'hutool'
+        :param suffix: 文件名后缀，默认 '.tmp'
+        :param dir_path: 临时文件所在目录，None 表示使用系统临时目录
+        :return: 创建的临时文件 Path 对象
+        """
+        dir_str = str(dir_path) if dir_path is not None else None
+        fd, tmp_path = tempfile.mkstemp(prefix=prefix, suffix=suffix, dir=dir_str)
+        os.close(fd)
+        return Path(tmp_path)
+
+    @staticmethod
+    def get_last_path_ele(path: Union[str, Path]) -> str:
+        """获取路径的最后一个元素
+
+        本方法是 :meth:`get_name` 的别名。
+
+        :param path: 文件或目录路径
+        :return: 路径最后一级的名称
+        """
+        return PathUtil.get_name(path)
+
+    @staticmethod
+    def get_path_ele(path: Union[str, Path], index: int) -> str:
+        """按索引获取路径元素
+
+        索引从 0 开始，支持负数索引（-1 表示最后一个元素）。
+
+        :param path: 文件或目录路径
+        :param index: 元素索引，支持负数
+        :return: 指定索引处的路径元素
+        :raises IndexError: 索引越界时抛出
+        """
+        parts = Path(path).parts
+        try:
+            return parts[index]
+        except IndexError:
+            raise IndexError(f"路径索引 {index} 越界，路径共 {len(parts)} 层: {path}")
+
+    @staticmethod
+    def get_mime_type(path: Union[str, Path]) -> Optional[str]:
+        """获取文件的 MIME 类型
+
+        根据文件扩展名猜测 MIME 类型。
+
+        :param path: 文件路径
+        :return: MIME 类型字符串，无法识别时返回 None
+        """
+        mime_type, _ = mimetypes.guess_type(str(path))
+        return mime_type
+
+    @staticmethod
+    def is_dir_empty(dir_path: Union[str, Path]) -> bool:
+        """判断目录是否为空
+
+        :param dir_path: 目录路径
+        :return: 目录为空或不存在返回 True
+        """
+        p = Path(dir_path)
+        if not p.is_dir():
+            return True
+        return not any(p.iterdir())
+
+    @staticmethod
+    def is_directory(path: Union[str, Path]) -> bool:
+        """判断路径是否为目录
+
+        本方法是 ``Path.is_dir()`` 的别名。
+
+        :param path: 文件或目录路径
+        :return: 是目录返回 True
+        """
+        return Path(path).is_dir()
+
+    @staticmethod
+    def is_exists_and_not_directory(path: Union[str, Path]) -> bool:
+        """判断路径是否存在且不是目录
+
+        :param path: 文件路径
+        :return: 路径存在且不是目录返回 True
+        """
+        p = Path(path)
+        return p.exists() and not p.is_dir()
+
+    @staticmethod
+    def is_file(path: Union[str, Path]) -> bool:
+        """判断路径是否为文件
+
+        本方法是 ``Path.is_file()`` 的别名。
+
+        :param path: 文件路径
+        :return: 是文件返回 True
+        """
+        return Path(path).is_file()
+
+    @staticmethod
+    def is_sub(parent: Union[str, Path], child: Union[str, Path]) -> bool:
+        """判断 child 是否为 parent 的子路径
+
+        :param parent: 父路径
+        :param child: 子路径
+        :return: child 是 parent 的子路径返回 True
+        """
+        parent_p = Path(parent).resolve()
+        child_p = Path(child).resolve()
+        try:
+            child_p.relative_to(parent_p)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def is_symlink(path: Union[str, Path]) -> bool:
+        """判断路径是否为符号链接
+
+        :param path: 文件或目录路径
+        :return: 是符号链接返回 True
+        """
+        return Path(path).is_symlink()
+
+    @staticmethod
+    def move_content(src_path: Union[str, Path], dest_path: Union[str, Path]) -> Path:
+        """移动路径内容
+
+        本方法是 :meth:`move` 的别名，使用默认参数（覆盖已存在的目标）。
+
+        :param src_path: 源路径
+        :param dest_path: 目标路径
+        :return: 目标路径的 Path 对象
+        :raises FileNotFoundError: 源路径不存在时抛出
+        """
+        return PathUtil.move(src_path, dest_path, is_override=True)
+
+    @staticmethod
+    def rename_path(path: Union[str, Path], new_name: str) -> Path:
+        """重命名路径的最后一级名称
+
+        :param path: 原始路径
+        :param new_name: 新名称（仅最后一级）
+        :return: 重命名后的 Path 对象
+        :raises FileNotFoundError: 路径不存在时抛出
+        """
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(f"路径不存在: {path}")
+        new_path = p.parent / new_name
+        p.rename(new_path)
+        return new_path
+
+    @staticmethod
+    def to_abs_normal(path: Union[str, Path]) -> str:
+        """将路径转换为绝对路径并标准化
+
+        先转为绝对路径，再去除冗余分隔符和上级引用。
+
+        :param path: 原始路径
+        :return: 绝对标准化路径字符串
+        """
+        return str(Path(path).resolve())
+
+    @staticmethod
+    def walk_files(
+        dir_path: Union[str, Path],
+        func: Optional[Callable[[Path], None]] = None,
+    ) -> Generator[Path, None, None]:
+        """遍历目录下的所有文件
+
+        返回一个生成器，逐个产出目录中的文件。若提供回调函数，则对每个文件执行回调。
+
+        :param dir_path: 目录路径
+        :param func: 可选的回调函数，接受 Path 参数
+        :return: 文件 Path 生成器
+        :raises FileNotFoundError: 路径不存在时抛出
+        """
+        p = Path(dir_path)
+        if not p.exists():
+            raise FileNotFoundError(f"路径不存在: {dir_path}")
+        if p.is_file():
+            if func is not None:
+                func(p)
+            yield p
+        else:
+            for f in sorted(p.rglob("*")):
+                if f.is_file():
+                    if func is not None:
+                        func(f)
+                    yield f

@@ -6,9 +6,10 @@
 
 from __future__ import annotations
 
+import calendar
 import time as _time
 from datetime import date, datetime, timedelta
-from typing import List, Optional, Union
+from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
 import pendulum
 from pendulum import DateTime as PendulumDateTime
@@ -2638,8 +2639,6 @@ class DateUtil:
                 month = current.month - 1 + 1
                 year = current.year + month // 12
                 month = month % 12 + 1
-                import calendar
-
                 _, last_day = calendar.monthrange(year, month)
                 current = current.replace(year=year, month=month, day=min(current.day, last_day))
             else:
@@ -2666,4 +2665,643 @@ class DateUtil:
         result = DateUtil.range(start, end, unit)
         if result and result[-1] != end:
             result.append(end)
+        return result
+
+    @staticmethod
+    def week_of_month(dt: Union[DateTime, datetime, date]) -> int:
+        """获取指定日期在当月的第几周（从 1 开始）。
+
+        :param dt: 日期
+        :return: 月内周序号（1-based）
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            dt = datetime(dt.year, dt.month, dt.day)
+        first_day = dt.replace(day=1)
+        # ISO weekday: Monday=1 ... Sunday=7
+        first_weekday = first_day.isoweekday()
+        day_of_month = dt.day
+        return (day_of_month + first_weekday - 2) // 7 + 1
+
+    @staticmethod
+    def get_last_day_of_month(dt: Union[DateTime, datetime, date]) -> int:
+        """获取指定日期所在月的最后一天（28/29/30/31）。
+
+        :param dt: 日期
+        :return: 月末日
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            dt = datetime(dt.year, dt.month, dt.day)
+        _, last_day = calendar.monthrange(dt.year, dt.month)
+        return last_day
+
+    @staticmethod
+    def new_simple_format(pattern: str):
+        """创建一个简单日期格式化函数。
+
+        返回一个可调用对象，接受 datetime 并输出格式化字符串。
+
+        :param pattern: 日期格式模式（如 "yyyy-MM-dd"）
+        :return: 格式化可调用对象
+
+        .. note::
+            Java ``SimpleDateFormat`` 模式会自动转换为 Python strftime 格式。
+        """
+        # 简单映射 Java pattern → Python strftime
+        java_to_py = {
+            "yyyy": "%Y",
+            "yy": "%y",
+            "MM": "%m",
+            "dd": "%d",
+            "HH": "%H",
+            "hh": "%I",
+            "mm": "%M",
+            "ss": "%S",
+            "EEE": "%a",
+            "EEEE": "%A",
+            "MMM": "%b",
+            "MMMM": "%B",
+        }
+        py_pattern = pattern
+        for java_fmt, py_fmt in sorted(java_to_py.items(), key=lambda x: -len(x[0])):
+            py_pattern = py_pattern.replace(java_fmt, py_fmt)
+
+        def _format(dt):
+            if isinstance(dt, DateTime):
+                dt = dt.to_datetime()
+            return dt.strftime(py_pattern)
+
+        return _format
+
+    @staticmethod
+    def offset_millisecond(dt: Union[DateTime, datetime], n: int) -> DateTime:
+        """偏移毫秒。
+
+        :param dt: 日期时间
+        :param n: 毫秒数（正数向未来偏移，负数向过去偏移）
+        :return: 偏移后的 DateTime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        from datetime import timedelta as _td
+
+        return DateTime(dt + _td(milliseconds=n))
+
+    @staticmethod
+    def parse_time_today(time_str: str, fmt: str = "%H:%M:%S") -> DateTime:
+        """解析时间字符串，日期取今日。
+
+        例如 ``"12:30:00"`` → 今日 12:30:00。
+
+        :param time_str: 时间字符串
+        :param fmt: 格式，默认 "%H:%M:%S"
+        :return: DateTime（今日 + 指定时间）
+        """
+        parsed = datetime.strptime(time_str, fmt)
+        today = datetime.now()
+        return DateTime(
+            today.replace(
+                hour=parsed.hour,
+                minute=parsed.minute,
+                second=parsed.second,
+                microsecond=parsed.microsecond,
+            )
+        )
+
+    @staticmethod
+    def range_func(
+        start: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+        unit: str = "day",
+    ) -> Generator[datetime, None, None]:
+        """生成日期范围生成器（不含结束日期）。
+
+        :param start: 起始日期
+        :param end: 结束日期（不含）
+        :param unit: 步进单位，"day", "week", "month"
+        :return: 日期生成器
+        """
+        if isinstance(start, DateTime):
+            start = start.to_datetime()
+        if isinstance(end, DateTime):
+            end = end.to_datetime()
+        if isinstance(start, date) and not isinstance(start, datetime):
+            start = datetime(start.year, start.month, start.day)
+        if isinstance(end, date) and not isinstance(end, datetime):
+            end = datetime(end.year, end.month, end.day)
+        current = start
+        while current < end:
+            yield current
+            if unit == "day":
+                current += timedelta(days=1)
+            elif unit == "week":
+                current += timedelta(weeks=1)
+            elif unit == "month":
+                m = current.month - 1 + 1
+                y = current.year + m // 12
+                m = m % 12 + 1
+                _, last_day = calendar.monthrange(y, m)
+                current = current.replace(year=y, month=m, day=min(current.day, last_day))
+            else:
+                raise ValueError(f"不支持的步进单位: {unit}")
+
+    @staticmethod
+    def range_consume(
+        start: Union[DateTime, datetime, date],
+        end: Union[DateTime, datetime, date],
+        unit: str = "day",
+        consumer: Optional[Callable[[datetime], None]] = None,
+    ) -> List[datetime]:
+        """遍历日期范围并消费（回调）。
+
+        :param start: 起始日期
+        :param end: 结束日期（不含）
+        :param unit: 步进单位
+        :param consumer: 回调函数（每步调用一次）
+        :return: 日期列表
+        """
+        result = []
+        for dt in DateUtil.range_func(start, end, unit):
+            result.append(dt)
+            if consumer is not None:
+                consumer(dt)
+        return result
+
+    @staticmethod
+    def range_not_contains(
+        range1: Tuple[Union[DateTime, datetime], Union[DateTime, datetime]],
+        range2: Tuple[Union[DateTime, datetime], Union[DateTime, datetime]],
+    ) -> bool:
+        """判断两个日期范围是否不相交。
+
+        :param range1: 第一个范围 (start, end)
+        :param range2: 第二个范围 (start, end)
+        :return: 是否不相交
+        """
+        s1, e1 = range1
+        s2, e2 = range2
+        if isinstance(s1, DateTime):
+            s1 = s1.to_datetime()
+        if isinstance(e1, DateTime):
+            e1 = e1.to_datetime()
+        if isinstance(s2, DateTime):
+            s2 = s2.to_datetime()
+        if isinstance(e2, DateTime):
+            e2 = e2.to_datetime()
+        return e1 <= s2 or e2 <= s1
+
+    @staticmethod
+    def spend_nt(start_time: int) -> int:
+        """计时，返回从 start_time 到当前时间的毫秒差。
+
+        :param start_time: 起始时间戳（纳秒级，由 time.perf_counter_ns() 获得）
+        :return: 经过的毫秒数
+        """
+        elapsed_ns = _time.perf_counter_ns() - start_time
+        return elapsed_ns // 1_000_000
+
+    @staticmethod
+    def to_int_second(dt: Union[DateTime, datetime, date]) -> int:
+        """将日期转换为秒级时间戳。
+
+        :param dt: 日期时间
+        :return: 秒级时间戳
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            dt = datetime(dt.year, dt.month, dt.day)
+        return int(dt.timestamp())
+
+    @staticmethod
+    def format_http_date(dt: Optional[datetime] = None) -> str:
+        """格式化为 HTTP 日期字符串（RFC 7231 / RFC 2616）。
+
+        例如 ``"Mon, 16 Jun 2026 12:00:00 GMT"``。
+
+        :param dt: 日期时间，默认当前时间
+        :return: HTTP 日期字符串
+        """
+        if dt is None:
+            dt = datetime.utcnow()
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        # 确保是 UTC-aware datetime 以便 email.utils.format_datetime 使用 usegmt
+        if dt.tzinfo is None:
+            from datetime import timezone
+
+            dt = dt.replace(tzinfo=timezone.utc)
+        import email.utils
+
+        return email.utils.format_datetime(dt, usegmt=True)
+
+    @staticmethod
+    def format_between_enhanced(
+        begin: Union[DateTime, datetime],
+        end: Union[DateTime, datetime],
+        level: str = "millisecond",
+    ) -> str:
+        """格式化两个日期之间的间隔。
+
+        增强版 format_between，支持更多级别。
+
+        :param begin: 起始时间
+        :param end: 结束时间
+        :param level: 精度级别（"millisecond"/"second"/"minute"/"hour"/"day"）
+        :return: 格式化的时间间隔字符串
+        """
+        if isinstance(begin, DateTime):
+            begin = begin.to_datetime()
+        if isinstance(end, DateTime):
+            end = end.to_datetime()
+        delta = end - begin
+        total_seconds = abs(delta.total_seconds())
+        total_ms = total_seconds * 1000
+
+        days = int(total_seconds // 86400)
+        hours = int((total_seconds % 86400) // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        seconds = int(total_seconds % 60)
+        millis = int(total_ms % 1000)
+
+        parts = []
+        if level in ("day",):
+            parts.append(f"{days}天")
+        elif level in ("hour",):
+            parts.append(f"{days}天{hours}小时")
+        elif level in ("minute",):
+            parts.append(f"{days}天{hours}小时{minutes}分")
+        elif level in ("second",):
+            parts.append(f"{days}天{hours}小时{minutes}分{seconds}秒")
+        else:  # millisecond
+            parts.append(f"{days}天{hours}小时{minutes}分{seconds}秒{millis}毫秒")
+        return "".join(parts)
+
+    @staticmethod
+    def convert_timezone_enhanced(
+        dt: Union[DateTime, datetime],
+        from_tz: str,
+        to_tz: str,
+    ) -> datetime:
+        """时区转换（增强版，支持字符串时区名和 ZoneInfo）。
+
+        :param dt: 日期时间
+        :param from_tz: 源时区
+        :param to_tz: 目标时区
+        :return: 转换后的 datetime
+        """
+        if isinstance(dt, DateTime):
+            dt = dt.to_datetime()
+        if dt.tzinfo is None:
+            import pytz
+
+            src_tz = pytz.timezone(from_tz)
+            dt = src_tz.localize(dt)
+        import pytz
+
+        target_tz = pytz.timezone(to_tz)
+        return dt.astimezone(target_tz)
+
+    @staticmethod
+    def today_date() -> date:
+        """获取今日 date 对象。
+
+        与 ``today()``（返回字符串）不同，本方法返回 ``date`` 对象。
+
+        :return: 今日 date 对象
+        """
+        return date.today()
+
+    @staticmethod
+    def yesterday_date() -> date:
+        """获取昨日 date 对象。
+
+        :return: 昨日 date 对象
+        """
+        return date.today() - timedelta(days=1)
+
+    @staticmethod
+    def tomorrow_date() -> date:
+        """获取明日 date 对象。
+
+        :return: 明日 date 对象
+        """
+        return date.today() + timedelta(days=1)
+
+    @staticmethod
+    def week_start(dt: Optional[Union[datetime, date]] = None) -> date:
+        """获取本周一日期。
+
+        :param dt: 参考日期，默认为今日
+        :return: 本周一 date 对象
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        return dt - timedelta(days=dt.weekday())
+
+    @staticmethod
+    def week_end(dt: Optional[Union[datetime, date]] = None) -> date:
+        """获取本周日日期。
+
+        :param dt: 参考日期，默认为今日
+        :return: 本周日 date 对象
+        """
+        start = DateUtil.week_start(dt)
+        return start + timedelta(days=6)
+
+    @staticmethod
+    def day_start(dt: Optional[Union[datetime, date]] = None) -> datetime:
+        """获取当天 00:00:00。
+
+        :param dt: 参考日期，默认为今日
+        :return: 当天 00:00:00 的 datetime 对象
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        return datetime(dt.year, dt.month, dt.day)
+
+    @staticmethod
+    def day_end(dt: Optional[Union[datetime, date]] = None) -> datetime:
+        """获取当天 23:59:59.999999。
+
+        :param dt: 参考日期，默认为今日
+        :return: 当天 23:59:59.999999 的 datetime 对象
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            return dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+        return datetime(dt.year, dt.month, dt.day, 23, 59, 59, 999999)
+
+    @staticmethod
+    def month_start(dt: Optional[Union[datetime, date]] = None) -> date:
+        """获取本月第一天。
+
+        :param dt: 参考日期，默认为今日
+        :return: 本月第一天 date 对象
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        return dt.replace(day=1)
+
+    @staticmethod
+    def month_end(dt: Optional[Union[datetime, date]] = None) -> date:
+        """获取本月最后一天。
+
+        :param dt: 参考日期，默认为今日
+        :return: 本月最后一天 date 对象
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        import calendar as _cal
+
+        last_day = _cal.monthrange(dt.year, dt.month)[1]
+        return dt.replace(day=last_day)
+
+    @staticmethod
+    def is_between_dates(
+        dt: Union[datetime, date],
+        start: Union[datetime, date],
+        end: Union[datetime, date],
+    ) -> bool:
+        """判断日期是否在两个日期之间（含边界）。
+
+        :param dt: 待判断的日期
+        :param start: 起始日期
+        :param end: 结束日期
+        :return: 是否在范围内
+        """
+        return start <= dt <= end
+
+    @staticmethod
+    def get_weekday_name(
+        dt: Optional[Union[datetime, date]] = None,
+        locale: str = "zh_CN",
+    ) -> str:
+        """获取星期几的名称。
+
+        :param dt: 日期，默认为今日
+        :param locale: 语言区域，默认 ``zh_CN``
+        :return: 星期几的名称
+        """
+        if dt is None:
+            dt = date.today()
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        weekday = dt.weekday()
+        _zh_names = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+        _en_names = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+        if locale.startswith("zh"):
+            return _zh_names[weekday]
+        return _en_names[weekday]
+
+    @staticmethod
+    def get_month_name(
+        dt: Optional[Union[datetime, date]] = None,
+        locale: str = "zh_CN",
+    ) -> str:
+        """获取月份名称。
+
+        :param dt: 日期，默认为今日
+        :param locale: 语言区域，默认 ``zh_CN``
+        :return: 月份名称
+        """
+        if dt is None:
+            dt = date.today()
+        month = dt.month
+        _zh_names = [
+            "",
+            "一月",
+            "二月",
+            "三月",
+            "四月",
+            "五月",
+            "六月",
+            "七月",
+            "八月",
+            "九月",
+            "十月",
+            "十一月",
+            "十二月",
+        ]
+        _en_names = [
+            "",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
+        if locale.startswith("zh"):
+            return _zh_names[month]
+        return _en_names[month]
+
+    @staticmethod
+    def get_tertial(dt: Optional[Union[datetime, date]] = None) -> int:
+        """获取日期所在三期（每期 4 个月，1-3）。
+
+        - 1-4 月 → 1
+        - 5-8 月 → 2
+        - 9-12 月 → 3
+
+        :param dt: 日期，默认为今日
+        :return: 三期序号（1-3）
+        """
+        if dt is None:
+            dt = date.today()
+        return (dt.month - 1) // 4 + 1
+
+    @staticmethod
+    def tertial_add(
+        dt: Union[datetime, date],
+        tertials: int,
+    ) -> Union[datetime, date]:
+        """日期加减 N 个三期（每期 4 个月）。
+
+        :param dt: 起始日期
+        :param tertials: 三期数（可为负数）
+        :return: 目标日期
+        """
+        return DateUtil.month_add(dt, tertials * 4)
+
+    @staticmethod
+    def get_tertial_span(
+        dt: Optional[Union[datetime, date]] = None,
+    ) -> tuple:
+        """获取三期的起止日期。
+
+        :param dt: 日期，默认为今日
+        :return: ``(起始月第一天, 结束月最后一天)`` 元组
+        """
+        if dt is None:
+            dt = date.today()
+        tertial = DateUtil.get_tertial(dt)
+        start_month = (tertial - 1) * 4 + 1
+        end_month = start_month + 3
+        import calendar as _cal
+
+        is_date_only = isinstance(dt, date) and not isinstance(dt, datetime)
+        start = datetime(dt.year, start_month, 1)
+        end = datetime(dt.year, end_month, _cal.monthrange(dt.year, end_month)[1])
+        if is_date_only:
+            return start.date(), end.date()
+        return start, end
+
+    @staticmethod
+    def group_by_day(
+        data: List[tuple],
+    ) -> Dict[date, list]:
+        """按日分组聚合 ``[(datetime, value), ...]``。
+
+        :param data: 日期-值对列表
+        :return: 按日分组的字典
+        """
+        result = {}  # type: Dict[date, list]
+        for dt_val in data:
+            dt, value = dt_val[0], dt_val[1]
+            if isinstance(dt, datetime):
+                key = dt.date()
+            else:
+                key = dt
+            result.setdefault(key, []).append(value)
+        return result
+
+    @staticmethod
+    def group_by_week(
+        data: List[tuple],
+    ) -> Dict[tuple, list]:
+        """按周分组聚合 ``[(datetime, value), ...]``。
+
+        键为 ``(年, 周序号)`` 元组。
+
+        :param data: 日期-值对列表
+        :return: 按周分组的字典
+        """
+        result = {}  # type: Dict[tuple, list]
+        for dt_val in data:
+            dt, value = dt_val[0], dt_val[1]
+            if isinstance(dt, datetime):
+                iso = dt.isocalendar()
+            else:
+                iso = datetime(dt.year, dt.month, dt.day).isocalendar()
+            key = (iso[0], iso[1])
+            result.setdefault(key, []).append(value)
+        return result
+
+    @staticmethod
+    def group_by_month(
+        data: List[tuple],
+    ) -> Dict[tuple, list]:
+        """按月分组聚合 ``[(datetime, value), ...]``。
+
+        键为 ``(年, 月)`` 元组。
+
+        :param data: 日期-值对列表
+        :return: 按月分组的字典
+        """
+        result = {}  # type: Dict[tuple, list]
+        for dt_val in data:
+            dt, value = dt_val[0], dt_val[1]
+            key = (dt.year, dt.month)
+            result.setdefault(key, []).append(value)
+        return result
+
+    @staticmethod
+    def group_by_quarter(
+        data: List[tuple],
+    ) -> Dict[tuple, list]:
+        """按季度分组聚合 ``[(datetime, value), ...]``。
+
+        键为 ``(年, 季度)`` 元组，季度为 1-4。
+
+        :param data: 日期-值对列表
+        :return: 按季度分组的字典
+        """
+        result = {}  # type: Dict[tuple, list]
+        for dt_val in data:
+            dt, value = dt_val[0], dt_val[1]
+            quarter = (dt.month - 1) // 3 + 1
+            key = (dt.year, quarter)
+            result.setdefault(key, []).append(value)
+        return result
+
+    @staticmethod
+    def group_by_year(
+        data: List[tuple],
+    ) -> Dict[int, list]:
+        """按年分组聚合 ``[(datetime, value), ...]``。
+
+        :param data: 日期-值对列表
+        :return: 按年分组的字典
+        """
+        result = {}  # type: Dict[int, list]
+        for dt_val in data:
+            dt, value = dt_val[0], dt_val[1]
+            result.setdefault(dt.year, []).append(value)
         return result

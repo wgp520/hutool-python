@@ -349,11 +349,6 @@ StrUtil.split_ignore_case("aAbBcC", "b")  # ["aA", "", "cC"]
 # replaceFrom — 从指定位置开始替换
 StrUtil.replace_from("aabbcc", 2, "b", "d")  # "aadbcc"
 
-# replaceByFunc — 正则匹配 + 回调函数
-import re
-StrUtil.replace_by_func("hello123", r"\d+", lambda m: "[NUM]")
-# "hello[NUM]"
-
 # replaceFirst/replaceLast — 支持 ignore_case
 StrUtil.replace_first("Hello HELLO", "hello", "hi", ignore_case=True)
 # "hi HELLO"
@@ -380,6 +375,32 @@ StrUtil.is_char_equals("aab")  # False
 
 # toString — null 返回 "null"
 StrUtil.to_string(None)  # "null"
+```
+
+### 文本缩略
+
+```python
+# shrinkRepeated — 压缩连续重复字符
+StrUtil.shrink_repeated("aaaaabbbcc", 3)  # "aaabbbcc"
+StrUtil.shrink_repeated("!!hello!!", 1)   # "!hello!"
+```
+
+### 中文标点替换
+
+```python
+# subChinesePunctuations — 中文标点替换为英文标点
+StrUtil.sub_chinese_punctuations("你好，世界！")  # "你好,世界!"
+```
+
+### 驼峰/下划线转换（增强）
+
+```python
+# toCamelCase — 下划线转驼峰
+StrUtil.to_camel_case("hello_world")    # "helloWorld"
+
+# toSnakeCase — 驼峰转下划线（支持连续大写）
+StrUtil.to_snake_case("HelloWorld")     # "hello_world"
+StrUtil.to_snake_case("getHTTPResponse") # "get_http_response"
 ```
 
 ---

@@ -107,3 +107,112 @@ class TestXmlUtil:
     def test_create_document(self):
         doc = XmlUtil.create_document()
         assert doc.tag == "root"
+
+    def test_escape_xml(self):
+        assert XmlUtil.escape_xml('a&b<c>"e') == "a&amp;b&lt;c&gt;&quot;e"
+
+    def test_unescape_xml(self):
+        assert XmlUtil.unescape_xml("a&amp;b&lt;c&gt;") == "a&b<c>"
+
+    def test_xml_to_map(self):
+        xml = "<root><name>test</name><value>123</value></root>"
+        result = XmlUtil.xml_to_map(xml)
+        assert "root" in result
+
+    def test_map_to_xml_str(self):
+        data = {"name": "test", "value": "123"}
+        result = XmlUtil.map_to_xml_str(data)
+        assert "<name>" in result
+        assert "<value>" in result
+
+    def test_bean_to_xml(self):
+        data = {"name": "test", "value": "123"}
+        result = XmlUtil.bean_to_xml(data, "item")
+        assert "<item>" in result
+
+    def test_parse_xml(self):
+        xml = "<root><a>1</a></root>"
+        elem = XmlUtil.parse_xml(xml)
+        assert elem.tag == "root"
+
+    def test_read_xml_file(self, tmp_path):
+        p = tmp_path / "test.xml"
+        p.write_text("<root><a>1</a></root>", encoding="utf-8")
+        elem = XmlUtil.read_xml_file(str(p))
+        assert elem.tag == "root"
+
+    def test_format_xml_pretty(self):
+        xml = "<root><a>1</a></root>"
+        result = XmlUtil.format_xml_pretty(xml, indent=2)
+        assert "\n" in result
+
+    def test_get_by_xpath(self):
+        from xml.etree.ElementTree import fromstring
+
+        elem = fromstring("<root><child>text</child></root>")
+        result = XmlUtil.get_by_xpath(elem, "child")
+        assert result == "text"
+
+    def test_get_node_by_xpath(self):
+        from xml.etree.ElementTree import fromstring
+
+        elem = fromstring("<root><child>text</child></root>")
+        node = XmlUtil.get_node_by_xpath(elem, "child")
+        assert node is not None
+        assert node.text == "text"
+
+    def test_write_object_as_xml(self, tmp_path):
+        data = {"name": "test"}
+        p = tmp_path / "out.xml"
+        XmlUtil.write_object_as_xml(data, str(p), "root")
+        assert p.exists()
+
+    def test_dict_to_element(self):
+        data = {"name": "test", "age": "20"}
+        elem = XmlUtil.dict_to_element(data)
+        assert elem.tag == "item"
+        assert elem.find("name").text == "test"
+        assert elem.find("age").text == "20"
+
+    def test_dict_to_element_custom_tag(self):
+        data = {"x": 1}
+        elem = XmlUtil.dict_to_element(data, tag="record")
+        assert elem.tag == "record"
+
+    def test_list_to_element(self):
+        data = [{"id": "1"}, {"id": "2"}]
+        elem = XmlUtil.list_to_element(data)
+        assert elem.tag == "root"
+        assert len(list(elem)) == 2
+        assert next(iter(elem)).tag == "item"
+
+    def test_list_to_element_custom_tags(self):
+        data = [{"id": "1"}]
+        elem = XmlUtil.list_to_element(data, tag="items", item_tag="entry")
+        assert elem.tag == "items"
+        assert next(iter(elem)).tag == "entry"
+
+    def test_list_to_element_scalars(self):
+        data = ["a", "b", "c"]
+        elem = XmlUtil.list_to_element(data)
+        assert len(list(elem)) == 3
+        assert next(iter(elem)).text == "a"
+
+    def test_dict_to_xml(self):
+        data = {"name": "test"}
+        xml_str = XmlUtil.dict_to_xml(data)
+        assert "<name>test</name>" in xml_str
+
+    def test_list_to_xml(self):
+        data = [{"id": "1"}, {"id": "2"}]
+        xml_str = XmlUtil.list_to_xml(data)
+        assert "<root>" in xml_str
+        assert xml_str.count("<item>") == 2
+
+    def test_indent_element(self):
+        root = ET.Element("root")
+        child = ET.SubElement(root, "child")
+        child.text = "text"
+        XmlUtil.indent_element(root)
+        xml_str = ET.tostring(root, encoding="unicode")
+        assert "\n" in xml_str

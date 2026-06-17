@@ -102,3 +102,74 @@ IterUtil.size(range(100))            # 100
 IterUtil.is_equal_list([1, 2], [1, 2])  # True
 IterUtil.to_str([1, 2, 3], "-")       # "1-2-3"
 ```
+
+### 前置追加
+
+```python
+# prepend — 在迭代器前面追加元素
+list(IterUtil.prepend("start", [1, 2, 3]))  # ["start", 1, 2, 3]
+```
+
+### 表格化输出
+
+```python
+# tabulate — 将数据格式化为表格
+IterUtil.tabulate([["Alice", 30], ["Bob", 25]], headers=["Name", "Age"])
+# Name    Age
+# ------- ---
+# Alice   30
+# Bob     25
+```
+
+### 消费迭代器
+
+```python
+# consume — 消费迭代器（执行操作，不返回结果）
+IterUtil.consume(range(5), print)
+# 0 1 2 3 4
+```
+
+### None 填充
+
+```python
+# padNone — 无限补充 None
+list(IterUtil.take(5, IterUtil.pad_none([1, 2])))  # [1, 2, None, None, None]
+```
+
+### 循环重复
+
+```python
+# nCycles — 循环重复 N 次
+list(IterUtil.n_cycles([1, 2, 3], 2))  # [1, 2, 3, 1, 2, 3]
+```
+
+### 异常终止迭代
+
+```python
+# iterExcept — 迭代直到抛出指定异常
+d = {"a": 1}
+list(IterUtil.iter_except(lambda: d.popitem(), KeyError))  # [("a", 1)]
+```
+
+### 首个真值
+
+```python
+# firstTrue — 返回第一个使谓词为 True 的元素
+IterUtil.first_true([1, 2, 3, 4], pred=lambda x: x > 2)  # 3
+```
+
+### 随机组合
+
+```python
+# randomProduct — 随机笛卡尔积元素
+IterUtil.random_product([1, 2], ["a", "b"])  # (2, "a")
+
+# randomPermutation — 随机排列
+IterUtil.random_permutation([1, 2, 3])  # [3, 1, 2]
+
+# randomCombination — 随机组合
+IterUtil.random_combination([1, 2, 3, 4], 2)  # [2, 4]
+
+# nthCombination — 第 N 个组合
+IterUtil.nth_combination([1, 2, 3, 4], 2, 0)  # [1, 2]
+```
