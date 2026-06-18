@@ -37,17 +37,33 @@ class TreeNode:
             f"children_count={len(self.children)})"
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(
+        self,
+        id_field: str = "id",
+        parent_field: str = "parentId",
+        children_field: str = "children",
+        name_field: str = "name",
+        weight_field: str = "weight",
+    ) -> dict:
         """将节点及其子树转为字典
 
         :return: 包含节点信息和子节点列表的字典
         """
         result = {
-            "id": self.id,
-            "parentId": self.parent_id,
-            "name": self.name,
-            "weight": self.weight,
-            "children": [child.to_dict() for child in self.children],
+            id_field: self.id,
+            parent_field: self.parent_id,
+            name_field: self.name,
+            weight_field: self.weight,
+            children_field: [
+                child.to_dict(
+                    id_field=id_field,
+                    parent_field=parent_field,
+                    children_field=children_field,
+                    name_field=name_field,
+                    weight_field=weight_field,
+                )
+                for child in self.children
+            ],
         }
         if self.extra:
             result.update(self.extra)
