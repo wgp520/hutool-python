@@ -447,6 +447,33 @@ class MapUtil:
                 return value
         return None
 
+    @staticmethod
+    def get_ignore_case(m: dict, key: str, default=None) -> Any:
+        """忽略大小写获取字典中的值。
+
+        遍历字典的键，找到第一个与 ``key`` 大小写不敏感匹配的键并返回其值。
+        仅适用于键为字符串的字典。
+
+        :param m: 字典
+        :param key: 键（字符串）
+        :param default: 默认值
+        :return: 匹配到的值，未找到返回默认值
+
+        ::
+
+            >>> MapUtil.get_ignore_case({"Name": "Alice", "AGE": 20}, "name")
+            'Alice'
+            >>> MapUtil.get_ignore_case({"Name": "Alice"}, "age", 0)
+            0
+        """
+        if MapUtil.is_empty(m):
+            return default
+        lower_key = key.lower()
+        for k, v in m.items():
+            if isinstance(k, str) and k.lower() == lower_key:
+                return v
+        return default
+
     # ----------------------------------------------------------------
     # 批量操作
     # ----------------------------------------------------------------
@@ -1288,34 +1315,10 @@ class FuncKeyDict(MapWrapper[_K, _V]):
         return f"FuncKeyDict({{{items}}})"
 
 
-# ====================================================================
-# DictUtil  (兼容旧接口，委托给 MapUtil)
-# ====================================================================
-
-
-class DictUtil:
-    """字典相关工具类，兼容旧接口。
-
-    部分方法直接委托给 MapUtil，部分保留独立实现。
+class DictUtil(MapUtil):
     """
-
-    @staticmethod
-    def is_empty(value: dict) -> bool:
-        """字典是否为空
-
-        :param value: 字典
-        :return: 是否为空
-        """
-        return MapUtil.is_empty(value)
-
-    @staticmethod
-    def is_not_empty(value: dict) -> bool:
-        """字典是否为非空
-
-        :param value: 字典
-        :return: 是否为非空
-        """
-        return MapUtil.is_not_empty(value)
+    字典相关工具类。
+    """
 
     @staticmethod
     def empty_if_none(value: Union[dict, None]) -> dict:
@@ -1325,16 +1328,6 @@ class DictUtil:
         :return: 原集合，若为None返回空集合
         """
         return MapUtil.empty_if_null(value)
-
-    @staticmethod
-    def default_if_empty(value: dict, default: dict) -> dict:
-        """如果给定字典为空，返回默认字典
-
-        :param value: 字典
-        :param default: 默认字典
-        :return: 非空（empty）的原字典或默认字典
-        """
-        return MapUtil.default_if_empty(value, default)
 
     @staticmethod
     def new_dict(is_ordered: bool = False, /, *args, **kwargs) -> dict:
@@ -1372,26 +1365,3 @@ class DictUtil:
         :return: 字典
         """
         return MapUtil.to_list_map(dict_list)
-
-    @staticmethod
-    def to_dict_list(list_dict: Dict[_K, Sequence[_V]]) -> List[Dict[_K, _V]]:
-        """列转行
-
-        传入: {'a': [1,2,3,4], 'b': [1,2,3], 'c': [1]}
-        结果: [{'a': 1, 'b': 1, 'c': 1}, {'a': 2, 'b': 2}, {'a': 3, 'b': 3}, {'a': 4}]
-
-        :param list_dict: 列表字典
-        :return: 字典列表
-        """
-        return MapUtil.to_dict_list(list_dict)
-
-    @staticmethod
-    def inverse(data: Dict[_K, _V]) -> Dict[_V, _K]:
-        """字典的键和值互换
-
-        互换键值对不检查值是否有重复，如果有则后加入的元素替换先加入的元素。
-
-        :param data: 字典
-        :return: 互换后的字典
-        """
-        return MapUtil.inverse(data)

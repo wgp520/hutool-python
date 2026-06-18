@@ -123,14 +123,58 @@ class TestMapUtil:
         assert isinstance(m, dict)
         assert len(m) == 0
 
+    # ── get_ignore_case ─────────────────────────────────────────
 
-class TestBiMap:
+    def test_get_ignore_case_exact(self):
+        """精确匹配也能正常返回。"""
+        m = {"name": "Alice"}
+        assert MapUtil.get_ignore_case(m, "name") == "Alice"
+
+    def test_get_ignore_case_upper(self):
+        """键全大写，查询全小写。"""
+        m = {"NAME": "Alice"}
+        assert MapUtil.get_ignore_case(m, "name") == "Alice"
+
+    def test_get_ignore_case_mixed(self):
+        """混合大小写。"""
+        m = {"Content-Type": "application/json"}
+        assert MapUtil.get_ignore_case(m, "content-type") == "application/json"
+        assert MapUtil.get_ignore_case(m, "CONTENT-TYPE") == "application/json"
+        assert MapUtil.get_ignore_case(m, "Content-Type") == "application/json"
+
+    def test_get_ignore_case_not_found(self):
+        """未找到返回默认值。"""
+        m = {"name": "Alice"}
+        assert MapUtil.get_ignore_case(m, "age") is None
+        assert MapUtil.get_ignore_case(m, "age", 0) == 0
+
+    def test_get_ignore_case_empty_dict(self):
+        """空字典返回默认值。"""
+        assert MapUtil.get_ignore_case({}, "key", "default") == "default"
+
+    def test_get_ignore_case_none_dict(self):
+        """None 字典返回默认值。"""
+        assert MapUtil.get_ignore_case(None, "key") is None
+
+    def test_get_ignore_case_non_str_key_ignored(self):
+        """非字符串键不会匹配。"""
+        m = {1: "int_key", "Name": "Alice"}
+        assert MapUtil.get_ignore_case(m, "name") == "Alice"
+        assert MapUtil.get_ignore_case(m, "1") is None
+
+    def test_get_ignore_case_first_match(self):
+        """存在多个大小写匹配时返回第一个。"""
+        m = {"Name": "first", "name": "second"}
+        values = {"first", "second"}
+        result = MapUtil.get_ignore_case(m, "NAME")
+        assert result in values
+
     def test_put_and_get(self):
         bm = BiMap()
         bm["a"] = 1
         assert bm["a"] == 1
 
-    def test_inverse(self):
+    def test_inverse_v2(self):
         bm = BiMap()
         bm["a"] = 1
         bm["b"] = 2
