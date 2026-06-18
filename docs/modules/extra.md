@@ -160,3 +160,75 @@ class MyEpub(Epub):
     @property
     def book(self): ...
 ```
+
+## TtsUtil / AsyncTtsUtil / TtsVoice
+
+文字转语音工具，基于 Microsoft Edge TTS 服务（免费、无需 API Key）。
+提供同步（``TtsUtil``）和异步（``AsyncTtsUtil``）两个工具类，方法名完全一致。
+支持生成文件 / bytes / 流式 / 字幕 / 批量生成。
+
+安装：``pip install edge_tts``
+
+### TtsUtil — 同步版
+
+```python
+from hutool import TtsUtil, TtsVoice
+
+# 生成到文件
+TtsUtil.gen_voice("你好世界", output="hello.mp3", voice=TtsVoice.XIAO_XIAO)
+
+# 生成为 bytes
+audio_bytes = TtsUtil.gen_voice_bytes("测试", voice=TtsVoice.YUN_YANG)
+
+# 同时生成字幕（SRT 格式）
+TtsUtil.gen_voice("你好", output="hello.mp3", subtitle_file="hello.srt")
+
+# 仅生成字幕
+srt = TtsUtil.gen_subtitle("逐字字幕", voice=TtsVoice.XIAO_XIAO)
+
+# 流式获取音频（适合实时播放）
+for chunk in TtsUtil.stream_voice("长文本..."):
+    process(chunk)
+
+# 批量生成所有内置语音
+files = TtsUtil.gen_all_voices("测试", output_dir="data/tts")
+
+# 按条件查找在线语音
+voices = TtsUtil.find_voices(locale="zh-CN", gender="Female")
+```
+
+### AsyncTtsUtil — 异步版
+
+方法名与 ``TtsUtil`` 完全一致，所有方法均为 ``async``：
+
+```python
+import asyncio
+from hutool import AsyncTtsUtil, TtsVoice
+
+# 生成到文件
+asyncio.run(AsyncTtsUtil.gen_voice("你好", output="hello.mp3", voice=TtsVoice.XIAO_XIAO))
+
+# 生成为 bytes
+audio_bytes = asyncio.run(AsyncTtsUtil.gen_voice_bytes("测试"))
+
+# 流式获取音频
+async def stream_example():
+    async for chunk in AsyncTtsUtil.stream_voice("长文本..."):
+        process(chunk)
+
+# 查找语音
+voices = asyncio.run(AsyncTtsUtil.find_voices(locale="zh-CN", gender="Female"))
+```
+
+### TtsVoice 内置语音
+
+| 枚举 | 名称 | 性别 | 语言 |
+|------|------|------|------|
+| ``XIAO_XIAO`` | 晓晓 | 女 | 中文普通话 |
+| ``YUN_YANG`` | 云扬 | 男 | 中文普通话 |
+| ``YUN_XI`` | 云希 | 男 | 中文普通话 |
+| ``XIAO_BEI`` | 晓北 | 女 | 中文辽宁 |
+| ``EN_EMMA`` | Emma | 女 | 英语 |
+| ``JA_NANAMI`` | Nanami | 女 | 日语 |
+| ``KO_SUNHI`` | SunHi | 女 | 韩语 |
+| ... | 共 25 个语音 | | |

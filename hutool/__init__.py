@@ -96,7 +96,20 @@ from .core.workday import WorkdayUtil
 from .cron import CronPattern, CronUtil, CronValidator
 from .crypto import DigestUtil, SecureUtil, SignUtil
 from .dfa import SensitiveUtil
-from .extra import EbooklibEpub, EmojiUtil, Epub, EpubFactory, MkEpub, PinyinUtil, PyPub3Epub, QrCodeUtil, TemplateUtil
+from .extra import (
+    AsyncTtsUtil,
+    EbooklibEpub,
+    EmojiUtil,
+    Epub,
+    EpubFactory,
+    MkEpub,
+    PinyinUtil,
+    PyPub3Epub,
+    QrCodeUtil,
+    TemplateUtil,
+    TtsUtil,
+    TtsVoice,
+)
 from .httpx_client import HtmlUtil, HttpRequest, HttpResponse, HttpUtil
 from .json import JSONUtil
 from .jwt import JWTUtil
@@ -105,6 +118,7 @@ from .setting import PropsUtil, SettingUtil, YamlUtil
 __all__ = [
     "ArithmeticCaptcha",
     "ArrayUtil",
+    "AsyncTtsUtil",
     "BankUtil",
     "Base32",
     "Base32Util",
@@ -212,6 +226,8 @@ __all__ = [
     "TreeNode",
     "TreeUtil",
     "TtlLruCache",
+    "TtsUtil",
+    "TtsVoice",
     "URLUtil",
     "UnicodeUtil",
     "UserAgentUtil",
