@@ -7,12 +7,28 @@
 from __future__ import annotations
 
 import calendar
+import re
 import time as _time
 from datetime import date, datetime, timedelta
 from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
 import pendulum
 from pendulum import DateTime as PendulumDateTime
+
+# ── 时间增量表达式解析正则 ────────────────────────────────────
+# 支持格式：+1y-2M+3w-4d+5h-6m+7s
+_timedelta_pattern = ""
+for _name, _sym in [
+    ("years", "y"),
+    ("months", "M"),
+    ("weeks", "w"),
+    ("days", "d"),
+    ("hours", "h"),
+    ("minutes", "m"),
+    ("seconds", "s"),
+]:
+    _timedelta_pattern += rf"((?P<{_name}>(?:\+|-)\d+?){_sym})?"
+_TIMELTA_RE = re.compile(_timedelta_pattern)
 
 
 class DateTime:
@@ -3305,3 +3321,70 @@ class DateUtil:
             dt, value = dt_val[0], dt_val[1]
             result.setdefault(dt.year, []).append(value)
         return result
+
+    # ── 自然语言日期解析 ──────────────────────────────────────
+
+    @staticmethod
+    def parse_natural(date_string: str) -> datetime:
+        """解析自然语言日期字符串。
+
+        支持三种格式：
+
+        1. 标准日期时间：``"2024-01-15 12:30:00"``
+        2. 关键字 ``"now"``：返回当前时间
+        3. 相对时间增量：基于当前时间偏移，格式为 ``+/-N{unit}`` 的组合
+
+        支持的增量单位：
+
+        - ``y`` — 年（按 365.24 天折算）
+        - ``M`` — 月（按 30.42 天折算）
+        - ``w`` — 周
+        - ``d`` — 天
+        - ``h`` — 小时
+        - ``m`` — 分钟
+        - ``s`` — 秒
+
+        :param date_string: 日期字符串
+        :return: datetime 对象
+        :raises ValueError: 无法解析时
+
+        ::
+
+            >>> DateUtil.parse_natural("now")                          # 当前时间
+            >>> DateUtil.parse_natural("2024-01-15 12:30:00")          # 标准格式
+            >>> DateUtil.parse_natural("+1d")                          # 明天此时
+            >>> DateUtil.parse_natural("-2h+30m")                      # 2小时30分前
+            >>> DateUtil.parse_natural("+1y-3M+5d")                    # 1年3月后减5天
+        """
+        # 1. 标准格式
+        try:
+            return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+
+        # 2. "now" 关键字
+        if date_string.strip().lower() == "now":
+            return datetime.now()
+
+        # 3. 相对时间增量
+        parts = _TIMELTA_RE.match(date_string)
+        if not parts:
+            raise ValueError(f"无法解析日期字符串: {date_string!r}")
+
+        time_params: Dict[str, int] = {}
+        for name, value in parts.groupdict().items():
+            if value:
+                time_params[name] = int(value)
+
+        if not time_params:
+            raise ValueError(f"无法解析日期字符串: {date_string!r}")
+
+        # 年和月转换为天数
+        if "years" in time_params:
+            time_params.setdefault("days", 0)
+            time_params["days"] += int(365.24 * time_params.pop("years"))
+        if "months" in time_params:
+            time_params.setdefault("days", 0)
+            time_params["days"] += int(30.42 * time_params.pop("months"))
+
+        return datetime.now() + timedelta(**time_params)

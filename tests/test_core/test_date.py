@@ -733,6 +733,105 @@ class TestDateUtil:
         assert len(result) == 2
         assert len(result[2024]) == 2
 
+    # ── parse_natural ────────────────────────────────────────────
+
+    def test_parse_natural_standard_format(self):
+        """标准日期时间格式。"""
+        result = DateUtil.parse_natural("2024-01-15 12:30:00")
+        assert result.year == 2024
+        assert result.month == 1
+        assert result.day == 15
+        assert result.hour == 12
+        assert result.minute == 30
+        assert result.second == 0
+
+    def test_parse_natural_now(self):
+        """now 关键字。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("now")
+        after = datetime.now()
+        assert before <= result <= after
+
+    def test_parse_natural_now_case_insensitive(self):
+        """now 关键字大小写不敏感。"""
+        result = DateUtil.parse_natural("NOW")
+        assert isinstance(result, datetime)
+
+    def test_parse_natural_plus_days(self):
+        """+Nd 正向天偏移。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+1d")
+        expected_min = before + timedelta(days=1) - timedelta(seconds=2)
+        expected_max = before + timedelta(days=1) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_minus_hours(self):
+        """-Nh 负向小时偏移。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("-2h")
+        expected_min = before - timedelta(hours=2) - timedelta(seconds=2)
+        expected_max = before - timedelta(hours=2) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_combined(self):
+        """组合偏移 +1d-2h+30m。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+1d-2h+30m")
+        expected_min = before + timedelta(days=1, hours=-2, minutes=30) - timedelta(seconds=2)
+        expected_max = before + timedelta(days=1, hours=-2, minutes=30) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_years(self):
+        """年偏移（按 365.24 天折算）。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+1y")
+        expected_days = int(365.24 * 1)
+        expected_min = before + timedelta(days=expected_days) - timedelta(seconds=2)
+        expected_max = before + timedelta(days=expected_days) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_months(self):
+        """月偏移（按 30.42 天折算）。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+2M")
+        expected_days = int(30.42 * 2)
+        expected_min = before + timedelta(days=expected_days) - timedelta(seconds=2)
+        expected_max = before + timedelta(days=expected_days) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_weeks(self):
+        """周偏移。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+1w")
+        expected_min = before + timedelta(weeks=1) - timedelta(seconds=2)
+        expected_max = before + timedelta(weeks=1) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_seconds(self):
+        """秒偏移。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+60s")
+        expected_min = before + timedelta(seconds=60) - timedelta(seconds=2)
+        expected_max = before + timedelta(seconds=60) + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_complex_expression(self):
+        """复杂组合表达式 +1y-3M+5d-2h+30m-10s。"""
+        before = datetime.now()
+        result = DateUtil.parse_natural("+1y-3M+5d-2h+30m-10s")
+        expected_days = int(365.24 * 1) - int(30.42 * 3) + 5
+        expected_delta = timedelta(days=expected_days, hours=-2, minutes=30, seconds=-10)
+        expected_min = before + expected_delta - timedelta(seconds=2)
+        expected_max = before + expected_delta + timedelta(seconds=2)
+        assert expected_min <= result <= expected_max
+
+    def test_parse_natural_invalid(self):
+        """无效字符串应抛出 ValueError。"""
+        import pytest
+
+        with pytest.raises(ValueError, match="无法解析"):
+            DateUtil.parse_natural("invalid_string")
+
 
 class TestDateTime:
     def test_create(self):
