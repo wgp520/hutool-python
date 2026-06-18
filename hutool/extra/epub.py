@@ -11,14 +11,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
+from hutool import StrUtil
+
 logger = logging.getLogger(__name__)
-
-
-def _remove_chars(s: str, *chars: str) -> str:
-    """从字符串中移除指定的字符/子串。"""
-    for c in chars:
-        s = s.replace(c, "")
-    return s
 
 
 # ── PIL 可选导入 ───────────────────────────────────────────────
@@ -181,7 +176,7 @@ class Epub(ABC):
 
         for item in body:
             if isinstance(item, str):
-                cleaned = _remove_chars(item, "\n", "\r", "\t", "&nbsp;", " ", "　", "&#13;")
+                cleaned = StrUtil.remove_any(item, "\n", "\r", "\t", "&nbsp;", " ", "　", "&#13;")
                 if cleaned:
                     parts.append(f"<p>{cleaned}</p>")
             elif isinstance(item, bytes):
@@ -190,7 +185,9 @@ class Epub(ABC):
                 raise TypeError(f"add_page: 不支持的 body 元素类型: {type(item)}")
 
         body_html = "\n".join(parts)
-        clean_title = _remove_chars(title, "\n", "\r", " ", "&nbsp;", "　", "&#13;", "\t") or f"第{self._chapter_no}章"
+        clean_title = (
+            StrUtil.remove_any(title, "\n", "\r", " ", "&nbsp;", "　", "&#13;", "\t") or f"第{self._chapter_no}章"
+        )
         self._add_item(clean_title, body_html)
 
     def add_image_page(self, title: str, img: Union[bytes, List[bytes]]) -> None:
