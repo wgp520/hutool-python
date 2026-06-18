@@ -26,6 +26,7 @@
 - **`SqlUtil`** - SQL 生成工具（SELECT/INSERT/UPDATE/DELETE/备份表，可选 numpy 支持）
 - **`CronValidator`** - Cron 表达式校验（Quartz 风格 6-7 字段，逐字段校验 + 整体校验）
 - **`FuncUtil`** - 函数字符串解析（AST 解析、可调用对象转换、安全执行、点分路径解析）
+- **`Epub`** / **`EpubFactory`** - EPUB 生成工具
 
 #### 现有工具类大幅扩展
 

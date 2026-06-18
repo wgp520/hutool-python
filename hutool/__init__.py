@@ -96,7 +96,7 @@ from .core.workday import WorkdayUtil
 from .cron import CronPattern, CronUtil, CronValidator
 from .crypto import DigestUtil, SecureUtil, SignUtil
 from .dfa import SensitiveUtil
-from .extra import EmojiUtil, PinyinUtil, QrCodeUtil, TemplateUtil
+from .extra import EbooklibEpub, EmojiUtil, Epub, EpubFactory, MkEpub, PinyinUtil, PyPub3Epub, QrCodeUtil, TemplateUtil
 from .httpx_client import HtmlUtil, HttpRequest, HttpResponse, HttpUtil
 from .json import JSONUtil
 from .jwt import JWTUtil
@@ -139,8 +139,11 @@ __all__ = [
     "DesensitizedUtil",
     "DictUtil",
     "DigestUtil",
+    "EbooklibEpub",
     "EmojiUtil",
     "EnumUtil",
+    "Epub",
+    "EpubFactory",
     "EscapeUtil",
     "ExecUtil",
     "FIFOCache",
@@ -171,6 +174,7 @@ __all__ = [
     "MathUtil",
     "Memoize",
     "MemoryRepo",
+    "MkEpub",
     "MoneyUtil",
     "NetUtil",
     "NoneOnException",
@@ -183,6 +187,7 @@ __all__ = [
     "ProfUtil",
     "ProfileDeco",
     "PropsUtil",
+    "PyPub3Epub",
     "QrCodeUtil",
     "RandomUtil",
     "ReUtil",
