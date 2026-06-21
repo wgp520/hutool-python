@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Hutool-Python"
 copyright = "2026, Hutool-Python"
 author = "Hutool-Python"
-release = "1.1.0"
+release = "1.1.1"
 language = "zh_CN"
 
 # -- General configuration ----------------------------------------------------
