@@ -418,4 +418,6 @@ class DigestUtil:
         except ImportError:
             raise ImportError("需要安装 bcrypt 库: pip install bcrypt")
         pwd = DigestUtil._to_bytes(password)
+        if hashed is None:
+            raise ValueError("bcrypt哈希字符串不能为空")
         return _bcrypt.checkpw(pwd, hashed.encode("utf-8"))
