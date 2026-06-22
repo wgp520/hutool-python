@@ -128,3 +128,55 @@ class TestIdUtil:
         id1 = IdUtil.luid(separator=":")
         assert ":" in id1
         assert "-" not in id1
+
+    # ── is_snowflake_id ──────────────────────────────────────
+
+    def test_is_snowflake_id_valid(self):
+        """测试有效雪花ID"""
+        sid = IdUtil.snowflake_id(worker_id=1, datacenter_id=1)
+        assert IdUtil.is_snowflake_id(sid) is True
+
+    def test_is_snowflake_id_with_matching_ids(self):
+        """测试匹配worker_id和datacenter_id"""
+        sid = IdUtil.snowflake_id(worker_id=5, datacenter_id=3)
+        assert IdUtil.is_snowflake_id(sid, worker_id=5, datacenter_id=3) is True
+
+    def test_is_snowflake_id_wrong_worker_id(self):
+        """测试worker_id不匹配"""
+        sid = IdUtil.snowflake_id(worker_id=1, datacenter_id=1)
+        assert IdUtil.is_snowflake_id(sid, worker_id=2) is False
+
+    def test_is_snowflake_id_wrong_datacenter_id(self):
+        """测试datacenter_id不匹配"""
+        sid = IdUtil.snowflake_id(worker_id=1, datacenter_id=1)
+        assert IdUtil.is_snowflake_id(sid, datacenter_id=2) is False
+
+    def test_is_snowflake_id_negative(self):
+        """测试负数"""
+        assert IdUtil.is_snowflake_id(-1) is False
+
+    def test_is_snowflake_id_zero(self):
+        """测试零"""
+        assert IdUtil.is_snowflake_id(0) is False
+
+    def test_is_snowflake_id_non_int(self):
+        """测试非整数类型"""
+        assert IdUtil.is_snowflake_id("12345") is False
+        assert IdUtil.is_snowflake_id(12345.0) is False
+        assert IdUtil.is_snowflake_id(None) is False
+
+    def test_is_snowflake_id_too_large(self):
+        """测试超过63位的数"""
+        assert IdUtil.is_snowflake_id(1 << 63) is False
+
+    def test_is_snowflake_id_no_timestamp_check(self):
+        """测试跳过时间戳校验"""
+        # 构造一个时间戳部分很小的值（但仍为正数）
+        # 只需确保 check_timestamp=False 时不因时间戳拒绝
+        sid = IdUtil.snowflake_id(worker_id=1, datacenter_id=1)
+        assert IdUtil.is_snowflake_id(sid, check_timestamp=False) is True
+
+    def test_is_snowflake_id_max_boundary(self):
+        """测试边界最大worker_id和datacenter_id"""
+        sid = IdUtil.snowflake_id(worker_id=31, datacenter_id=31)
+        assert IdUtil.is_snowflake_id(sid, worker_id=31, datacenter_id=31) is True

@@ -2,6 +2,7 @@ import secrets
 import threading
 import time
 import uuid
+from typing import Optional
 
 
 class _SnowflakeWorkerPool:
@@ -254,6 +255,57 @@ class IdUtil:
         ts = format(int(time.time()) & 0xFFFFFFFF, "08X")
         counter = format(_machine_id_gen._counter & 0xFFFF, "04X")
         return separator.join([host_hash, f"PID{pid}", ts, counter])
+
+    @staticmethod
+    def is_snowflake_id(
+        snowflake_id: int,
+        worker_id: Optional[int] = None,
+        datacenter_id: Optional[int] = None,
+        check_timestamp: bool = True,
+    ) -> bool:
+        """判断一个数字是否为有效的雪花算法 ID，并可选验证 worker_id 和 datacenter_id 是否匹配。
+
+        验证逻辑：
+
+        1. 必须是正整数且不超过 63 位
+        2. 解析出的时间戳必须在合理范围内（EPOCH ~ 当前时间 + 1 天）
+        3. 若指定 ``worker_id``，则要求 ID 中的 worker_id 与之相等
+        4. 若指定 ``datacenter_id``，则要求 ID 中的 datacenter_id 与之相等
+
+        :param snowflake_id: 待判断的数字
+        :param worker_id: 期望的工作机器 ID（0-31），为 None 时不校验
+        :param datacenter_id: 期望的数据中心 ID（0-31），为 None 时不校验
+        :param check_timestamp: 是否校验时间戳合理性，默认 True
+        :return: 是否为有效的雪花 ID 且 worker/datacenter 匹配
+        """
+        if not isinstance(snowflake_id, int) or snowflake_id <= 0:
+            return False
+
+        bits = snowflake_id.bit_length()
+        if bits > 63:
+            return False
+
+        # 解析各段
+        wid = (snowflake_id >> _SnowflakeIdWorker.WORKER_ID_SHIFT) & _SnowflakeIdWorker.MAX_WORKER_ID
+        dc_id = (snowflake_id >> _SnowflakeIdWorker.DATACENTER_ID_SHIFT) & _SnowflakeIdWorker.MAX_DATACENTER_ID
+        ts = (snowflake_id >> _SnowflakeIdWorker.TIMESTAMP_LEFT_SHIFT) + _SnowflakeIdWorker.EPOCH
+
+        # 校验 worker_id
+        if worker_id is not None and wid != worker_id:
+            return False
+
+        # 校验 datacenter_id
+        if datacenter_id is not None and dc_id != datacenter_id:
+            return False
+
+        # 校验时间戳范围
+        if check_timestamp:
+            now_ms = int(time.time() * 1000)
+            # 允许未来 1 天的时钟偏差
+            if ts < _SnowflakeIdWorker.EPOCH or ts > now_ms + 86400000:
+                return False
+
+        return True
 
 
 class _SnowflakeIdWorker:
