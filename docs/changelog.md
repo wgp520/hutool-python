@@ -1,5 +1,13 @@
 # 更新日志
 
+## v1.1.2（2026-06-23）
+
+- SqlUtil新增多方言支持（mysql、postgresql、sqlite）
+- SqlUtil新增链式调用API（SelectBuilder/InsertBuilder/UpdateBuilder/DeleteBuilder/CreateTableBuilder）
+- 新增Q条件组合器（AND/OR/NOT）
+- 新增F字段引用（算术运算/聚合函数）
+- 新增ColumnType列类型枚举（自动适配三方言）
+
 ## v1.1.1（2026-06-22）
 
 ### 工具类扩展

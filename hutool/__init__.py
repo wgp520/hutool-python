@@ -49,7 +49,7 @@ from .core.memory_repo import MemoryRepo
 from .core.money import MoneyUtil
 from .core.net import Ipv4Util, MaskBit, NetUtil
 from .core.prof import ProfUtil
-from .core.sql import SqlUtil
+from .core.sql import ColumnType, F, Q, SqlUtil
 from .core.struct import Struct
 from .core.text.csv import CsvUtil
 from .core.text.stop_watch import StopWatch, TaskInfo
@@ -139,6 +139,7 @@ __all__ = [
     "ClassUtil",
     "CollUtil",
     "ColorUtil",
+    "ColumnType",
     "ConvertUtil",
     "Coordinate",
     "CoordinateUtil",
@@ -160,6 +161,7 @@ __all__ = [
     "EpubFactory",
     "EscapeUtil",
     "ExecUtil",
+    "F",
     "FIFOCache",
     "FileNameUtil",
     "FileUtil",
@@ -202,6 +204,7 @@ __all__ = [
     "ProfileDeco",
     "PropsUtil",
     "PyPub3Epub",
+    "Q",
     "QrCodeUtil",
     "RandomUtil",
     "ReUtil",
