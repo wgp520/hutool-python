@@ -405,8 +405,6 @@ class SqlUtil:
         """
         if isinstance(value, str):
             value = value.strip()
-            if "select" in value.lower():
-                value = "\x00" + value + "\x00"
         elif isinstance(value, (list, dict)):
             value = json.dumps(value)
         elif isinstance(value, datetime.datetime):
