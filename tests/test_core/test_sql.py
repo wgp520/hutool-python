@@ -119,8 +119,7 @@ class TestMakeInsertSql:
         assert "1" in sql
 
     def test_subselect_value(self):
-        sql = SqlUtil.make_insert_sql("user", {"name": "select 1"})
-        # 子查询用 \x00 标记包裹后被去掉，保留引号
+        sql = SqlUtil.make_insert_sql("user", {"name": "${select 1}"})
         assert "select 1" in sql
 
     def test_custom_separator(self):
