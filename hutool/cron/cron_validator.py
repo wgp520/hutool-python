@@ -26,6 +26,11 @@ class CronValidator:
     - ``#`` : 第几个星期几 (如 ``6#3`` 表示第三个星期五)
     """
 
+    ONE_YEAR_LENGTH = 4
+    MAX_YEAR = 2099
+    CRON_EXPRESSION_LENGTH_MIN = 6
+    CRON_EXPRESSION_LENGTH_MAX = 7
+
     # ── 内部辅助 ──────────────────────────────────────────────
 
     @staticmethod
@@ -159,8 +164,11 @@ class CronValidator:
             or ("#" in year and re.match(r"^[1-7]#[1-4]$", year))
             or ("L" in year and re.match(r"^[1-7]L$", year))
             or (
-                (len(year) == 4 or "," in year)
-                and all(int(item) in future_years and current_year <= int(item) <= 2099 for item in year.split(","))
+                (len(year) == CronValidator.ONE_YEAR_LENGTH or "," in year)
+                and all(
+                    int(item) in future_years and current_year <= int(item) <= CronValidator.MAX_YEAR
+                    for item in year.split(",")
+                )
             )
         )
 
@@ -185,7 +193,7 @@ class CronValidator:
             False
         """
         values = cron_expression.split()
-        if len(values) not in (6, 7):
+        if len(values) not in (CronValidator.CRON_EXPRESSION_LENGTH_MIN, CronValidator.CRON_EXPRESSION_LENGTH_MAX):
             return False
         if not CronValidator.validate_second_or_minute(values[0]):
             return False
@@ -199,7 +207,7 @@ class CronValidator:
             return False
         if not CronValidator.validate_week(values[5]):
             return False
-        if len(values) == 7:
+        if len(values) == CronValidator.CRON_EXPRESSION_LENGTH_MAX:
             return CronValidator.validate_year(values[6])
         return True
 
