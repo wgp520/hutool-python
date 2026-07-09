@@ -48,7 +48,7 @@ class IdUtil:
 
         :return: 32位十六进制UUID字符串，如 ``"550e8400e29b41d4a716446655440000"``
         """
-        return str(uuid.uuid4()).replace("-", "")
+        return uuid.uuid4().hex
 
     @staticmethod
     def fast_uuid() -> str:
@@ -66,7 +66,7 @@ class IdUtil:
 
         :return: 32位十六进制UUID字符串
         """
-        return str(uuid.uuid4()).replace("-", "")
+        return uuid.uuid4().hex
 
     @staticmethod
     def nano_id(size: int = 21) -> str:
