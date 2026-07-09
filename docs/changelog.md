@@ -1,5 +1,11 @@
 # 更新日志
 
+## v1.1.2（2026-07-09）
+
+- SqlUtil修复插入 SQL 语句生成时对特殊字符的处理逻辑
+- 使用常量替代硬编码值，增强CronValidator的可维护性
+- IdUtil优化UUID生成方法，直接返回32位十六进制字符串
+
 ## v1.1.2（2026-06-23）
 
 - SqlUtil新增多方言支持（mysql、postgresql、sqlite）

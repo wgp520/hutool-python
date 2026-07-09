@@ -14,7 +14,7 @@
 - setting: 配置工具（YAML、Properties）
 """
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 # 核心工具类 - 顶层快捷导入
 # 其他模块
