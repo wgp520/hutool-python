@@ -13,12 +13,12 @@ from hutool import Struct
 
 # 直接创建
 s = Struct({"name": "test", "age": 20})
-s.name       # 'test'
-s["age"]     # 20
+s.name  # 'test'
+s["age"]  # 20
 
 # 设置属性
 s.email = "test@example.com"
-s["email"]   # 'test@example.com'
+s["email"]  # 'test@example.com'
 
 # 删除属性
 del s.name
@@ -30,12 +30,12 @@ del s.name
 # 类方法 — 递归转换
 data = {"user": {"name": "Alice", "tags": [{"id": 1}]}}
 s = Struct.from_dict(data)
-s.user.name       # 'Alice'
-s.user.tags[0].id # 1
+s.user.name  # 'Alice'
+s.user.tags[0].id  # 1
 
 # 非递归模式
 s = Struct.from_dict({"user": {"name": "test"}}, recursive=False)
-s.user            # {'name': 'test'}（仍是 dict）
+s.user  # {'name': 'test'}（仍是 dict）
 ```
 
 ---

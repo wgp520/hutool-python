@@ -22,7 +22,7 @@ with open("photo.jpg", "rb") as f:
 fmt = ImageUtil.detect_image_type(data)  # 'jpg'
 
 # 无法识别时返回 None
-ImageUtil.detect_image_type(b'random data')  # None
+ImageUtil.detect_image_type(b"random data")  # None
 ```
 
 ### 支持的格式
@@ -62,12 +62,7 @@ ImageUtil.resize_image(b"\x89PNG...", 100, 100, output_path="/tmp/small.png")
 
 ```python
 # 将红色替换为绿色（容差 30）
-data = ImageUtil.replace_color(
-    b"\x89PNG...",
-    target_color=(255, 0, 0),
-    replacement_color=(0, 255, 0),
-    tolerance=30
-)
+data = ImageUtil.replace_color(b"\x89PNG...", target_color=(255, 0, 0), replacement_color=(0, 255, 0), tolerance=30)
 ```
 
 #### 添加水印
@@ -77,12 +72,7 @@ data = ImageUtil.replace_color(
 data = ImageUtil.add_watermark("/path/to/photo.jpg", "CONFIDENTIAL")
 
 # 自定义位置和颜色
-data = ImageUtil.add_watermark(
-    photo_bytes, "DRAFT",
-    position=(10, 10),
-    color=(255, 0, 0),
-    font_size=48
-)
+data = ImageUtil.add_watermark(photo_bytes, "DRAFT", position=(10, 10), color=(255, 0, 0), font_size=48)
 ```
 
 #### 人脸检测

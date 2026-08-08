@@ -13,8 +13,7 @@ from hutool import HttpUtil
 content = HttpUtil.get("https://httpbin.org/get")
 
 # POST 请求
-result = HttpUtil.post("https://httpbin.org/post",
-                       json_data={"city": "北京"})
+result = HttpUtil.post("https://httpbin.org/post", json_data={"city": "北京"})
 
 # 下载文件
 HttpUtil.download_file("https://example.com/file.zip", "/path/to/save.zip")
@@ -30,39 +29,35 @@ html = HttpUtil.download_string("https://example.com")
 ```python
 from hutool import HttpRequest
 
-response = (HttpRequest.get("https://httpbin.org/get")
+response = (
+    HttpRequest.get("https://httpbin.org/get")
     .header("Accept", "application/json")
     .header("User-Agent", "Hutool-Python")
     .cookie("session=abc123")
     .timeout(5000)
     .charset("utf-8")
     .follow_redirects(True)
-    .execute())
+    .execute()
+)
 
-print(response.status)     # 200
-print(response.body)       # 响应内容
-print(response.is_ok())    # True
+print(response.status)  # 200
+print(response.body)  # 响应内容
+print(response.is_ok())  # True
 ```
 
 ### POST 请求
 
 ```python
 # 表单提交
-response = (HttpRequest.post("https://httpbin.org/post")
-    .form("username", "admin")
-    .form("password", "123456")
-    .execute())
+response = HttpRequest.post("https://httpbin.org/post").form("username", "admin").form("password", "123456").execute()
 
 # JSON 提交
-response = (HttpRequest.post("https://httpbin.org/post")
-    .json({"key": "value"})
-    .execute())
+response = HttpRequest.post("https://httpbin.org/post").json({"key": "value"}).execute()
 
 # 原始 Body
-response = (HttpRequest.post("https://httpbin.org/post")
-    .body("raw content")
-    .header("Content-Type", "text/plain")
-    .execute())
+response = (
+    HttpRequest.post("https://httpbin.org/post").body("raw content").header("Content-Type", "text/plain").execute()
+)
 ```
 
 ### 其他
@@ -96,14 +91,14 @@ req.timeout(connect_ms=3000, read_ms=10000, write_ms=5000)
 ```python
 response = HttpRequest.get("https://httpbin.org/get").execute()
 
-response.status          # 状态码
-response.headers         # 响应头
-response.body            # 响应体（字符串）
-response.is_ok()         # 状态码是否为 2xx
-response.to_bytes()      # 响应体（字节）
-response.to_json()       # 解析为 JSON
-response.get_status()    # 获取状态码（别名）
-response.sync_read()     # 同步读取 body
+response.status  # 状态码
+response.headers  # 响应头
+response.body  # 响应体（字符串）
+response.is_ok()  # 状态码是否为 2xx
+response.to_bytes()  # 响应体（字节）
+response.to_json()  # 解析为 JSON
+response.get_status()  # 获取状态码（别名）
+response.sync_read()  # 同步读取 body
 ```
 
 ### HttpResponse 流式读取
@@ -128,7 +123,7 @@ HtmlUtil.escape('<script>alert("xss")</script>')
 
 # 移除 HTML 标签
 HtmlUtil.remove_html_tag("<p>Hello <b>World</b></p>")  # "Hello World"
-HtmlUtil.clean_html_tag("<p>content</p>")               # "content"
+HtmlUtil.clean_html_tag("<p>content</p>")  # "content"
 ```
 
 ## 异步用法（AsyncHttpUtil / AsyncHttpRequest）
@@ -150,10 +145,9 @@ await AsyncHttpUtil.download_file("https://example.com/file.zip", "/path/to/save
 data = await AsyncHttpUtil.download_bytes("https://example.com/file.bin")
 
 # 链式异步请求
-response = await (AsyncHttpRequest.get("https://httpbin.org/get")
-    .header("Accept", "application/json")
-    .timeout(5000)
-    .execute())
+response = await (
+    AsyncHttpRequest.get("https://httpbin.org/get").header("Accept", "application/json").timeout(5000).execute()
+)
 print(response.status)
 ```
 

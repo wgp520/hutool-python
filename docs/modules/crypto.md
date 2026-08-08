@@ -16,8 +16,8 @@ Hutool-Python 基于 `cryptography` 库封装了这三种加密类型。
 from hutool import DigestUtil
 
 # MD5
-DigestUtil.md5_hex("hello")           # "5d41402abc4b2a76b9719d911017c592"
-DigestUtil.md5_hex16("hello")         # 16位 MD5
+DigestUtil.md5_hex("hello")  # "5d41402abc4b2a76b9719d911017c592"
+DigestUtil.md5_hex16("hello")  # 16位 MD5
 
 # SHA
 DigestUtil.sha1_hex("hello")
@@ -96,10 +96,10 @@ sign = SignUtil.sort_sign(params, "secret_key")  # 按 key 排序后签名
 
 ```python
 # 加密
-SecureUtil.caesar_encode("Hello", 3)   # "Khoor"
+SecureUtil.caesar_encode("Hello", 3)  # "Khoor"
 
 # 解密
-SecureUtil.caesar_decode("Khoor", 3)   # "Hello"
+SecureUtil.caesar_decode("Khoor", 3)  # "Hello"
 ```
 
 ## 支持的算法

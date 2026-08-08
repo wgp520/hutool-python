@@ -21,7 +21,7 @@ from hutool import CreditCodeUtil
 
 # 校验统一社会信用代码
 CreditCodeUtil.is_valid_credit_code("91110108MA004GHJ0K")  # True
-CreditCodeUtil.is_valid_credit_code("invalid")               # False
+CreditCodeUtil.is_valid_credit_code("invalid")  # False
 ```
 
 ```{note}

@@ -55,8 +55,10 @@ pip install hutool-python[dev]
 
 ```python
 import hutool
+
 print(hutool.__version__)  # 1.0.0
 
 from hutool import StrUtil
+
 print(StrUtil.is_blank(""))  # True
 ```

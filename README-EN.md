@@ -109,18 +109,18 @@ pip install -e ".[dev]"
 from hutool import StrUtil
 
 # Check if blank
-StrUtil.is_blank("")       # True
-StrUtil.is_blank("  ")     # True
+StrUtil.is_blank("")  # True
+StrUtil.is_blank("  ")  # True
 StrUtil.is_blank("hello")  # False
 
 # Substring operations
-StrUtil.sub_before("abc.jpg", ".")      # "abc"
-StrUtil.sub_after("abc.jpg", ".")       # "jpg"
+StrUtil.sub_before("abc.jpg", ".")  # "abc"
+StrUtil.sub_after("abc.jpg", ".")  # "jpg"
 StrUtil.sub_between("a(b)c", "(", ")")  # "b"
 
 # Naming convention conversion
-StrUtil.to_camel_case("hello_world")   # "helloWorld"
-StrUtil.to_snake_case("helloWorld")    # "hello_world"
+StrUtil.to_camel_case("hello_world")  # "helloWorld"
+StrUtil.to_snake_case("helloWorld")  # "hello_world"
 
 # String similarity
 StrUtil.similar("I love coding", "I love code")  # 0.857...
@@ -132,15 +132,15 @@ StrUtil.similar("I love coding", "I love code")  # 0.857...
 from hutool import DateUtil
 
 # Get current time
-DateUtil.now()        # "2024-01-15 14:30:00"
-DateUtil.today()      # "2024-01-15"
+DateUtil.now()  # "2024-01-15 14:30:00"
+DateUtil.today()  # "2024-01-15"
 
 # Parse dates
 dt = DateUtil.parse("2024-01-15")
 
 # Date offset
-DateUtil.offset_day(dt, 7)    # 7 days later
-DateUtil.offset_month(dt, -1) # 1 month earlier
+DateUtil.offset_day(dt, 7)  # 7 days later
+DateUtil.offset_month(dt, -1)  # 1 month earlier
 
 # Date difference
 start = DateUtil.parse("2024-01-01")
@@ -173,11 +173,11 @@ MapUtil.sort({"c": 3, "a": 1, "b": 2})  # {"a": 1, "b": 2, "c": 3}
 ```python
 from hutool import IdUtil
 
-IdUtil.random_uuid()       # "550e8400-e29b-41d4-a716-446655440000"
-IdUtil.simple_uuid()       # "550e8400e29b41d4a716446655440000"
-IdUtil.nano_id()           # "V1StGXR8_Z5jdHi6B-myT"
-IdUtil.snowflake_id()      # 1480946864314982400
-IdUtil.object_id()         # "5f8b2c3d4e5f6a7b8c9d0e1f"
+IdUtil.random_uuid()  # "550e8400-e29b-41d4-a716-446655440000"
+IdUtil.simple_uuid()  # "550e8400e29b41d4a716446655440000"
+IdUtil.nano_id()  # "V1StGXR8_Z5jdHi6B-myT"
+IdUtil.snowflake_id()  # 1480946864314982400
+IdUtil.object_id()  # "5f8b2c3d4e5f6a7b8c9d0e1f"
 ```
 
 ### HTTP Client
@@ -194,14 +194,16 @@ result = HttpUtil.post("https://api.example.com/data", json_data={"key": "value"
 # Chained request builder
 from hutool import HttpRequest
 
-resp = (HttpRequest.post("https://api.example.com/data")
+resp = (
+    HttpRequest.post("https://api.example.com/data")
     .header("Authorization", "Bearer token")
     .json({"key": "value"})
     .timeout(30)
-    .execute())
+    .execute()
+)
 
-print(resp.is_ok())      # True
-print(resp.to_json())    # {...}
+print(resp.is_ok())  # True
+print(resp.to_json())  # {...}
 ```
 
 ### Encryption
@@ -210,8 +212,8 @@ print(resp.to_json())    # {...}
 from hutool.crypto import DigestUtil, SecureUtil
 
 # Digest algorithms
-DigestUtil.md5_hex("hello")           # "5d41402abc4b2a76b9719d911017c592"
-DigestUtil.sha256_hex("hello")        # "2cf24dba5fb0a30e..."
+DigestUtil.md5_hex("hello")  # "5d41402abc4b2a76b9719d911017c592"
+DigestUtil.sha256_hex("hello")  # "2cf24dba5fb0a30e..."
 
 # AES symmetric encryption
 key = SecureUtil.generate_aes_key()
@@ -249,17 +251,29 @@ img_bytes = captcha.get_image_bytes()
 
 # Arithmetic CAPTCHA
 arith = CaptchaUtil.create_arithmetic_captcha(width=200, height=80)
-arith.create_code()        # "3+5=?"
-arith.get_result()         # "8"
+arith.create_code()  # "3+5=?"
+arith.get_result()  # "8"
 ```
 
 ### More Utilities
 
 ```python
 from hutool.core.util import (
-    NumberUtil, ArrayUtil, RandomUtil, HexUtil, HashUtil,
-    ReUtil, EscapeUtil, PhoneUtil, IdcardUtil, DesensitizedUtil,
-    CoordinateUtil, ZipUtil, XmlUtil, UrlUtil, VersionUtil,
+    NumberUtil,
+    ArrayUtil,
+    RandomUtil,
+    HexUtil,
+    HashUtil,
+    ReUtil,
+    EscapeUtil,
+    PhoneUtil,
+    IdcardUtil,
+    DesensitizedUtil,
+    CoordinateUtil,
+    ZipUtil,
+    XmlUtil,
+    UrlUtil,
+    VersionUtil,
 )
 from hutool.core.codec import Base64
 from hutool.core.io import FileUtil, IoUtil, PathUtil

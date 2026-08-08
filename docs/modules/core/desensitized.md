@@ -10,20 +10,20 @@
 from hutool import DesensitizedUtil
 
 # 中文姓名：保留姓，其余用 * 替代
-DesensitizedUtil.chinese_name("张三")       # "张*"
-DesensitizedUtil.chinese_name("欧阳娜娜")   # "欧**"
+DesensitizedUtil.chinese_name("张三")  # "张*"
+DesensitizedUtil.chinese_name("欧阳娜娜")  # "欧**"
 
 # 身份证号
 DesensitizedUtil.id_card("110101199001011234")  # "110101****1234"
 
 # 手机号：中间4位用 * 替代
-DesensitizedUtil.mobile_phone("13812345678")   # "138****5678"
+DesensitizedUtil.mobile_phone("13812345678")  # "138****5678"
 
 # 座机号
-DesensitizedUtil.fixed_phone("01012345678")    # "010****5678"
+DesensitizedUtil.fixed_phone("01012345678")  # "010****5678"
 
 # 邮箱：@前保留首尾字符
-DesensitizedUtil.email("test@example.com")     # "t***t@example.com"
+DesensitizedUtil.email("test@example.com")  # "t***t@example.com"
 
 # 地址
 DesensitizedUtil.address("北京市海淀区中关村大街1号", 3)  # "北京市海淀区****"
@@ -53,7 +53,7 @@ DesensitizedUtil.passport("E12345678")  # "E******8"
 DesensitizedUtil.credit_code("91350100M000100Y43")  # "913501***100Y43"
 
 # clearMask — 全部替换为 *
-DesensitizedUtil.clear_mask("hello")    # "*****"
+DesensitizedUtil.clear_mask("hello")  # "*****"
 DesensitizedUtil.clear_mask("hello", replacement="#")  # "#####"
 
 # clearToNull — 清空返回 None
@@ -61,7 +61,7 @@ DesensitizedUtil.clear_to_null("hello")  # None
 
 # desensitized — 通用脱敏（指定区间替换）
 DesensitizedUtil.desensitized("13812345678", 3, 7)  # "138****5678"
-DesensitizedUtil.desensitized("abcdefghij", 2, 6)   # "ab****ghij"
+DesensitizedUtil.desensitized("abcdefghij", 2, 6)  # "ab****ghij"
 
 # userId — 用户 ID 脱敏
 DesensitizedUtil.user_id("1234567890")  # "12345*****"

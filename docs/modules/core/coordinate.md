@@ -37,5 +37,5 @@ coord = CoordinateUtil.bd09_to_wgs84(116.417128, 39.936527)
 ```python
 coord = CoordinateUtil.wgs84_to_gcj02(116.397128, 39.916527)
 print(coord.longitude)  # 经度
-print(coord.latitude)   # 纬度
+print(coord.latitude)  # 纬度
 ```

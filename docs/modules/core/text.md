@@ -8,13 +8,13 @@ Unicode 编码转换工具，常用于处理中文编码问题。
 from hutool import UnicodeUtil
 
 # 中文转 Unicode
-UnicodeUtil.to_unicode("中文")        # "\\u4e2d\\u6587"
+UnicodeUtil.to_unicode("中文")  # "\\u4e2d\\u6587"
 
 # Unicode 转中文
 UnicodeUtil.from_unicode("\\u4e2d\\u6587")  # "中文"
 
 # 转义/反转义
-UnicodeUtil.escape("中文")     # "\\u4e2d\\u6587"
+UnicodeUtil.escape("中文")  # "\\u4e2d\\u6587"
 UnicodeUtil.unescape("\\u4e2d\\u6587")  # "中文"
 ```
 
@@ -59,6 +59,6 @@ builder.to_string()  # "Hello World"
 builder.reverse()
 builder.to_string()  # "dlroW olleH"
 
-len(builder)         # 11
-builder.is_empty()   # False
+len(builder)  # 11
+builder.is_empty()  # False
 ```

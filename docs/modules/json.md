@@ -26,9 +26,9 @@ JSONUtil.to_json_pretty_str({"name": "test"})
 
 ```python
 # 解析 JSON 字符串
-obj = JSONUtil.parse_obj('{"name": "test"}')     # {"name": "test"}
-arr = JSONUtil.parse_array('[1, 2, 3]')           # [1, 2, 3]
-data = JSONUtil.parse('{"key": "value"}')          # 自动判断类型
+obj = JSONUtil.parse_obj('{"name": "test"}')  # {"name": "test"}
+arr = JSONUtil.parse_array("[1, 2, 3]")  # [1, 2, 3]
+data = JSONUtil.parse('{"key": "value"}')  # 自动判断类型
 ```
 
 ### Bean 转换
@@ -38,6 +38,7 @@ class User:
     def __init__(self):
         self.name = ""
         self.age = 0
+
 
 # JSON 转对象
 user = JSONUtil.to_bean('{"name": "张三", "age": 25}', User)
@@ -77,12 +78,12 @@ JSONUtil.put_by_path(data, "user.profile.email", "test@example.com")
 ### 判断
 
 ```python
-JSONUtil.is_json('{"key": "value"}')     # True
-JSONUtil.is_json_obj('{"key": "value"}') # True
-JSONUtil.is_json_array('[1, 2, 3]')      # True
-JSONUtil.is_json("not json")             # False
-JSONUtil.is_json(None)                   # False（None/空字符串返回 False）
-JSONUtil.is_json("")                     # False
+JSONUtil.is_json('{"key": "value"}')  # True
+JSONUtil.is_json_obj('{"key": "value"}')  # True
+JSONUtil.is_json_array("[1, 2, 3]")  # True
+JSONUtil.is_json("not json")  # False
+JSONUtil.is_json(None)  # False（None/空字符串返回 False）
+JSONUtil.is_json("")  # False
 ```
 
 ### 格式化
@@ -142,6 +143,6 @@ JSONUtil.get_ordered_json({"b": 2, "a": 1})  # '{"a": 1, "b": 2}'
 
 ```python
 # parseFromXml — 从 XML 解析为 JSON
-data = JSONUtil.parse_from_xml('<root><name>test</name><value>123</value></root>')
+data = JSONUtil.parse_from_xml("<root><name>test</name><value>123</value></root>")
 # {"name": "test", "value": "123"}
 ```

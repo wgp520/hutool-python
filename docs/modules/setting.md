@@ -42,7 +42,7 @@ props = PropsUtil.load("application.properties")
 # {"server.port": "8080", "server.host": "localhost"}
 
 # 获取值
-port = PropsUtil.get(props, "server.port")           # "8080"
+port = PropsUtil.get(props, "server.port")  # "8080"
 host = PropsUtil.get(props, "server.host", "0.0.0.0")  # "localhost"
 ```
 

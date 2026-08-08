@@ -25,23 +25,23 @@
 from hutool import SqlUtil
 
 # MySQL（默认）
-SqlUtil.make_select_sql('user', ['name', 'age'])
+SqlUtil.make_select_sql("user", ["name", "age"])
 # 'SELECT `name`,`age` FROM `user`'
 
 # 带条件和排序
-SqlUtil.make_select_sql('user', '*', condition='age > 18', order_by=['id'])
+SqlUtil.make_select_sql("user", "*", condition="age > 18", order_by=["id"])
 # 'SELECT * FROM `user` WHERE age > 18 ORDER BY `id`'
 
 # 分页查询
-SqlUtil.make_select_sql('user', '*', page_no=2, page_size=10)
+SqlUtil.make_select_sql("user", "*", page_no=2, page_size=10)
 # 'SELECT * FROM `user` LIMIT 10, 10'
 
 # PostgreSQL
-SqlUtil.make_select_sql('user', '*', page_no=2, page_size=10, dialect='postgresql')
+SqlUtil.make_select_sql("user", "*", page_no=2, page_size=10, dialect="postgresql")
 # 'SELECT * FROM "user" LIMIT 10 OFFSET 10'
 
 # SQLite
-SqlUtil.make_select_sql('user', ['name', 'age'], dialect='sqlite')
+SqlUtil.make_select_sql("user", ["name", "age"], dialect="sqlite")
 # 'SELECT `name`,`age` FROM `user`'
 ```
 
@@ -49,37 +49,35 @@ SqlUtil.make_select_sql('user', ['name', 'age'], dialect='sqlite')
 
 ```python
 # 单条插入（MySQL）
-SqlUtil.make_insert_sql('user', {'name': 'Alice', 'age': 20})
+SqlUtil.make_insert_sql("user", {"name": "Alice", "age": 20})
 
 # 批量插入
-data = [{'name': 'Alice', 'age': 20}, {'name': 'Bob', 'age': 30}]
-SqlUtil.make_insert_sql('user', data)
+data = [{"name": "Alice", "age": 20}, {"name": "Bob", "age": 30}]
+SqlUtil.make_insert_sql("user", data)
 
 # INSERT IGNORE（MySQL）
-SqlUtil.make_insert_sql('user', {'name': 'Alice'}, insert_ignore=True)
+SqlUtil.make_insert_sql("user", {"name": "Alice"}, insert_ignore=True)
 
 # INSERT IGNORE（PostgreSQL → ON CONFLICT DO NOTHING）
-SqlUtil.make_insert_sql('user', {'name': 'Alice'}, insert_ignore=True, dialect='postgresql')
+SqlUtil.make_insert_sql("user", {"name": "Alice"}, insert_ignore=True, dialect="postgresql")
 
 # INSERT IGNORE（SQLite → INSERT OR IGNORE）
-SqlUtil.make_insert_sql('user', {'name': 'Alice'}, insert_ignore=True, dialect='sqlite')
+SqlUtil.make_insert_sql("user", {"name": "Alice"}, insert_ignore=True, dialect="sqlite")
 
 # REPLACE INTO（MySQL）
-SqlUtil.make_insert_sql('user', {'name': 'Alice'}, auto_update=True)
+SqlUtil.make_insert_sql("user", {"name": "Alice"}, auto_update=True)
 
 # ON DUPLICATE KEY UPDATE（MySQL）
-SqlUtil.make_insert_sql('user', {'name': 'Alice', 'age': 20}, update_columns=('name',))
+SqlUtil.make_insert_sql("user", {"name": "Alice", "age": 20}, update_columns=("name",))
 
 # ON CONFLICT DO UPDATE SET（PostgreSQL，需指定 on_conflict）
 SqlUtil.make_insert_sql(
-    'user', {'name': 'Alice', 'age': 20},
-    update_columns=('name',), on_conflict=('id',), dialect='postgresql'
+    "user", {"name": "Alice", "age": 20}, update_columns=("name",), on_conflict=("id",), dialect="postgresql"
 )
 
 # ON CONFLICT DO UPDATE SET（SQLite）
 SqlUtil.make_insert_sql(
-    'user', {'name': 'Alice', 'age': 20},
-    update_columns=('name',), on_conflict=('id',), dialect='sqlite'
+    "user", {"name": "Alice", "age": 20}, update_columns=("name",), on_conflict=("id",), dialect="sqlite"
 )
 ```
 
@@ -87,18 +85,18 @@ SqlUtil.make_insert_sql(
 
 ```python
 # MySQL
-SqlUtil.make_update_sql('user', {'name': 'Bob'}, 'id = 1')
+SqlUtil.make_update_sql("user", {"name": "Bob"}, "id = 1")
 # "UPDATE `user` SET `name`='Bob' WHERE id = 1;\n"
 
 # PostgreSQL
-SqlUtil.make_update_sql('user', {'name': 'Bob'}, 'id = 1', dialect='postgresql')
+SqlUtil.make_update_sql("user", {"name": "Bob"}, "id = 1", dialect="postgresql")
 # 'UPDATE "user" SET "name"=\'Bob\' WHERE id = 1;\n'
 ```
 
 ### 生成删除 SQL
 
 ```python
-SqlUtil.make_delete_sql('user', 'id = 1')
+SqlUtil.make_delete_sql("user", "id = 1")
 # 'DELETE FROM user WHERE id = 1'
 ```
 
@@ -106,15 +104,15 @@ SqlUtil.make_delete_sql('user', 'id = 1')
 
 ```python
 # 使用默认日期
-SqlUtil.create_bak_table_sql('user')
+SqlUtil.create_bak_table_sql("user")
 # 'create table user_20240115 as select * from user;\n'
 
 # 指定日期
-SqlUtil.create_bak_table_sql('user', bak_date='20240101')
+SqlUtil.create_bak_table_sql("user", bak_date="20240101")
 # 'create table user_20240101 as select * from user;\n'
 
 # 批量备份
-SqlUtil.create_bak_table_sql(['t1', 't2'], bak_date='20240101')
+SqlUtil.create_bak_table_sql(["t1", "t2"], bak_date="20240101")
 ```
 
 ### 值格式化
@@ -148,22 +146,22 @@ numpy 支持是可选的。安装了 numpy 时会自动识别 `np.float16/32/64`
 from hutool import SqlUtil, Q
 
 # 简单条件
-Q(name='Alice')  # → `name`='Alice'
+Q(name="Alice")  # → `name`='Alice'
 
 # OR
-Q(age__gt=18) | Q(role='admin')
+Q(age__gt=18) | Q(role="admin")
 # → (`age`>18 OR `role`='admin')
 
 # AND（显式）
-Q(status='active') & Q(dept='IT')
+Q(status="active") & Q(dept="IT")
 # → `status`='active' AND `dept`='IT'
 
 # NOT
-~Q(status='deleted')
+~Q(status="deleted")
 # → NOT `status`='deleted'
 
 # 复杂嵌套
-condition = (Q(age__gte=18, status='active') | Q(role='admin')) & Q(dept__in=['IT', 'HR'])
+condition = (Q(age__gte=18, status="active") | Q(role="admin")) & Q(dept__in=["IT", "HR"])
 ```
 
 **支持的操作符：** `__gt`、`__gte`、`__lt`、`__lte`、`__ne`、`__in`、`__not_in`、`__between`、`__like`、`__contains`、`__startswith`、`__endswith`、`__isnull`
@@ -176,16 +174,16 @@ condition = (Q(age__gte=18, status='active') | Q(role='admin')) & Q(dept__in=['I
 from hutool import SqlUtil, F
 
 # 算术运算
-F('balance') + 100   # → `balance`+100
-F('stock') - 10      # → `stock`-10
-F('price') * 1.5     # → `price`*1.5
+F("balance") + 100  # → `balance`+100
+F("stock") - 10  # → `stock`-10
+F("price") * 1.5  # → `price`*1.5
 
 # 聚合函数
-F.count('*')    # → COUNT(*)
-F.sum('amount') # → SUM(`amount`)
-F.avg('score')  # → AVG(`score`)
-F.max('price')  # → MAX(`price`)
-F.min('price')  # → MIN(`price`)
+F.count("*")  # → COUNT(*)
+F.sum("amount")  # → SUM(`amount`)
+F.avg("score")  # → AVG(`score`)
+F.max("price")  # → MAX(`price`)
+F.min("price")  # → MIN(`price`)
 ```
 
 ### SELECT 链式查询
@@ -194,45 +192,36 @@ F.min('price')  # → MIN(`price`)
 from hutool import SqlUtil, Q, F
 
 # 基础查询
-sql = (SqlUtil.select('user')
-    .columns('id', 'name', 'age')
-    .where(age__gt=18, status='active')
-    .order_by('-age', 'name')
-    .limit(10).offset(20)
-    .sql())
+sql = (
+    SqlUtil.select("user")
+    .columns("id", "name", "age")
+    .where(age__gt=18, status="active")
+    .order_by("-age", "name")
+    .limit(10)
+    .offset(20)
+    .sql()
+)
 
 # 不指定 columns → SELECT *
-sql = SqlUtil.select('user').where(id=1).sql()
+sql = SqlUtil.select("user").where(id=1).sql()
 
 # Q 组合条件
-sql = (SqlUtil.select('user')
-    .where(Q(age__gt=18) | Q(role='admin'))
-    .where(~Q(status='deleted'))
-    .sql())
+sql = SqlUtil.select("user").where(Q(age__gt=18) | Q(role="admin")).where(~Q(status="deleted")).sql()
 
 # F 字段引用
-sql = (SqlUtil.select('product')
-    .where(price__gt=F('cost') * 1.5)
-    .sql())
+sql = SqlUtil.select("product").where(price__gt=F("cost") * 1.5).sql()
 
 # 原始 SQL 片段
-sql = (SqlUtil.select('user')
-    .where('find_in_set(1, status)', Q(age__gt=18))
-    .where_raw('YEAR(created_at) = 2024')
-    .sql())
+sql = SqlUtil.select("user").where("find_in_set(1, status)", Q(age__gt=18)).where_raw("YEAR(created_at) = 2024").sql()
 
 # GROUP BY + HAVING
-sql = (SqlUtil.select('order')
-    .columns('user_id', 'COUNT(*) AS cnt')
-    .group_by('user_id')
-    .having(cnt__gt=5)
-    .sql())
+sql = SqlUtil.select("order").columns("user_id", "COUNT(*) AS cnt").group_by("user_id").having(cnt__gt=5).sql()
 
 # DISTINCT
-sql = SqlUtil.select('user').columns('city').distinct().sql()
+sql = SqlUtil.select("user").columns("city").distinct().sql()
 
 # 分页
-sql = SqlUtil.select('user').columns('*').page(2, 10).sql()
+sql = SqlUtil.select("user").columns("*").page(2, 10).sql()
 ```
 
 **方法列表：**
@@ -253,81 +242,64 @@ sql = SqlUtil.select('user').columns('*').page(2, 10).sql()
 
 ```python
 # 基础插入
-sql = SqlUtil.insert('user').values(name='Alice', age=20).sql()
+sql = SqlUtil.insert("user").values(name="Alice", age=20).sql()
 
 # 批量插入
-data = [{'name': 'Alice', 'age': 20}, {'name': 'Bob', 'age': 30}]
-sql = SqlUtil.insert('user').values_list(data).sql()
+data = [{"name": "Alice", "age": 20}, {"name": "Bob", "age": 30}]
+sql = SqlUtil.insert("user").values_list(data).sql()
 
 # INSERT IGNORE
-sql = SqlUtil.insert('user').values(name='Alice').ignore().sql()
+sql = SqlUtil.insert("user").values(name="Alice").ignore().sql()
 
 # REPLACE INTO
-sql = SqlUtil.insert('user').values(name='Alice').replace().sql()
+sql = SqlUtil.insert("user").values(name="Alice").replace().sql()
 
 # ON DUPLICATE KEY UPDATE（MySQL）
-sql = (SqlUtil.insert('user')
-    .values(name='Alice', age=20)
-    .do_update('name')
-    .sql())
+sql = SqlUtil.insert("user").values(name="Alice", age=20).do_update("name").sql()
 
 # ON CONFLICT DO UPDATE SET（PostgreSQL）
-sql = (SqlUtil.insert('user', dialect='postgresql')
-    .values(name='Alice', age=20)
-    .on_conflict('id')
-    .do_update('name', 'age')
-    .sql())
+sql = (
+    SqlUtil.insert("user", dialect="postgresql")
+    .values(name="Alice", age=20)
+    .on_conflict("id")
+    .do_update("name", "age")
+    .sql()
+)
 
 # ON CONFLICT DO NOTHING
-sql = (SqlUtil.insert('user', dialect='postgresql')
-    .values(name='Alice')
-    .do_nothing()
-    .sql())
+sql = SqlUtil.insert("user", dialect="postgresql").values(name="Alice").do_nothing().sql()
 ```
 
 ### UPDATE 链式更新
 
 ```python
 # 基础更新
-sql = SqlUtil.update('user').set(name='Bob', age=30).where(id=1).sql()
+sql = SqlUtil.update("user").set(name="Bob", age=30).where(id=1).sql()
 
 # F 字段引用
-sql = (SqlUtil.update('account')
-    .set(balance=F('balance') + 100)
-    .where(id=1)
-    .sql())
+sql = SqlUtil.update("account").set(balance=F("balance") + 100).where(id=1).sql()
 
 # 原始 SET
-sql = (SqlUtil.update('account')
-    .set_raw('balance = balance + 100', 'login_count = login_count + 1')
-    .where(id=1)
-    .sql())
+sql = SqlUtil.update("account").set_raw("balance = balance + 100", "login_count = login_count + 1").where(id=1).sql()
 
 # Q 条件
-sql = (SqlUtil.update('user')
-    .set(active=False)
-    .where(Q(status='banned') | Q(inactive_days__gt=365))
-    .sql())
+sql = SqlUtil.update("user").set(active=False).where(Q(status="banned") | Q(inactive_days__gt=365)).sql()
 ```
 
 ### DELETE 链式删除
 
 ```python
 # 基础删除
-sql = SqlUtil.delete('user').where(id=1).sql()
+sql = SqlUtil.delete("user").where(id=1).sql()
 
 # 多条件
-sql = (SqlUtil.delete('user')
-    .where(status='inactive', created_at__lt='2020-01-01')
-    .sql())
+sql = SqlUtil.delete("user").where(status="inactive", created_at__lt="2020-01-01").sql()
 
 # Q 条件
-sql = (SqlUtil.delete('user')
-    .where(Q(age__lt=18) | Q(status='banned'))
-    .sql())
+sql = SqlUtil.delete("user").where(Q(age__lt=18) | Q(status="banned")).sql()
 
 # 原始 SQL
-sql = SqlUtil.delete('user').where_raw('DATEDIFF(NOW(), created_at) > 365').sql()
+sql = SqlUtil.delete("user").where_raw("DATEDIFF(NOW(), created_at) > 365").sql()
 ```
 
 ### CREATE TABLE 链式建表
@@ -339,32 +311,38 @@ from hutool import SqlUtil
 from hutool.core.sql import ColumnType as CT
 
 # MySQL
-sql = (SqlUtil.create_table('user')
-    .column('id', CT.SERIAL, primary_key=True)
-    .column('name', CT.VARCHAR, type_args='(100)', nullable=False)
-    .column('age', CT.INT, default=0)
-    .column('bio', CT.TEXT)
-    .column('active', CT.BOOLEAN, default=True)
-    .column('extra', CT.JSON)
+sql = (
+    SqlUtil.create_table("user")
+    .column("id", CT.SERIAL, primary_key=True)
+    .column("name", CT.VARCHAR, type_args="(100)", nullable=False)
+    .column("age", CT.INT, default=0)
+    .column("bio", CT.TEXT)
+    .column("active", CT.BOOLEAN, default=True)
+    .column("extra", CT.JSON)
     .if_not_exists()
-    .engine('InnoDB')
-    .charset('utf8mb4')
-    .sql())
+    .engine("InnoDB")
+    .charset("utf8mb4")
+    .sql()
+)
 
 # PostgreSQL
-sql = (SqlUtil.create_table('user', dialect='postgresql')
-    .column('id', CT.SERIAL, primary_key=True)
-    .column('name', CT.VARCHAR, type_args='(100)', nullable=False)
-    .column('uid', CT.UUID)
+sql = (
+    SqlUtil.create_table("user", dialect="postgresql")
+    .column("id", CT.SERIAL, primary_key=True)
+    .column("name", CT.VARCHAR, type_args="(100)", nullable=False)
+    .column("uid", CT.UUID)
     .if_not_exists()
-    .sql())
+    .sql()
+)
 
 # 复合主键
-sql = (SqlUtil.create_table('user_role')
-    .column('user_id', CT.INT)
-    .column('role_id', CT.INT)
-    .primary_key('user_id', 'role_id')
-    .sql())
+sql = (
+    SqlUtil.create_table("user_role")
+    .column("user_id", CT.INT)
+    .column("role_id", CT.INT)
+    .primary_key("user_id", "role_id")
+    .sql()
+)
 ```
 
 **ColumnType 枚举值：**

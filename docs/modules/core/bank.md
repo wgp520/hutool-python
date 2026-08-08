@@ -12,18 +12,18 @@ IBAN（International Bank Account Number）是国际银行账号标准，校验�
 from hutool import BankUtil
 
 # 根据账号和银行代码计算 IBAN
-iban = BankUtil.calculate_iban('1234567890', '37040044')
+iban = BankUtil.calculate_iban("1234567890", "37040044")
 # 'DE89370400441234567890'
 
 # 指定国家代码
-iban = BankUtil.calculate_iban('1234567890', '37040044', country='DE')
+iban = BankUtil.calculate_iban("1234567890", "37040044", country="DE")
 ```
 
 ### 验证 IBAN
 
 ```python
-BankUtil.check_iban('DE89370400441234567890')  # True
-BankUtil.check_iban('DE00370400441234567890')  # False
+BankUtil.check_iban("DE89370400441234567890")  # True
+BankUtil.check_iban("DE00370400441234567890")  # False
 ```
 
 ---

@@ -11,13 +11,13 @@
 ```python
 from hutool import MoneyUtil
 
-MoneyUtil.fen_to_yuan(100)      # Decimal('1.00')
-MoneyUtil.fen_to_yuan(1)        # Decimal('0.01')
-MoneyUtil.fen_to_yuan('50')     # Decimal('0.50')
+MoneyUtil.fen_to_yuan(100)  # Decimal('1.00')
+MoneyUtil.fen_to_yuan(1)  # Decimal('0.01')
+MoneyUtil.fen_to_yuan("50")  # Decimal('0.50')
 
-MoneyUtil.yuan_to_fen(1)        # 100
-MoneyUtil.yuan_to_fen('0.5')    # 50
-MoneyUtil.yuan_to_fen('0.01')   # 1
+MoneyUtil.yuan_to_fen(1)  # 100
+MoneyUtil.yuan_to_fen("0.5")  # 50
+MoneyUtil.yuan_to_fen("0.01")  # 1
 ```
 
 ### 税价计算
@@ -28,15 +28,15 @@ MoneyUtil.yuan_to_fen('0.01')   # 1
 from decimal import Decimal
 
 # 不含税价 → 含税价
-MoneyUtil.gross_price(Decimal('100'))            # Decimal('113.00')
-MoneyUtil.gross_price(Decimal('100'), tax_rate=8)  # Decimal('108.00')
+MoneyUtil.gross_price(Decimal("100"))  # Decimal('113.00')
+MoneyUtil.gross_price(Decimal("100"), tax_rate=8)  # Decimal('108.00')
 
 # 含税价 → 不含税价
-MoneyUtil.net_price(Decimal('113'))              # Decimal('100.00')
-MoneyUtil.net_price(Decimal('108'), tax_rate=8)  # Decimal('100.00')
+MoneyUtil.net_price(Decimal("113"))  # Decimal('100.00')
+MoneyUtil.net_price(Decimal("108"), tax_rate=8)  # Decimal('100.00')
 
 # 计算税额
-MoneyUtil.tax_amount(Decimal('113'))             # Decimal('13.00')
+MoneyUtil.tax_amount(Decimal("113"))  # Decimal('13.00')
 ```
 
 ### 利润率计算
@@ -45,28 +45,28 @@ MoneyUtil.tax_amount(Decimal('113'))             # Decimal('13.00')
 from decimal import Decimal
 
 # netto — 不含税金额
-MoneyUtil.netto(Decimal('100'), Decimal('0.13'))  # Decimal('88.50')
+MoneyUtil.netto(Decimal("100"), Decimal("0.13"))  # Decimal('88.50')
 
 # brutto — 含税金额
-MoneyUtil.brutto(Decimal('100'), Decimal('0.13'))  # Decimal('113.00')
+MoneyUtil.brutto(Decimal("100"), Decimal("0.13"))  # Decimal('113.00')
 
 # profitMargin — 利润率
-MoneyUtil.profit_margin(Decimal('100'), Decimal('80'))  # Decimal('25.00')
+MoneyUtil.profit_margin(Decimal("100"), Decimal("80"))  # Decimal('25.00')
 ```
 
 ### 元/分互转（增强）
 
 ```python
 # centToYuan / yuanToCent — 与 fen_to_yuan / yuan_to_fen 相同
-MoneyUtil.cent_to_yuan(100)    # Decimal('1.00')
-MoneyUtil.yuan_to_cent(1.00)   # 100
+MoneyUtil.cent_to_yuan(100)  # Decimal('1.00')
+MoneyUtil.yuan_to_cent(1.00)  # 100
 ```
 
 ### 税额计算（增强）
 
 ```python
 # taxAmount — 精确税额计算
-MoneyUtil.tax_amount(Decimal('100'), Decimal('0.13'))  # Decimal('13.00')
+MoneyUtil.tax_amount(Decimal("100"), Decimal("0.13"))  # Decimal('13.00')
 ```
 
 ---

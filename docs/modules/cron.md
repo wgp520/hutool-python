@@ -39,6 +39,7 @@ pattern = CronPattern("0 9 * * 1-5")  # 工作日9点
 
 # 判断当前时间是否匹配
 from datetime import datetime
+
 pattern.match(datetime.now())
 
 # 获取下一次匹配时间
@@ -75,21 +76,21 @@ Quartz 风格 6-7 字段 Cron 表达式校验：
 from hutool import CronValidator
 
 # 整体校验
-CronValidator.validate("0 0 12 * * ?")       # True — 每天中午
-CronValidator.validate("0 0/5 14 * * ?")      # True — 14:00 起每5分钟
-CronValidator.validate("0 15 10 ? * 6L")      # True — 每月最后一个周五
-CronValidator.validate("0 15 10 ? * 6#3")     # True — 第三个周五
+CronValidator.validate("0 0 12 * * ?")  # True — 每天中午
+CronValidator.validate("0 0/5 14 * * ?")  # True — 14:00 起每5分钟
+CronValidator.validate("0 15 10 ? * 6L")  # True — 每月最后一个周五
+CronValidator.validate("0 15 10 ? * 6#3")  # True — 第三个周五
 
 # 便捷方法
-CronValidator.is_valid("0 0 12 * * ?")        # True
-CronValidator.is_valid(None)                  # False
-CronValidator.is_valid("")                    # False
+CronValidator.is_valid("0 0 12 * * ?")  # True
+CronValidator.is_valid(None)  # False
+CronValidator.is_valid("")  # False
 
 # 单字段校验
 CronValidator.validate_second_or_minute("0/5")  # True
-CronValidator.validate_hour("9,12,18")          # True
-CronValidator.validate_day("15W")               # True — 最近工作日
-CronValidator.validate_week("6#3")              # True — 第三个周五
+CronValidator.validate_hour("9,12,18")  # True
+CronValidator.validate_day("15W")  # True — 最近工作日
+CronValidator.validate_week("6#3")  # True — 第三个周五
 ```
 
 ### 字段格式

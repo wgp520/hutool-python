@@ -10,93 +10,93 @@
 from hutool import BooleanUtil
 
 # 判断
-BooleanUtil.is_true(True)    # True
+BooleanUtil.is_true(True)  # True
 BooleanUtil.is_false(False)  # True
 
 # 转换
-BooleanUtil.to_int(True)             # 1
-BooleanUtil.int_to_boolean(0)        # False
-BooleanUtil.to_str(True, "是", "否") # "是"
+BooleanUtil.to_int(True)  # 1
+BooleanUtil.int_to_boolean(0)  # False
+BooleanUtil.to_str(True, "是", "否")  # "是"
 
 # 解析字符串
-BooleanUtil.parse("true")   # True
-BooleanUtil.parse("yes")    # True
-BooleanUtil.parse("1")      # True
-BooleanUtil.parse("on")     # True
+BooleanUtil.parse("true")  # True
+BooleanUtil.parse("yes")  # True
+BooleanUtil.parse("1")  # True
+BooleanUtil.parse("on")  # True
 BooleanUtil.parse("false")  # False
 
 # 逻辑运算（批量）
 BooleanUtil.and_(True, True, False)  # False
 BooleanUtil.or_(False, False, True)  # True
-BooleanUtil.xor(True, True)          # False
-BooleanUtil.negate(True)             # False
+BooleanUtil.xor(True, True)  # False
+BooleanUtil.negate(True)  # False
 
 # toBoolean — 万能布尔转换
 BooleanUtil.to_boolean("true")  # True
-BooleanUtil.to_boolean("yes")   # True
-BooleanUtil.to_boolean(1)       # True
-BooleanUtil.to_boolean("no")    # False
+BooleanUtil.to_boolean("yes")  # True
+BooleanUtil.to_boolean(1)  # True
+BooleanUtil.to_boolean("no")  # False
 
 # isBoolean — 判断是否为布尔字符串
-BooleanUtil.is_boolean("true")   # True
-BooleanUtil.is_boolean("abc")    # False
+BooleanUtil.is_boolean("true")  # True
+BooleanUtil.is_boolean("abc")  # False
 
 # 格式化输出
 BooleanUtil.to_string_true_false(True)  # "true"
-BooleanUtil.to_string_yes_no(True)      # "yes"
-BooleanUtil.to_string_on_off(True)      # "on"
+BooleanUtil.to_string_yes_no(True)  # "yes"
+BooleanUtil.to_string_on_off(True)  # "on"
 
 # xorOfWrap — 两值异或
 BooleanUtil.xor_of_wrap(True, False)  # True
 
 # exactlyOneTrue — 恰好一个为 True
 BooleanUtil.exactly_one_true(True, False, False)  # True
-BooleanUtil.exactly_one_true(True, True, False)   # False
+BooleanUtil.exactly_one_true(True, True, False)  # False
 
 # ifTrue — 三元表达式
-BooleanUtil.if_true(True, "yes", "no")   # "yes"
+BooleanUtil.if_true(True, "yes", "no")  # "yes"
 BooleanUtil.if_true(False, "yes", "no")  # "no"
 
 # negate — None 安全取反
-BooleanUtil.negate(None)   # None（None 输入返回 None）
-BooleanUtil.negate(True)   # False
+BooleanUtil.negate(None)  # None（None 输入返回 None）
+BooleanUtil.negate(True)  # False
 
 # to_str — 带 null_str 参数
 BooleanUtil.to_str(None, "是", "否", "空")  # "空"
-BooleanUtil.to_str(None, "是", "否")         # "否"（默认 None 视为 False）
+BooleanUtil.to_str(None, "是", "否")  # "否"（默认 None 视为 False）
 
 # 扩展字符串解析（y, t, ok, correct, success 也解析为 True）
-BooleanUtil.parse("y")        # True
-BooleanUtil.parse("ok")       # True
+BooleanUtil.parse("y")  # True
+BooleanUtil.parse("ok")  # True
 BooleanUtil.parse("correct")  # True
 BooleanUtil.parse("success")  # True
 
 # and_of_wrap / or_of_wrap — None 视为 False
-BooleanUtil.and_of_wrap(True, None)   # False
-BooleanUtil.or_of_wrap(None, None)    # False
-BooleanUtil.or_of_wrap(True, None)    # True
+BooleanUtil.and_of_wrap(True, None)  # False
+BooleanUtil.or_of_wrap(None, None)  # False
+BooleanUtil.or_of_wrap(True, None)  # True
 
 # is_boolean_class — 类型判断
-BooleanUtil.is_boolean_class(True)    # True
-BooleanUtil.is_boolean_class(1)       # False
+BooleanUtil.is_boolean_class(True)  # True
+BooleanUtil.is_boolean_class(1)  # False
 ```
 
 ### 批量布尔运算
 
 ```python
 # booleanAnd — 批量 AND 运算
-BooleanUtil.boolean_and(True, True, True)   # True
+BooleanUtil.boolean_and(True, True, True)  # True
 BooleanUtil.boolean_and(True, False, True)  # False
 
 # booleanOr — 批量 OR 运算
 BooleanUtil.boolean_or(False, False, True)  # True
-BooleanUtil.boolean_or(False, False, False) # False
+BooleanUtil.boolean_or(False, False, False)  # False
 ```
 
 ### 中文输出
 
 ```python
 # to_string_yes_no — 布尔转中文字符串
-BooleanUtil.to_string_yes_no(True)   # "是"
+BooleanUtil.to_string_yes_no(True)  # "是"
 BooleanUtil.to_string_yes_no(False)  # "否"
 ```

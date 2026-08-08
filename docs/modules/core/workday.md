@@ -16,11 +16,13 @@ from datetime import date
 holidays = WorkdayUtil.holidays(2024)
 
 # 自定义假日列表
-WorkdayUtil.set_custom_holidays([
-    date(2024, 1, 1),
-    date(2024, 2, 10),
-    date(2024, 2, 11),
-])
+WorkdayUtil.set_custom_holidays(
+    [
+        date(2024, 1, 1),
+        date(2024, 2, 10),
+        date(2024, 2, 11),
+    ]
+)
 
 # 恢复默认
 WorkdayUtil.set_custom_holidays(None)
@@ -31,16 +33,16 @@ WorkdayUtil.set_custom_holidays(None)
 ```python
 from datetime import date
 
-WorkdayUtil.is_workday(date(2024, 1, 2))   # True（周二，非假日）
-WorkdayUtil.is_workday(date(2024, 1, 1))   # False（元旦）
-WorkdayUtil.is_workday(date(2024, 1, 6))   # False（周六）
+WorkdayUtil.is_workday(date(2024, 1, 2))  # True（周二，非假日）
+WorkdayUtil.is_workday(date(2024, 1, 1))  # False（元旦）
+WorkdayUtil.is_workday(date(2024, 1, 6))  # False（周六）
 ```
 
 ### 工作日导航
 
 ```python
 # 下一个工作日
-WorkdayUtil.next_workday(date(2024, 1, 5))   # date(2024, 1, 8)（跳过周末）
+WorkdayUtil.next_workday(date(2024, 1, 5))  # date(2024, 1, 8)（跳过周末）
 
 # 上一个工作日
 WorkdayUtil.previous_workday(date(2024, 1, 8))  # date(2024, 1, 5)
@@ -53,7 +55,7 @@ WorkdayUtil.previous_workday(date(2024, 1, 8))  # date(2024, 1, 5)
 WorkdayUtil.workdays(date(2024, 1, 1), date(2024, 1, 5))  # 3
 
 # 日期加减 N 个工作日
-WorkdayUtil.add_workdays(date(2024, 1, 1), 5)   # date(2024, 1, 8)
+WorkdayUtil.add_workdays(date(2024, 1, 1), 5)  # date(2024, 1, 8)
 WorkdayUtil.add_workdays(date(2024, 1, 8), -3)  # date(2024, 1, 3)
 ```
 

@@ -111,18 +111,18 @@ pip install -e ".[dev]"
 from hutool import StrUtil
 
 # 判断是否为空白
-StrUtil.is_blank("")       # True
-StrUtil.is_blank("  ")     # True
+StrUtil.is_blank("")  # True
+StrUtil.is_blank("  ")  # True
 StrUtil.is_blank("hello")  # False
 
 # 子串操作
-StrUtil.sub_before("abc.jpg", ".")      # "abc"
-StrUtil.sub_after("abc.jpg", ".")       # "jpg"
+StrUtil.sub_before("abc.jpg", ".")  # "abc"
+StrUtil.sub_after("abc.jpg", ".")  # "jpg"
 StrUtil.sub_between("a(b)c", "(", ")")  # "b"
 
 # 命名转换
-StrUtil.to_camel_case("hello_world")   # "helloWorld"
-StrUtil.to_snake_case("helloWorld")    # "hello_world"
+StrUtil.to_camel_case("hello_world")  # "helloWorld"
+StrUtil.to_snake_case("helloWorld")  # "hello_world"
 
 # 字符串相似度
 StrUtil.similar("我爱学习", "我爱学")  # 0.75
@@ -134,15 +134,15 @@ StrUtil.similar("我爱学习", "我爱学")  # 0.75
 from hutool import DateUtil
 
 # 获取当前时间
-DateUtil.now()        # "2024-01-15 14:30:00"
-DateUtil.today()      # "2024-01-15"
+DateUtil.now()  # "2024-01-15 14:30:00"
+DateUtil.today()  # "2024-01-15"
 
 # 解析日期
 dt = DateUtil.parse("2024-01-15")
 
 # 日期偏移
-DateUtil.offset_day(dt, 7)    # 7天后
-DateUtil.offset_month(dt, -1) # 1个月前
+DateUtil.offset_day(dt, 7)  # 7天后
+DateUtil.offset_month(dt, -1)  # 1个月前
 
 # 日期差
 start = DateUtil.parse("2024-01-01")
@@ -175,11 +175,11 @@ MapUtil.sort({"c": 3, "a": 1, "b": 2})  # {"a": 1, "b": 2, "c": 3}
 ```python
 from hutool import IdUtil
 
-IdUtil.random_uuid()       # "550e8400-e29b-41d4-a716-446655440000"
-IdUtil.simple_uuid()       # "550e8400e29b41d4a716446655440000"
-IdUtil.nano_id()           # "V1StGXR8_Z5jdHi6B-myT"
-IdUtil.snowflake_id()      # 1480946864314982400
-IdUtil.object_id()         # "5f8b2c3d4e5f6a7b8c9d0e1f"
+IdUtil.random_uuid()  # "550e8400-e29b-41d4-a716-446655440000"
+IdUtil.simple_uuid()  # "550e8400e29b41d4a716446655440000"
+IdUtil.nano_id()  # "V1StGXR8_Z5jdHi6B-myT"
+IdUtil.snowflake_id()  # 1480946864314982400
+IdUtil.object_id()  # "5f8b2c3d4e5f6a7b8c9d0e1f"
 ```
 
 ### HTTP 客户端
@@ -196,14 +196,16 @@ result = HttpUtil.post("https://api.example.com/data", json_data={"key": "value"
 # 链式调用
 from hutool import HttpRequest, HttpResponse
 
-resp = (HttpRequest.post("https://api.example.com/data")
+resp = (
+    HttpRequest.post("https://api.example.com/data")
     .header("Authorization", "Bearer token")
     .json({"key": "value"})
     .timeout(30)
-    .execute())
+    .execute()
+)
 
-print(resp.is_ok())      # True
-print(resp.to_json())    # {...}
+print(resp.is_ok())  # True
+print(resp.to_json())  # {...}
 ```
 
 ### 加密工具
@@ -212,8 +214,8 @@ print(resp.to_json())    # {...}
 from hutool.crypto import DigestUtil, SecureUtil
 
 # 摘要算法
-DigestUtil.md5_hex("hello")           # "5d41402abc4b2a76b9719d911017c592"
-DigestUtil.sha256_hex("hello")        # "2cf24dba5fb0a30e..."
+DigestUtil.md5_hex("hello")  # "5d41402abc4b2a76b9719d911017c592"
+DigestUtil.sha256_hex("hello")  # "2cf24dba5fb0a30e..."
 
 # AES 对称加密
 key = SecureUtil.generate_aes_key()
@@ -251,17 +253,29 @@ img_bytes = captcha.get_image_bytes()
 
 # 算术验证码
 arith = CaptchaUtil.create_arithmetic_captcha(width=200, height=80)
-arith.create_code()        # "3+5=?"
-arith.get_result()         # "8"
+arith.create_code()  # "3+5=?"
+arith.get_result()  # "8"
 ```
 
 ### 更多工具
 
 ```python
 from hutool.core.util import (
-    NumberUtil, ArrayUtil, RandomUtil, HexUtil, HashUtil,
-    ReUtil, EscapeUtil, PhoneUtil, IdcardUtil, DesensitizedUtil,
-    CoordinateUtil, ZipUtil, XmlUtil, UrlUtil, VersionUtil,
+    NumberUtil,
+    ArrayUtil,
+    RandomUtil,
+    HexUtil,
+    HashUtil,
+    ReUtil,
+    EscapeUtil,
+    PhoneUtil,
+    IdcardUtil,
+    DesensitizedUtil,
+    CoordinateUtil,
+    ZipUtil,
+    XmlUtil,
+    UrlUtil,
+    VersionUtil,
 )
 from hutool.core.codec import Base64
 from hutool.core.io import FileUtil, IoUtil, PathUtil

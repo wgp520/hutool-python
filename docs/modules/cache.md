@@ -28,8 +28,8 @@ cache.put("b", 2)
 cache.put("c", 3)
 cache.put("d", 4)  # "a" 被移除
 
-cache.get("a")     # None
-cache.get("d")     # 4
+cache.get("a")  # None
+cache.get("d")  # 4
 ```
 
 **优点**：简单快速
@@ -47,8 +47,8 @@ cache.put("a", 1)
 cache.put("b", 2)
 cache.put("c", 3)
 
-cache.get("a")     # 1（a 的访问计数增加）
-cache.get("a")     # 1
+cache.get("a")  # 1（a 的访问计数增加）
+cache.get("a")  # 1
 cache.put("d", 4)  # "b" 被移除（访问次数最少）
 ```
 
@@ -64,7 +64,7 @@ cache.put("a", 1)
 cache.put("b", 2)
 cache.put("c", 3)
 
-cache.get("a")     # 1（a 被访问，移到最前）
+cache.get("a")  # 1（a 被访问，移到最前）
 cache.put("d", 4)  # "b" 被移除（最久未使用）
 ```
 
@@ -81,10 +81,10 @@ from hutool import TimedCache
 cache = TimedCache(timeout=5)  # 5秒过期
 cache.put("key", "value")
 
-cache.get("key")    # "value"
+cache.get("key")  # "value"
 
 # 5秒后...
-cache.get("key")    # None（已过期）
+cache.get("key")  # None（已过期）
 
 # 启动定时清理
 cache.schedule_prune(delay_seconds=1)  # 每1秒清理一次过期缓存
@@ -96,13 +96,13 @@ cache.schedule_prune(delay_seconds=1)  # 每1秒清理一次过期缓存
 
 ```python
 cache.put("key", "value")
-cache.get("key")              # 获取值
-cache.get("key", "default")   # 获取值，不存在返回默认值
-cache.remove("key")           # 移除
-cache.size()                  # 当前大小
-cache.capacity()              # 容量
-cache.clear()                 # 清空
-cache.is_full()               # 是否已满
+cache.get("key")  # 获取值
+cache.get("key", "default")  # 获取值，不存在返回默认值
+cache.remove("key")  # 移除
+cache.size()  # 当前大小
+cache.capacity()  # 容量
+cache.clear()  # 清空
+cache.is_full()  # 是否已满
 ```
 
 ## 缓存装饰器
@@ -117,21 +117,25 @@ cache.is_full()               # 是否已满
 ```python
 from hutool import CacheFunction, CacheUtil
 
+
 # class-based（推荐）
 @CacheFunction(ttl=60)
 def expensive(x):
     return x * 2
+
 
 # 或者
 @CacheUtil.cache_function(ttl=60)
 def also_expensive(x):
     return x * 2
 
-expensive(5)   # 计算并缓存
-expensive(5)   # 直接返回缓存值
+
+expensive(5)  # 计算并缓存
+expensive(5)  # 直接返回缓存值
 
 # 访问内部缓存
-expensive.cache   # {(5,): (10, 1687000000.0)}
+expensive.cache  # {(5,): (10, 1687000000.0)}
+
 
 # async
 @CacheFunction(ttl=60)
@@ -146,21 +150,24 @@ async def async_expensive(x):
 ```python
 from hutool import TtlLruCache, CacheUtil
 
+
 # class-based（推荐）
 @TtlLruCache(maxsize=128, ttl=300)
 def compute(x):
-    return x ** 2
+    return x**2
+
 
 # 或者
 @CacheUtil.lru_cache(maxsize=128, ttl=300)
 def also_compute(x):
-    return x ** 2
+    return x**2
 
-compute(10)   # 计算并缓存
-compute(10)   # 直接返回缓存值（300 秒内）
 
-compute.cache_clear()   # 清空缓存
-compute.cache_info()    # 查看缓存命中信息
+compute(10)  # 计算并缓存
+compute(10)  # 直接返回缓存值（300 秒内）
+
+compute.cache_clear()  # 清空缓存
+compute.cache_info()  # 查看缓存命中信息
 ```
 
 ### memoize — 记忆化装饰器
@@ -170,16 +177,17 @@ compute.cache_info()    # 查看缓存命中信息
 ```python
 from hutool import Memoize, CacheUtil
 
+
 @Memoize(ttl=600)
 def fibonacci(n):
     if n < 2:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)
 
+
 # 或者
 @CacheUtil.memoize(ttl=600)
-def old_fibonacci(n):
-    ...
+def old_fibonacci(n): ...
 ```
 
 ### func_once — 单次执行
@@ -189,17 +197,20 @@ def old_fibonacci(n):
 ```python
 from hutool import FuncOnce, CacheUtil
 
+
 # class-based（推荐）
 @FuncOnce
 def init():
     print("初始化...")
     return "initialized"
 
+
 # 或者
 @CacheUtil.func_once
 def old_init():
     return "initialized"
 
-init()   # 打印 "初始化..."，返回 "initialized"
-init()   # 直接返回 "initialized"（不再打印）
+
+init()  # 打印 "初始化..."，返回 "initialized"
+init()  # 直接返回 "initialized"（不再打印）
 ```

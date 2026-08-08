@@ -11,19 +11,24 @@
 ```python
 from hutool import TimeThis
 
+
 # 无括号
 @TimeThis
 def slow_func():
     import time
+
     time.sleep(0.1)
+
 
 slow_func()
 # 打印: slow_func :  耗时 0.100...
+
 
 # 有括号
 @TimeThis()
 def also_slow():
     time.sleep(0.1)
+
 
 # async
 @TimeThis
@@ -56,7 +61,7 @@ timer = TimingUtil.Timer()
 timer.start()
 # ... 某些操作 ...
 timer.stop()
-print(timer.elapsed)   # 累计耗时（秒）
+print(timer.elapsed)  # 累计耗时（秒）
 
 # 用法二：with 语句
 with TimingUtil.Timer() as timer:

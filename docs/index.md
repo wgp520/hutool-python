@@ -25,16 +25,16 @@ Hutool 是一个功能丰富且易用的 Java 工具库，涵盖了字符串、�
 from hutool import StrUtil, DateUtil, IdUtil
 
 # 字符串工具
-StrUtil.is_blank("")          # True
-StrUtil.sub("abcdefgh", 2, 5) # "cde"
+StrUtil.is_blank("")  # True
+StrUtil.sub("abcdefgh", 2, 5)  # "cde"
 
 # 日期工具
-DateUtil.now()                 # 当前时间字符串
+DateUtil.now()  # 当前时间字符串
 DateUtil.format_date(DateUtil.date())  # "2024-01-01"
 
 # ID 生成
-IdUtil.random_uuid()           # UUID
-IdUtil.simple_uuid()           # 无横线 UUID
+IdUtil.random_uuid()  # UUID
+IdUtil.simple_uuid()  # 无横线 UUID
 ```
 
 ---

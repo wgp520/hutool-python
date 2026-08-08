@@ -40,7 +40,7 @@ formatted = XmlUtil.format(xml_str)
 pretty = XmlUtil.pretty_print(xml_str)
 
 # formatXml — 美化缩进
-xml = '<root><name>test</name><value>123</value></root>'
+xml = "<root><name>test</name><value>123</value></root>"
 XmlUtil.format_xml(xml, indent=2)
 # <root>
 #   <name>test</name>
@@ -84,16 +84,19 @@ xml = XmlUtil.bean_to_xml(data, root_tag="config")
 
 # XML 转 dataclass
 from dataclasses import dataclass
+
+
 @dataclass
 class Config:
     name: str = ""
     value: int = 0
 
-obj = XmlUtil.xml_to_bean('<config><name>test</name><value>123</value></config>', Config)
+
+obj = XmlUtil.xml_to_bean("<config><name>test</name><value>123</value></config>", Config)
 # Config(name="test", value=123)
 
 # XML 转字典
-data = XmlUtil.xml_to_map('<root><a>1</a><b>2</b></root>')
+data = XmlUtil.xml_to_map("<root><a>1</a><b>2</b></root>")
 # {"a": "1", "b": "2"}
 
 # 字典转 XML 字符串
@@ -121,7 +124,7 @@ nodes = XmlUtil.get_node_list_by_xpath(element, "./item")
 
 ```python
 # 解析 XML 字符串
-element = XmlUtil.parse_xml('<root><child/></root>')
+element = XmlUtil.parse_xml("<root><child/></root>")
 
 # 读取 XML 文件
 element = XmlUtil.read_xml("/path/to/config.xml")
@@ -144,7 +147,7 @@ XmlUtil.unescape_xml("Tom &amp; Jerry")
 ```python
 # XSLT 转换（需 lxml）
 xslt_str = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="root"><output><xsl:value-of select="name"/></output></xsl:template></xsl:stylesheet>'
-result = XmlUtil.transform_xml('<root><name>test</name></root>', xslt_str)
+result = XmlUtil.transform_xml("<root><name>test</name></root>", xslt_str)
 ```
 
 ### 写入文件

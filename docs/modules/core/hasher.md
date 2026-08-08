@@ -10,24 +10,24 @@
 from hutool import HashUtil
 
 # FNV 哈希
-HashUtil.fnv1(b"hello")       # FNV1 哈希值
-HashUtil.fnv1a(b"hello")      # FNV1a 哈希值
+HashUtil.fnv1(b"hello")  # FNV1 哈希值
+HashUtil.fnv1a(b"hello")  # FNV1a 哈希值
 
 # 字符串哈希
-HashUtil.bkdr_hash("hello")   # BKDR 哈希
-HashUtil.ap_hash("hello")     # AP 哈希
-HashUtil.djb_hash("hello")    # DJB 哈希
-HashUtil.js_hash("hello")     # JS 哈希
-HashUtil.rs_hash("hello")     # RS 哈希
-HashUtil.sdbm_hash("hello")   # SDBM 哈希
-HashUtil.elf_hash("hello")    # ELF 哈希
-HashUtil.dek_hash("hello")    # DEK 哈希
+HashUtil.bkdr_hash("hello")  # BKDR 哈希
+HashUtil.ap_hash("hello")  # AP 哈希
+HashUtil.djb_hash("hello")  # DJB 哈希
+HashUtil.js_hash("hello")  # JS 哈希
+HashUtil.rs_hash("hello")  # RS 哈希
+HashUtil.sdbm_hash("hello")  # SDBM 哈希
+HashUtil.elf_hash("hello")  # ELF 哈希
+HashUtil.dek_hash("hello")  # DEK 哈希
 
 # Java hashCode 兼容
 HashUtil.java_hash_code("hello")  # 与 Java 的 "hello".hashCode() 一致
 
 # 累加哈希
-HashUtil.additive_hash("hello", 1009)   # 按质数取模
+HashUtil.additive_hash("hello", 1009)  # 按质数取模
 
 # 旋转哈希
 HashUtil.rotating_hash("hello", 1009)
@@ -56,8 +56,8 @@ HashUtil.hf_ip_hash("hello")
 
 ```python
 # fnvHash — FNV-1a 32 位哈希
-HashUtil.fnv_hash(b"hello")    # 32 位哈希值
-HashUtil.fnv_hash("hello")     # 支持字符串输入
+HashUtil.fnv_hash(b"hello")  # 32 位哈希值
+HashUtil.fnv_hash("hello")  # 支持字符串输入
 ```
 
 ### Java 兼容
@@ -90,7 +90,7 @@ HashUtil.murmur128(b"hello")
 # CityHash
 HashUtil.city_hash32(b"hello")
 HashUtil.city_hash64(b"hello")
-HashUtil.city_hash128(b"hello")   # (h1, h2)
+HashUtil.city_hash128(b"hello")  # (h1, h2)
 
 # MetroHash
 HashUtil.metro_hash64(b"hello")

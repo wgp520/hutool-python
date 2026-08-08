@@ -13,14 +13,14 @@ from hutool import EscapeUtil
 EscapeUtil.escape_html('<script>alert("xss")</script>')
 # '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'
 
-EscapeUtil.unescape_html('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;')
+EscapeUtil.unescape_html("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;")
 # '<script>alert("xss")</script>'
 
 # XML 转义
-EscapeUtil.escape_xml('<root>content</root>')
+EscapeUtil.escape_xml("<root>content</root>")
 # '&lt;root&gt;content&lt;/root&gt;'
 
-EscapeUtil.unescape_xml('&lt;root&gt;content&lt;/root&gt;')
+EscapeUtil.unescape_xml("&lt;root&gt;content&lt;/root&gt;")
 # '<root>content</root>'
 
 # SQL 转义

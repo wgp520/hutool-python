@@ -11,15 +11,18 @@ Hutool-Python 所有装饰器使用 class-based 实现，统一支持 **有括�
 ```python
 from hutool import TimeThis
 
+
 # 无括号
 @TimeThis
 def slow():
     time.sleep(0.1)
 
+
 # 有括号
 @TimeThis()
 def also_slow():
     time.sleep(0.1)
+
 
 # async 也适用
 @TimeThis
@@ -32,9 +35,11 @@ Util方式调用：
 ```python
 from hutool import timethis, TimingUtil
 
+
 @timethis
 def old_style():
     pass
+
 
 @TimingUtil.timethis
 def also_old():
@@ -48,20 +53,21 @@ def also_old():
 ```python
 from hutool import ProfileDeco
 
+
 # 无括号（默认 cumtime, 10 行）
 @ProfileDeco
 def compute():
     return sum(range(100000))
 
+
 # 有括号
 @ProfileDeco(sort_by="tottime", limit=5)
-def slow_func():
-    ...
+def slow_func(): ...
+
 
 # async
 @ProfileDeco(sort_by="tottime", limit=3)
-async def async_compute():
-    ...
+async def async_compute(): ...
 ```
 
 Util方式调用：
@@ -69,13 +75,13 @@ Util方式调用：
 ```python
 from hutool import ProfUtil
 
+
 @ProfUtil.profile_deco(sort_by="tottime", limit=5)
-def old_style():
-    ...
+def old_style(): ...
+
 
 @ProfUtil.prof_decorator(sort_by="tottime", limit=5)
-def also_old():
-    ...
+def also_old(): ...
 ```
 
 | 参数 | 默认值 | 说明 |
@@ -90,29 +96,34 @@ def also_old():
 ```python
 from hutool import CacheFunction
 
+
 # 无括号（默认 TTL 300 秒）
 @CacheFunction
 def expensive(x):
     return x * 2
+
 
 # 有括号
 @CacheFunction(ttl=60)
 def compute(x):
     return x * 2
 
+
 # async
 @CacheFunction(ttl=60)
 async def async_fetch(url):
     return await aio_get(url)
 
+
 # 访问内部缓存
-compute.cache   # dict
+compute.cache  # dict
 ```
 
 Util方式调用：
 
 ```python
 from hutool import CacheUtil
+
 
 @CacheUtil.cache_function(ttl=60)
 def old_style(x):
@@ -130,6 +141,7 @@ def old_style(x):
 ```python
 from hutool import Memoize
 
+
 @Memoize(ttl=600)
 def fibonacci(n):
     if n < 2:
@@ -142,9 +154,9 @@ Util方式调用：
 ```python
 from hutool import CacheUtil
 
+
 @CacheUtil.memoize(ttl=600)
-def old_style(n):
-    ...
+def old_style(n): ...
 ```
 
 ## FuncOnce — 单次执行
@@ -154,29 +166,34 @@ def old_style(n):
 ```python
 from hutool import FuncOnce
 
+
 # 无括号
 @FuncOnce
 def init():
     return expensive_setup()
+
 
 # 有括号
 @FuncOnce()
 def also_init():
     return expensive_setup()
 
+
 # async
 @FuncOnce
 async def async_init():
     return await aio_setup()
 
-init()   # 执行
-init()   # 直接返回缓存结果
+
+init()  # 执行
+init()  # 直接返回缓存结果
 ```
 
 Util方式调用：
 
 ```python
 from hutool import CacheUtil
+
 
 @CacheUtil.func_once
 def old_style():
@@ -190,29 +207,34 @@ def old_style():
 ```python
 from hutool import TtlLruCache
 
+
 # 无括号（默认 maxsize=128, ttl=300）
 @TtlLruCache
 def expensive(x):
     return x * 2
+
 
 # 有括号
 @TtlLruCache(maxsize=64, ttl=120)
 def compute(x):
     return x * 2
 
+
 # async
 @TtlLruCache(ttl=60)
 async def async_fetch(url):
     return await aio_get(url)
 
-compute.cache_clear()   # 清空缓存
-compute.cache_info()    # 查看命中信息
+
+compute.cache_clear()  # 清空缓存
+compute.cache_info()  # 查看命中信息
 ```
 
 Util方式调用：
 
 ```python
 from hutool import CacheUtil
+
 
 @CacheUtil.lru_cache(maxsize=64, ttl=120)
 def old_style(x):
@@ -231,22 +253,27 @@ def old_style(x):
 ```python
 from hutool import NoneOnException
 
+
 # 无括号
 @NoneOnException
 def risky():
     raise ValueError("oops")
 
+
 assert risky() is None
+
 
 # 有括号
 @NoneOnException()
 def also_risky():
     raise RuntimeError("boom")
 
+
 # async
 @NoneOnException
 async def async_risky():
     raise ValueError("oops")
+
 
 assert await async_risky() is None
 ```
@@ -255,6 +282,7 @@ Util方式调用：
 
 ```python
 from hutool import ObjectUtil
+
 
 @ObjectUtil.none_on_exception
 def old_style():

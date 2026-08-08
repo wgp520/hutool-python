@@ -11,10 +11,12 @@ Python 内置的 `cProfile` 模块功能强大但使用繁琐。`ProfUtil` 提�
 ```python
 from hutool import ProfileDeco
 
+
 # 无括号（默认 cumtime, 10 行）
 @ProfileDeco
 def compute():
     return sum(range(100000))
+
 
 # 有括号
 @ProfileDeco(sort_by="tottime", limit=5)
@@ -24,8 +26,10 @@ def slow_func():
         total += i
     return total
 
+
 slow_func()
 # 打印 cProfile 统计信息（按自身时间排序，前 5 行）
+
 
 # async
 @ProfileDeco(sort_by="tottime", limit=3)
@@ -40,13 +44,13 @@ async def async_compute():
 ```python
 from hutool import ProfUtil
 
+
 @ProfUtil.profile_deco(sort_by="tottime", limit=5)
-def old_style():
-    ...
+def old_style(): ...
+
 
 @ProfUtil.prof_decorator(sort_by="tottime", limit=5)
-def also_old():
-    ...
+def also_old(): ...
 ```
 
 ### 上下文管理器 profile_context
@@ -54,7 +58,7 @@ def also_old():
 ```python
 with ProfUtil.profile_context(sort_by="cumtime", limit=10):
     # ... 需要分析的代码 ...
-    data = [x ** 2 for x in range(100000)]
+    data = [x**2 for x in range(100000)]
 # 退出时打印 cProfile 统计信息
 ```
 

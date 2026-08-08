@@ -23,14 +23,14 @@ SensitiveUtil.init(["傻逼", "混蛋", "色情", "赌博"])
 
 ```python
 # 是否包含敏感词
-SensitiveUtil.contains("这是一个傻逼的测试")     # True
-SensitiveUtil.contains("这是一个正常的文本")     # False
+SensitiveUtil.contains("这是一个傻逼的测试")  # True
+SensitiveUtil.contains("这是一个正常的文本")  # False
 
 # 查找第一个敏感词
 SensitiveUtil.find_first("这是傻逼和混蛋的测试")  # "傻逼"
 
 # 查找所有敏感词
-SensitiveUtil.find_all("这是傻逼和混蛋的测试")    # ["傻逼", "混蛋"]
+SensitiveUtil.find_all("这是傻逼和混蛋的测试")  # ["傻逼", "混蛋"]
 ```
 
 ### 替换

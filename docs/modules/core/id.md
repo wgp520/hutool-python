@@ -12,13 +12,13 @@
 from hutool import IdUtil
 
 # 标准 UUID（带横线）
-IdUtil.random_uuid()       # "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+IdUtil.random_uuid()  # "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 
 # 简单 UUID（无横线）
-IdUtil.simple_uuid()       # "a1b2c3d4e5f67890abcdef1234567890"
+IdUtil.simple_uuid()  # "a1b2c3d4e5f67890abcdef1234567890"
 
 # 快速 UUID（使用 uuid4）
-IdUtil.fast_uuid()         # 同 random_uuid
+IdUtil.fast_uuid()  # 同 random_uuid
 IdUtil.fast_simple_uuid()  # 同 simple_uuid
 ```
 
@@ -27,8 +27,8 @@ IdUtil.fast_simple_uuid()  # 同 simple_uuid
 NanoId 是一种更短、更安全的 ID 生成算法：
 
 ```python
-IdUtil.nano_id()           # "V1StGXR8_Z5jdHi6B-myT"（默认21位）
-IdUtil.nano_id(10)         # "V1StGXR8_Z5"（自定义长度）
+IdUtil.nano_id()  # "V1StGXR8_Z5jdHi6B-myT"（默认21位）
+IdUtil.nano_id(10)  # "V1StGXR8_Z5"（自定义长度）
 ```
 
 ### 雪花 ID
@@ -36,7 +36,7 @@ IdUtil.nano_id(10)         # "V1StGXR8_Z5"（自定义长度）
 雪花算法生成的 64 位整数 ID，适用于分布式系统：
 
 ```python
-IdUtil.snowflake_id()      # 1234567890123456789
+IdUtil.snowflake_id()  # 1234567890123456789
 ```
 
 雪花 ID 结构：
@@ -55,8 +55,8 @@ id_val = worker.next_id()
 snowflake = IdUtil.get_snowflake(1, 1)
 
 # 获取下一个雪花 ID
-IdUtil.get_snowflake_next_id(1, 1)       # int
-IdUtil.get_snowflake_next_id_str(1, 1)   # str
+IdUtil.get_snowflake_next_id(1, 1)  # int
+IdUtil.get_snowflake_next_id_str(1, 1)  # str
 ```
 
 ### 选择建议
@@ -75,14 +75,14 @@ IdUtil.get_snowflake_next_id_str(1, 1)   # str
 from hutool import IdUtil
 
 # 32 位机器唯一 ID（毫秒时间戳 12 位 + PID 8 位 + 计数器 12 位）
-id32 = IdUtil.unique_machine32()    # 例如 287454212
+id32 = IdUtil.unique_machine32()  # 例如 287454212
 
 # 64 位机器唯一 ID（含主机名哈希，跨机器唯一）
-id64 = IdUtil.unique_machine64()    # 例如 1382741234567890
+id64 = IdUtil.unique_machine64()  # 例如 1382741234567890
 
 # 基于主机名的全局唯一 ID（适合 NFS 文件命名）
-IdUtil.luid()                       # "A1B2C3D4-PID1234-60A1B2C3-0001"
-IdUtil.luid(separator=":")          # "A1B2C3D4:PID1234:60A1B2C3:0001"
+IdUtil.luid()  # "A1B2C3D4-PID1234-60A1B2C3-0001"
+IdUtil.luid(separator=":")  # "A1B2C3D4:PID1234:60A1B2C3:0001"
 ```
 
 ### Verhoeff 校验位 ID
@@ -93,9 +93,9 @@ IdUtil.luid(separator=":")          # "A1B2C3D4:PID1234:60A1B2C3:0001"
 from hutool import CheckUtil
 
 # 带前缀的 ID（数字部分补零到 6 位，末位为校验位）
-CheckUtil.build_verhoeff_id("INV", 42, length=6)    # "INV000042X"（X 为校验位）
-CheckUtil.build_verhoeff_id("ORD", 7, length=1)     # "ORD7X"
-CheckUtil.build_verhoeff_id("T", 0, length=1)        # "T0X"
+CheckUtil.build_verhoeff_id("INV", 42, length=6)  # "INV000042X"（X 为校验位）
+CheckUtil.build_verhoeff_id("ORD", 7, length=1)  # "ORD7X"
+CheckUtil.build_verhoeff_id("T", 0, length=1)  # "T0X"
 ```
 
 ### GUID128
@@ -105,8 +105,8 @@ CheckUtil.build_verhoeff_id("T", 0, length=1)        # "T0X"
 ```python
 from hutool import IdUtil
 
-IdUtil.guid128()                    # "0DGHJKMNPQRSTVWXYZ0123456"
-IdUtil.guid128(salt="my-salt")      # 带盐值的唯一 ID
+IdUtil.guid128()  # "0DGHJKMNPQRSTVWXYZ0123456"
+IdUtil.guid128(salt="my-salt")  # 带盐值的唯一 ID
 ```
 
 ### 全局单例管理器
@@ -115,6 +115,6 @@ IdUtil.guid128(salt="my-salt")      # 带盐值的唯一 ID
 from hutool.core.util.id import MachineIdGenerator
 
 gen = MachineIdGenerator()
-gen.generate32()    # 32 位 ID
-gen.generate64()    # 64 位 ID
+gen.generate32()  # 32 位 ID
+gen.generate64()  # 64 位 ID
 ```

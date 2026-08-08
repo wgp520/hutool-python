@@ -9,11 +9,13 @@ Java 中 Bean（对象与字典之间的转换）是极其常见的操作。Pyth
 ```python
 from hutool import BeanUtil
 
+
 # 对象转字典
 class User:
     def __init__(self):
         self.name = "张三"
         self.age = 25
+
 
 user = User()
 data = BeanUtil.bean_to_map(user)  # {"name": "张三", "age": 25}
@@ -28,26 +30,23 @@ target = User()
 BeanUtil.copy_properties(source, target)
 
 # 获取/设置字段值
-BeanUtil.get_field_value(user, "name")        # "张三"
+BeanUtil.get_field_value(user, "name")  # "张三"
 BeanUtil.set_field_value(user, "name", "李四")
 
 # 批量转换
-users = BeanUtil.to_bean_list(
-    [{"name": "张三"}, {"name": "李四"}],
-    User
-)
+users = BeanUtil.to_bean_list([{"name": "张三"}, {"name": "李四"}], User)
 
 # 判断是否为 Bean
-BeanUtil.is_bean(User())    # True
+BeanUtil.is_bean(User())  # True
 BeanUtil.is_bean("string")  # False
-BeanUtil.is_bean({})        # False
+BeanUtil.is_bean({})  # False
 
 # 判断 Bean 字段是否全为 None
 user3 = User()
 user3.name = None
 user3.age = None
-BeanUtil.is_empty(user3)       # True
-BeanUtil.is_not_empty(user)    # True（user.name 非 None）
+BeanUtil.is_empty(user3)  # True
+BeanUtil.is_not_empty(user)  # True（user.name 非 None）
 
 # 判断 Bean 是否有 None 字段
 BeanUtil.has_null_field(user3)  # True

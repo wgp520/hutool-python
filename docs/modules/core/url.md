@@ -14,10 +14,10 @@ URLUtil.encode("https://example.com/你好")  # "https://example.com/%E4%BD%A0%E
 URLUtil.decode("https://example.com/%E4%BD%A0%E5%A5%BD")  # "https://example.com/你好"
 
 # URL 信息提取
-URLUtil.get_path("https://example.com/path?query=1")     # "/path"
-URLUtil.get_host("https://example.com:8080/path")         # "example.com"
-URLUtil.get_port("https://example.com:8080/path")         # 8080
-URLUtil.get_query("https://example.com/path?key=value")   # "key=value"
+URLUtil.get_path("https://example.com/path?query=1")  # "/path"
+URLUtil.get_host("https://example.com:8080/path")  # "example.com"
+URLUtil.get_port("https://example.com:8080/path")  # 8080
+URLUtil.get_query("https://example.com/path?key=value")  # "key=value"
 
 # 构建 URL
 URLUtil.build_url("https://example.com", {"key": "value"})

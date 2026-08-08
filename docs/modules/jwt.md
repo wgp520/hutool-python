@@ -20,18 +20,11 @@ JWT（JSON Web Token）是一种网络身份认证和信息交换格式。`JWTUt
 from hutool import JWTUtil
 
 # 生成 Token（默认 HS256 算法）
-token = JWTUtil.create_token(
-    {"sub": "1234567890", "name": "张三", "admin": True},
-    secret="my-secret-key"
-)
+token = JWTUtil.create_token({"sub": "1234567890", "name": "张三", "admin": True}, secret="my-secret-key")
 # "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 
 # 使用其他算法
-token = JWTUtil.create_token(
-    {"sub": "1234567890"},
-    secret="my-secret-key",
-    algorithm="HS512"
-)
+token = JWTUtil.create_token({"sub": "1234567890"}, secret="my-secret-key", algorithm="HS512")
 ```
 
 ### 解析 Token
@@ -46,8 +39,8 @@ payload = JWTUtil.parse_token(token, secret="my-secret-key")
 
 ```python
 # 验证签名是否有效
-JWTUtil.verify(token, secret="my-secret-key")   # True
-JWTUtil.verify(token, secret="wrong-key")        # False
+JWTUtil.verify(token, secret="my-secret-key")  # True
+JWTUtil.verify(token, secret="wrong-key")  # False
 ```
 
 ### 获取 Payload（不验证签名）

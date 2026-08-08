@@ -14,9 +14,11 @@
 from hutool import ExecUtil
 import time
 
+
 def fetch(url):
     time.sleep(0.1)  # 模拟 I/O
     return f"data from {url}"
+
 
 urls = ["url1", "url2", "url3", "url4"]
 results = ExecUtil.multi_thread_submit(fetch, urls, max_workers=4)
@@ -29,7 +31,8 @@ results = ExecUtil.multi_thread_submit(fetch, urls, max_workers=4)
 
 ```python
 def compute(n):
-    return n ** 2
+    return n**2
+
 
 results = ExecUtil.multi_process_submit(compute, [1, 2, 3, 4, 5])
 # [1, 4, 9, 16, 25]

@@ -9,16 +9,20 @@
 ```python
 from hutool import MemoryRepo
 
+
 class User:
     def __init__(self, name, age):
         self.name = name
         self.age = age
 
-repo = MemoryRepo([
-    User("Alice", 30),
-    User("Bob", 25),
-    User("Charlie", 35),
-])
+
+repo = MemoryRepo(
+    [
+        User("Alice", 30),
+        User("Bob", 25),
+        User("Charlie", 35),
+    ]
+)
 ```
 
 ## 方法
@@ -72,9 +76,9 @@ last = repo.last()
 ### 统计
 
 ```python
-repo.count()    # 3
-repo.exists()   # True
-len(repo)       # 3
+repo.count()  # 3
+repo.exists()  # True
+len(repo)  # 3
 ```
 
 ### 转换

@@ -12,11 +12,11 @@ Emoji 表情处理工具。
 from hutool import EmojiUtil
 
 # 是否包含 Emoji
-EmojiUtil.contains_emoji("hello 😀")       # True
-EmojiUtil.contains_emoji("hello world")     # False
+EmojiUtil.contains_emoji("hello 😀")  # True
+EmojiUtil.contains_emoji("hello world")  # False
 
 # Emoji 与 Unicode 互转
-EmojiUtil.emoji_to_unicode("😀")           # "\\U0001F600"
+EmojiUtil.emoji_to_unicode("😀")  # "\\U0001F600"
 EmojiUtil.unicode_to_emoji("\\U0001F600")  # "😀"
 
 # 移除 Emoji
@@ -26,10 +26,10 @@ EmojiUtil.remove_emojis("hello 😀 world")  # "hello  world"
 EmojiUtil.remove_all_emojis("hello 😀👍 world")  # "hello  world"
 
 # toHtmlHex — Emoji 转 HTML 十六进制实体
-EmojiUtil.to_html_hex("😀")   # "&#x1F600;"
+EmojiUtil.to_html_hex("😀")  # "&#x1F600;"
 
 # toUnicode — Emoji 转 Unicode 表示
-EmojiUtil.to_unicode("😀")    # "\\U0001F600"
+EmojiUtil.to_unicode("😀")  # "\\U0001F600"
 ```
 
 ## PinyinUtil
@@ -40,14 +40,14 @@ EmojiUtil.to_unicode("😀")    # "\\U0001F600"
 from hutool import PinyinUtil
 
 # 获取拼音
-PinyinUtil.get_pinyin("中国")              # "zhongguo"
+PinyinUtil.get_pinyin("中国")  # "zhongguo"
 PinyinUtil.get_pinyin("中国", separator=" ")  # "zhong guo"
 
 # 获取拼音首字母
 PinyinUtil.get_pinyin_first_letter("中国")  # "Z"
 
 # 获取全拼（带声调）
-PinyinUtil.get_full_pinyin("中国")          # "zhōng guó"
+PinyinUtil.get_full_pinyin("中国")  # "zhōng guó"
 ```
 
 ## TemplateUtil
@@ -61,8 +61,7 @@ from hutool import TemplateUtil
 result = TemplateUtil.render("Hello {{ name }}!", {"name": "World"})
 # "Hello World!"
 
-result = TemplateUtil.render("{% for i in items %}{{ i }},{% endfor %}",
-                             {"items": [1, 2, 3]})
+result = TemplateUtil.render("{% for i in items %}{{ i }},{% endfor %}", {"items": [1, 2, 3]})
 # "1,2,3,"
 
 # 创建模板引擎（带模板目录）
@@ -85,13 +84,10 @@ from hutool import QrCodeUtil
 image = QrCodeUtil.generate("https://example.com")
 
 # 生成为字节
-image_bytes = QrCodeUtil.generate_as_bytes("https://example.com",
-                                           width=300, height=300,
-                                           format="png")
+image_bytes = QrCodeUtil.generate_as_bytes("https://example.com", width=300, height=300, format="png")
 
 # 生成并保存到文件
-QrCodeUtil.generate_to_file("https://example.com", "/path/to/qr.png",
-                            width=300, height=300)
+QrCodeUtil.generate_to_file("https://example.com", "/path/to/qr.png", width=300, height=300)
 ```
 
 ### ASCII 艺术二维码
@@ -119,7 +115,7 @@ from hutool import EpubFactory
 
 # 推荐：通过工厂创建
 epub = EpubFactory.create(
-    engine="ebooklib",   # 或 "mkepub" / "pypub3"
+    engine="ebooklib",  # 或 "mkepub" / "pypub3"
     epub_name="我的小说",
     author="作者名",
     language="zh",
@@ -151,6 +147,7 @@ path = epub.save("/path/to/book.epub")  # 指定文件名
 
 ```python
 from hutool.extra.epub import Epub, register_engine
+
 
 @register_engine("my_engine")
 class MyEpub(Epub):
@@ -211,10 +208,12 @@ asyncio.run(AsyncTtsUtil.gen_voice("你好", output="hello.mp3", voice=TtsVoice.
 # 生成为 bytes
 audio_bytes = asyncio.run(AsyncTtsUtil.gen_voice_bytes("测试"))
 
+
 # 流式获取音频
 async def stream_example():
     async for chunk in AsyncTtsUtil.stream_voice("长文本..."):
         process(chunk)
+
 
 # 查找语音
 voices = asyncio.run(AsyncTtsUtil.find_voices(locale="zh-CN", gender="Female"))

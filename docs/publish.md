@@ -188,7 +188,7 @@ pip install --upgrade hutool-python
 ```python
 from hutool import StrUtil, DateUtil, IdUtil
 
-StrUtil.is_blank("")     # True
-DateUtil.today()         # "2026-06-14"
-IdUtil.random_uuid()     # "550e8400-e29b-41d4-a716-446655440000"
+StrUtil.is_blank("")  # True
+DateUtil.today()  # "2026-06-14"
+IdUtil.random_uuid()  # "550e8400-e29b-41d4-a716-446655440000"
 ```
