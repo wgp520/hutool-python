@@ -1022,3 +1022,152 @@ class AsyncNetUtil:
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, NetUtil.get_local_ip)
+
+    # ===================== 纯计算 / 地址解析方法（薄壳委托同步实现） =====================
+
+    @staticmethod
+    async def is_valid_port(port: int) -> bool:
+        """是否为有效的端口（不检查占用）。"""
+        return NetUtil.is_valid_port(port)
+
+    @staticmethod
+    async def is_inner(ip: str) -> bool:
+        """判断是否为内网 IP 地址。"""
+        return NetUtil.is_inner(ip)
+
+    @staticmethod
+    async def ipv4_to_long(ip: str) -> int:
+        """将 IPv4 地址转换为 long 整型数值。"""
+        return NetUtil.ipv4_to_long(ip)
+
+    @staticmethod
+    async def long_to_ipv4(long_ip: int) -> str:
+        """将 long 整型数值转换为 IPv4 地址。"""
+        return NetUtil.long_to_ipv4(long_ip)
+
+    @staticmethod
+    async def is_inner_ip(ip: str) -> bool:
+        """判断是否为内网 IP（与 is_inner 相同）。"""
+        return NetUtil.is_inner_ip(ip)
+
+    @staticmethod
+    async def is_in_range(ip: str, cidr: str) -> bool:
+        """判断 IP 是否在 CIDR 范围内。"""
+        return NetUtil.is_in_range(ip, cidr)
+
+    @staticmethod
+    async def hide_ip_part(ip: str) -> str:
+        """遮蔽 IP 地址，将最后一段替换为 ``*``。"""
+        return NetUtil.hide_ip_part(ip)
+
+    @staticmethod
+    async def hide_ip_part_from_long(long_ip: int) -> str:
+        """从 long 型 IP 遮蔽最后一段。"""
+        return NetUtil.hide_ip_part_from_long(long_ip)
+
+    @staticmethod
+    async def ipv6_to_big_integer(ipv6: str) -> int:
+        """将 IPv6 地址转为大整数。"""
+        return NetUtil.ipv6_to_big_integer(ipv6)
+
+    @staticmethod
+    async def big_integer_to_ipv6(n: int) -> str:
+        """将大整数转为 IPv6 地址。"""
+        return NetUtil.big_integer_to_ipv6(n)
+
+    @staticmethod
+    async def to_ip_list(ip_range: str) -> List[str]:
+        """将 IP 范围字符串转为 IP 列表。"""
+        return NetUtil.to_ip_list(ip_range)
+
+    @staticmethod
+    async def get_localhost_str() -> str:
+        """获取 localhost 字符串表示。"""
+        return NetUtil.get_localhost_str()
+
+    @staticmethod
+    async def idn_to_ascii(domain: str) -> str:
+        """将国际化域名 (IDN) 转为 ASCII 形式。"""
+        return NetUtil.idn_to_ascii(domain)
+
+    @staticmethod
+    async def is_unknown(ip: str) -> bool:
+        """判断是否为未知 IP 地址。"""
+        return NetUtil.is_unknown(ip)
+
+    @staticmethod
+    async def parse_cookies(cookie_str: str) -> dict:
+        """解析 Cookie 字符串为字典。"""
+        return NetUtil.parse_cookies(cookie_str)
+
+    @staticmethod
+    async def get_local_host_name() -> str:
+        """获取本机主机名（与 get_localhost 相同）。"""
+        return NetUtil.get_local_host_name()
+
+    @staticmethod
+    async def to_absolute_url(base: str, relative: str) -> str:
+        """将相对 URL 补全为绝对 URL。"""
+        return NetUtil.to_absolute_url(base, relative)
+
+    # ===================== 网络 / 系统 I/O 方法（run_in_executor 委托，避免阻塞事件循环） =====================
+
+    @staticmethod
+    async def is_usable_local_port(port: int) -> bool:
+        """检测本地端口可用性。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.is_usable_local_port, port)
+
+    @staticmethod
+    async def get_usable_local_port(min_port: int = 1024, max_port: int = 0xFFFF) -> int:
+        """查找指定范围内的可用端口。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_usable_local_port, min_port, max_port)
+
+    @staticmethod
+    async def get_localhost() -> str:
+        """获取本机主机名。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_localhost)
+
+    @staticmethod
+    async def get_host_name() -> str:
+        """获取本机主机名。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_host_name)
+
+    @staticmethod
+    async def get_host_address() -> str:
+        """获取本机 IP 地址。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_host_address)
+
+    @staticmethod
+    async def get_mac_address() -> str:
+        """获取本机 MAC 地址。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_mac_address)
+
+    @staticmethod
+    async def local_ipv4s() -> list:
+        """获取本机所有 IPv4 地址列表。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.local_ipv4s)
+
+    @staticmethod
+    async def local_ipv6s() -> List[str]:
+        """获取本机所有 IPv6 地址列表。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.local_ipv6s)
+
+    @staticmethod
+    async def local_ips() -> List[str]:
+        """获取所有本地 IP 地址（IPv4 + IPv6）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.local_ips)
+
+    @staticmethod
+    async def get_usable_local_ports(count: int, min_port: int = 1024, max_port: int = 0xFFFF) -> List[int]:
+        """批量获取可用的本地端口。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_usable_local_ports, count, min_port, max_port)

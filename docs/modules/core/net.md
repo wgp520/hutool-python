@@ -121,3 +121,9 @@ ip = await AsyncNetUtil.get_ip_by_host("example.com")
 info = await AsyncNetUtil.get_dns_info("example.com")
 local = await AsyncNetUtil.get_local_ip()
 ```
+
+.. note::
+
+    ``AsyncNetUtil`` 已与 ``NetUtil`` **完全镜像**：除网络 I/O 方法外，所有纯计算方法（``ipv4_to_long`` /
+    ``hide_ip_part`` / ``to_ip_list`` / ``idn_to_ascii`` / ``to_absolute_url`` 等）也提供同名 ``async`` 薄壳。
+    引入 ``AsyncNetUtil`` 后通常可不再使用 ``NetUtil``。

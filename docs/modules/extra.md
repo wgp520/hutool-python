@@ -219,6 +219,11 @@ async def stream_example():
 voices = asyncio.run(AsyncTtsUtil.find_voices(locale="zh-CN", gender="Female"))
 ```
 
+.. note::
+
+    ``AsyncTtsUtil`` 的方法名与 ``TtsUtil`` 完全一致（含 ``gen_voice`` / ``gen_voice_bytes`` / ``stream_voice`` /
+    ``find_voices`` 等），可直接替换同步版本。
+
 ### TtsVoice 内置语音
 
 | 枚举 | 名称 | 性别 | 语言 |

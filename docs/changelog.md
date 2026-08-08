@@ -2,7 +2,7 @@
 
 ## v1.2.0（2026-08-08）
 
-- 新增异步工具类（基于 `async/await`），针对阻塞式 I/O 提供协程版本，与同步 API 方法名保持一致、调用需 `await`：
+- 新增异步工具类（基于 `async/await`），与同步 API **完全镜像**（含纯计算 / 工具方法，均为同名 `async` 薄壳）、调用需 `await`，引入异步类后通常可不再使用对应同步类：
   - `AsyncHttpUtil` / `AsyncHttpRequest`：基于 `httpx.AsyncClient` 的异步 HTTP 客户端（`hutool/httpx_client`），**无需额外依赖**
   - `AsyncNetUtil`：基于标准库 `asyncio` 的异步网络探测（`is_open` / `ping` / `net_cat` / `get_ip_by_host` / `get_dns_info` / `get_local_ip`），**无需额外依赖**
   - `AsyncFileUtil` / `AsyncResourceUtil`：基于 `aiofiles` 的异步文件 / 资源读写（`hutool/core/io`），需安装可选依赖

@@ -151,6 +151,12 @@ response = await (
 print(response.status)
 ```
 
+.. note::
+
+    ``AsyncHttpUtil`` 已与 ``HttpUtil`` **完全镜像**：除 I/O 方法外，所有纯计算 / URL 工具方法
+    （``is_https`` / ``to_params`` / ``encode_url`` / ``create_get`` / ``build_basic_auth`` 等）也提供同名
+    ``async`` 薄壳，调用时统一 ``await``。引入 ``AsyncHttpUtil`` 后通常可不再使用 ``HttpUtil``。
+
 ## 与 Java Hutool 的差异
 
 - 基于 `httpx` 而非 `HttpURLConnection`，支持 HTTP/2

@@ -4,6 +4,7 @@
 基于 pathlib.Path 实现，辅以 os 和 shutil。
 """
 
+import asyncio
 import binascii
 import hashlib
 import mimetypes
@@ -18,6 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 try:
     import aiofiles
+    import aiofiles.os  # ensure the aiofiles.os submodule is loaded (import aiofiles alone does NOT attach .os)
 
     _HAS_AIOFILES = True
 except Exception:
@@ -1481,8 +1483,10 @@ class AsyncFileUtil:
     """异步文件工具类，提供文件读写的异步方法。
 
     与 :class:`FileUtil` 方法名一致，读写方法均为协程，需用 ``await`` 调用。
-    底层使用 ``aiofiles`` 做非阻塞文件读写。纯路径 / 判断类方法（如 ``exist`` /
-    ``is_file``）直接继承自同步版，无需异步。
+    底层使用 ``aiofiles`` 做非阻塞文件读写；判断 / 元数据类方法（如 ``exist`` /
+    ``is_file`` / ``last_modified_time``）优先使用 ``aiofiles.os`` / ``aiofiles.os.path``
+    的原生异步实现，避免在事件循环中阻塞。仅含目录递归、符号链接解析、临时目录等
+    hutool 自定义逻辑的方法仍通过 ``run_in_executor`` 委托同步实现。
 
     .. note::
 
@@ -1666,3 +1670,543 @@ class AsyncFileUtil:
         :return: 文件路径
         """
         return await AsyncFileUtil.write_lines(path, lines, charset=charset, is_append=True)
+
+    # ===================== 纯计算 / 路径方法（薄壳委托同步实现，无文件系统访问） =====================
+
+    @staticmethod
+    async def is_windows() -> bool:
+        """判断当前操作系统是否为 Windows。"""
+        return FileUtil.is_windows()
+
+    @staticmethod
+    async def is_absolute(path: Union[str, Path]) -> bool:
+        """判断路径是否为绝对路径。"""
+        return FileUtil.is_absolute(path)
+
+    @staticmethod
+    async def is_absolute_path(path: Union[str, Path]) -> bool:
+        """判断路径是否为绝对路径。"""
+        return FileUtil.is_absolute_path(path)
+
+    @staticmethod
+    async def file(*names: str) -> Path:
+        """根据多个名称段构建文件路径。"""
+        return FileUtil.file(*names)
+
+    @staticmethod
+    async def get_name(path: Union[str, Path]) -> str:
+        """获取文件名（含扩展名）。"""
+        return FileUtil.get_name(path)
+
+    @staticmethod
+    async def get_suffix(path: Union[str, Path]) -> str:
+        """获取文件扩展名（不带点号）。"""
+        return FileUtil.get_suffix(path)
+
+    @staticmethod
+    async def get_prefix(path: Union[str, Path]) -> str:
+        """获取文件名前缀（不含扩展名）。"""
+        return FileUtil.get_prefix(path)
+
+    @staticmethod
+    async def main_name(path: Union[str, Path]) -> str:
+        """获取主文件名（同 get_prefix）。"""
+        return FileUtil.main_name(path)
+
+    @staticmethod
+    async def sub_path(path: Union[str, Path], start: int, end: int) -> str:
+        """获取子路径。"""
+        return FileUtil.sub_path(path, start, end)
+
+    @staticmethod
+    async def last_index_of_separator(path: str) -> int:
+        """获取路径中最后一个分隔符的索引位置。"""
+        return FileUtil.last_index_of_separator(path)
+
+    @staticmethod
+    async def path_ends_with(path: Union[str, Path], suffix: str) -> bool:
+        """判断路径是否以指定后缀结尾。"""
+        return FileUtil.path_ends_with(path, suffix)
+
+    @staticmethod
+    async def ext_name(path: Union[str, Path]) -> str:
+        """获取文件扩展名（不带点号，与 get_suffix 等价）。"""
+        return FileUtil.ext_name(path)
+
+    @staticmethod
+    async def get_type(path: Union[str, Path]) -> str:
+        """获取文件类型（通过扩展名推断 MIME 类型）。"""
+        return FileUtil.get_type(path)
+
+    @staticmethod
+    async def get_mime_type(path: Union[str, Path]) -> str:
+        """获取文件的 MIME 类型。"""
+        return FileUtil.get_mime_type(path)
+
+    @staticmethod
+    async def readable_file_size(size: int, precision: int = 1) -> str:
+        """将文件大小转换为可读字符串（如 "1.5 MB"）。"""
+        return FileUtil.readable_file_size(size, precision)
+
+    @staticmethod
+    async def contains_invalid(name: str) -> bool:
+        """判断文件名是否包含无效字符。"""
+        return FileUtil.contains_invalid(name)
+
+    @staticmethod
+    async def check_slip(file_path: Union[str, Path]) -> None:
+        """检查路径是否存在路径穿越（``..`` 攻击）。"""
+        return FileUtil.check_slip(file_path)
+
+    @staticmethod
+    async def get_parent(path: Union[str, Path], depth: int = 1) -> str:
+        """获取父目录路径（支持多级）。"""
+        return FileUtil.get_parent(path, depth)
+
+    # ===================== 文件系统 I/O 方法 =====================
+    # 判断 / 元数据类：aiofiles.os / aiofiles.os.path 原生异步实现
+    # 含目录递归 / 符号链接解析 / 临时目录等 hutool 自定义逻辑的方法：run_in_executor 委托同步实现
+
+    @staticmethod
+    async def exist(path: Union[str, Path]) -> bool:
+        """判断文件或目录是否存在。"""
+        AsyncFileUtil._check_aiofiles()
+        return await aiofiles.os.path.exists(path)
+
+    @staticmethod
+    async def is_dir(path: Union[str, Path]) -> bool:
+        """判断是否为目录。"""
+        AsyncFileUtil._check_aiofiles()
+        return await aiofiles.os.path.isdir(path)
+
+    @staticmethod
+    async def is_file(path: Union[str, Path]) -> bool:
+        """判断是否为文件。"""
+        AsyncFileUtil._check_aiofiles()
+        return await aiofiles.os.path.isfile(path)
+
+    @staticmethod
+    async def is_empty(path: Union[str, Path]) -> bool:
+        """文件或目录是否为空。"""
+        AsyncFileUtil._check_aiofiles()
+        if not await aiofiles.os.path.exists(path):
+            return True
+        if await aiofiles.os.path.isfile(path):
+            return await aiofiles.os.path.getsize(path) == 0
+        if await aiofiles.os.path.isdir(path):
+            return not (await aiofiles.os.listdir(path))
+        return True
+
+    @staticmethod
+    async def is_symlink(path: Union[str, Path]) -> bool:
+        """判断是否为符号链接。"""
+        AsyncFileUtil._check_aiofiles()
+        return await aiofiles.os.path.islink(path)
+
+    @staticmethod
+    async def is_dir_empty(path: Union[str, Path]) -> bool:
+        """判断目录是否为空。"""
+        AsyncFileUtil._check_aiofiles()
+        if not await aiofiles.os.path.isdir(path):
+            return True
+        return not (await aiofiles.os.listdir(path))
+
+    @staticmethod
+    async def is_directory(path: Union[str, Path]) -> bool:
+        """判断是否为目录（与 is_dir 等价）。"""
+        return await AsyncFileUtil.is_dir(path)
+
+    @staticmethod
+    async def is_modified(path: Union[str, Path], reference_time: float = 0) -> bool:
+        """判断文件是否在指定时间之后被修改。"""
+        AsyncFileUtil._check_aiofiles()
+        if not await aiofiles.os.path.exists(path):
+            return False
+        return await aiofiles.os.path.getmtime(path) > reference_time
+
+    @staticmethod
+    async def file_not_empty(path: Union[str, Path]) -> bool:
+        """判断文件是否非空。"""
+        AsyncFileUtil._check_aiofiles()
+        return (await aiofiles.os.path.isfile(path)) and (await aiofiles.os.path.getsize(path)) > 0
+
+    @staticmethod
+    async def is_sub_path(parent: Union[str, Path], child: Union[str, Path]) -> bool:
+        """判断 child 是否为 parent 的子路径。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.is_sub_path, parent, child)
+
+    @staticmethod
+    async def path_equals(path1: Union[str, Path], path2: Union[str, Path]) -> bool:
+        """判断两个路径是否指向同一文件/目录。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.path_equals, path1, path2)
+
+    @staticmethod
+    async def content_equals(
+        file1: Union[str, Path],
+        file2: Union[str, Path],
+        charset: str = "utf-8",
+    ) -> bool:
+        """判断两个文件的内容是否相等。"""
+        AsyncFileUtil._check_aiofiles()
+        p1, p2 = Path(file1), Path(file2)
+        if not await aiofiles.os.path.isfile(p1) or not await aiofiles.os.path.isfile(p2):
+            return False
+        if await aiofiles.os.path.getsize(p1) != await aiofiles.os.path.getsize(p2):
+            return False
+        return (await AsyncFileUtil.read_string(p1, charset=charset)) == (
+            await AsyncFileUtil.read_string(p2, charset=charset)
+        )
+
+    @staticmethod
+    async def get_absolute_path(path: Union[str, Path]) -> str:
+        """获取路径的绝对路径字符串。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_absolute_path, path)
+
+    @staticmethod
+    async def get_canonical_path(path: Union[str, Path]) -> str:
+        """获取路径的规范路径字符串（解析符号链接和 ``..``）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_canonical_path, path)
+
+    @staticmethod
+    async def normalize(path: Union[str, Path]) -> str:
+        """标准化路径，解析 ``~`` 和相对路径符号。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.normalize, path)
+
+    @staticmethod
+    async def get_tmp_dir_path() -> str:
+        """获取系统临时目录路径（字符串）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_tmp_dir_path)
+
+    @staticmethod
+    async def get_tmp_dir() -> Path:
+        """获取系统临时目录（Path 对象）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_tmp_dir)
+
+    @staticmethod
+    async def get_user_home_path() -> str:
+        """获取用户主目录路径（字符串）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_user_home_path)
+
+    @staticmethod
+    async def get_user_home_dir() -> Path:
+        """获取用户主目录（Path 对象）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.get_user_home_dir)
+
+    @staticmethod
+    async def newer_than(file: Union[str, Path], reference: Union[str, Path]) -> bool:
+        """判断文件是否比参考文件更新。"""
+        AsyncFileUtil._check_aiofiles()
+        if not await aiofiles.os.path.exists(Path(file)):
+            return False
+        if not await aiofiles.os.path.exists(Path(reference)):
+            return True
+        return (await aiofiles.os.path.getmtime(Path(file))) > (await aiofiles.os.path.getmtime(Path(reference)))
+
+    @staticmethod
+    async def size(path: Union[str, Path]) -> int:
+        """获取文件大小（字节）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.size, path)
+
+    @staticmethod
+    async def last_modified_time(path: Union[str, Path]) -> datetime:
+        """获取文件最后修改时间。"""
+        AsyncFileUtil._check_aiofiles()
+        return datetime.fromtimestamp(await aiofiles.os.path.getmtime(path))
+
+    @staticmethod
+    async def ls(path: Union[str, Path]) -> List[Path]:
+        """列出目录内容（仅直接子项）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.ls, path)
+
+    @staticmethod
+    async def list_file_names(path: Union[str, Path]) -> List[str]:
+        """列出目录下的文件名（仅直接子文件）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.list_file_names, path)
+
+    @staticmethod
+    async def loop_files(
+        path: Union[str, Path],
+        max_depth: Optional[int] = None,
+        file_filter: Optional[Callable[[Path], bool]] = None,
+    ) -> List[Path]:
+        """递归遍历目录下的所有文件。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.loop_files, path, max_depth, file_filter)
+
+    @staticmethod
+    async def walk_files(path: Union[str, Path], consumer: Callable[[Path], None]) -> None:
+        """递归遍历文件并对每个文件执行操作。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.walk_files, path, consumer)
+
+    @staticmethod
+    async def touch(path: Union[str, Path]) -> Path:
+        """创建文件（包括父目录）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.touch, path)
+
+    @staticmethod
+    async def mkdir(path: Union[str, Path]) -> Path:
+        """创建目录（含父目录，已存在则忽略）。"""
+        AsyncFileUtil._check_aiofiles()
+        await aiofiles.os.makedirs(str(path), exist_ok=True)
+        return Path(path)
+
+    @staticmethod
+    async def mkdirs(path: Union[str, Path]) -> Path:
+        """创建多级目录。"""
+        AsyncFileUtil._check_aiofiles()
+        await aiofiles.os.makedirs(str(path), exist_ok=True)
+        return Path(path)
+
+    @staticmethod
+    async def create_temp_file(
+        prefix: str = "hutool",
+        suffix: str = ".tmp",
+        parent_dir: Optional[str] = None,
+    ) -> Path:
+        """创建临时文件。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.create_temp_file, prefix, suffix, parent_dir)
+
+    @staticmethod
+    async def del_file(path: Union[str, Path]) -> bool:
+        """删除文件或目录。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.del_file, path)
+
+    @staticmethod
+    async def clean(path: Union[str, Path]) -> bool:
+        """清空目录内容（不删除目录本身）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.clean, path)
+
+    @staticmethod
+    async def copy(
+        src: Union[str, Path],
+        dest: Union[str, Path],
+        is_override: bool = True,
+    ) -> Path:
+        """复制文件或目录。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.copy, src, dest, is_override)
+
+    @staticmethod
+    async def copy_file(src: Union[str, Path], dest: Union[str, Path]) -> Path:
+        """复制文件。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.copy_file, src, dest)
+
+    @staticmethod
+    async def move(
+        src: Union[str, Path],
+        dest: Union[str, Path],
+        is_override: bool = True,
+    ) -> Path:
+        """移动文件或目录。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.move, src, dest, is_override)
+
+    @staticmethod
+    async def rename(file: Union[str, Path], new_name: str) -> Path:
+        """重命名文件或目录。"""
+        AsyncFileUtil._check_aiofiles()
+        p = Path(file)
+        if not await aiofiles.os.path.exists(p):
+            raise FileNotFoundError(f"路径不存在: {p}")
+        new_path = p.parent / new_name
+        await aiofiles.os.rename(str(p), str(new_path))
+        return new_path
+
+    @staticmethod
+    async def copy_content(
+        src: Union[str, Path],
+        dest: Union[str, Path],
+        is_override: bool = True,
+    ) -> Path:
+        """复制文件内容（与 copy 等价）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.copy_content, src, dest, is_override)
+
+    @staticmethod
+    async def move_content(src: Union[str, Path], dest: Union[str, Path]) -> Path:
+        """移动文件内容（与 move 等价）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.move_content, src, dest)
+
+    @staticmethod
+    async def convert_charset(
+        path: Union[str, Path],
+        src_charset: str,
+        dest_charset: str = "utf-8",
+    ) -> Path:
+        """转换文件编码。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.convert_charset, path, src_charset, dest_charset)
+
+    @staticmethod
+    async def convert_line_separator(path: Union[str, Path], separator: str = "\n") -> Path:
+        """转换文件的换行符。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.convert_line_separator, path, separator)
+
+    @staticmethod
+    async def copy_files_from_dir(
+        src_dir: Union[str, Path],
+        dest_dir: Union[str, Path],
+        is_override: bool = True,
+    ) -> List[Path]:
+        """从源目录复制所有文件到目标目录（不含子目录结构）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.copy_files_from_dir, src_dir, dest_dir, is_override)
+
+    @staticmethod
+    async def checksum(path: Union[str, Path], algorithm: str = "md5") -> str:
+        """计算文件的校验和。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.checksum, path, algorithm)
+
+    @staticmethod
+    async def checksum_crc32(path: Union[str, Path]) -> int:
+        """计算文件的 CRC32 校验值。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.checksum_crc32, path)
+
+    @staticmethod
+    async def clean_empty(path: Union[str, Path]) -> int:
+        """清理目录下的空文件和空目录。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.clean_empty, path)
+
+    @staticmethod
+    async def clean_invalid(path: Union[str, Path]) -> int:
+        """清理目录下文件名含无效字符的文件。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.clean_invalid, path)
+
+    @staticmethod
+    async def tail(
+        path: Union[str, Path],
+        lines: int = 10,
+        charset: str = "utf-8",
+        handler: Optional[Callable[[str], None]] = None,
+    ) -> List[str]:
+        """读取文件最后 N 行。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.tail, path, lines, charset, handler)
+
+    @staticmethod
+    async def get_total_lines(path: Union[str, Path]) -> int:
+        """获取文件总行数。"""
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, "rb") as f:
+            data = await f.read()
+        if not data:
+            return 0
+        return data.count(b"\n") + (0 if data.endswith(b"\n") else 1)
+
+    @staticmethod
+    async def read_line(
+        path: Union[str, Path],
+        line_number: int,
+        charset: str = "utf-8",
+    ) -> Optional[str]:
+        """按行号读取文件的指定行（0-based）。"""
+        if line_number < 0:
+            return None
+        AsyncFileUtil._check_aiofiles()
+        idx = 0
+        async with aiofiles.open(path, encoding=charset) as f:
+            async for line in f:
+                if idx == line_number:
+                    return line.rstrip("\n\r")
+                idx += 1
+        return None
+
+    @staticmethod
+    async def read_lines_str(path: Union[str, Path], charset: str = "utf-8") -> List[str]:
+        """读取文件的每一行（去除行尾换行符）。"""
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, encoding=charset) as f:
+            return (await f.read()).splitlines()
+
+    @staticmethod
+    async def write_utf8_string(path: Union[str, Path], content: str) -> Path:
+        """以 UTF-8 编码写入字符串到文件。"""
+        return await AsyncFileUtil.write_string(path, content, charset="utf-8")
+
+    @staticmethod
+    async def write_utf8_lines(path: Union[str, Path], lines: list) -> Path:
+        """以 UTF-8 编码写入多行到文件。"""
+        return await AsyncFileUtil.write_lines(path, lines, charset="utf-8")
+
+    @staticmethod
+    async def write_utf8_map(
+        path: Union[str, Path],
+        map_data: Dict[str, Any],
+        kv_separator: str = "=",
+    ) -> Path:
+        """以 UTF-8 编码将字典写入文件（每行一个 key=value）。"""
+        lines = [f"{k}{kv_separator}{v}" for k, v in map_data.items()]
+        return await AsyncFileUtil.write_utf8_lines(path, lines)
+
+    @staticmethod
+    async def write_map(
+        path: Union[str, Path],
+        map_data: Dict[str, Any],
+        kv_separator: str = "=",
+        charset: str = "utf-8",
+    ) -> Path:
+        """将字典写入文件（每行一个 key=value）。"""
+        lines = [f"{k}{kv_separator}{v}" for k, v in map_data.items()]
+        return await AsyncFileUtil.write_lines(path, lines, charset=charset)
+
+    @staticmethod
+    async def append_utf8_string(path: Union[str, Path], content: str) -> Path:
+        """以 UTF-8 编码追加字符串到文件。"""
+        return await AsyncFileUtil.append_string(path, content, charset="utf-8")
+
+    @staticmethod
+    async def append_utf8_lines(path: Union[str, Path], lines: list) -> Path:
+        """以 UTF-8 编码追加多行到文件。"""
+        return await AsyncFileUtil.append_lines(path, lines, charset="utf-8")
+
+    @staticmethod
+    async def load_file(path: Union[str, Path], charset: str = "utf-8") -> List[str]:
+        """加载文件内容为行列表（去除行尾换行符）。"""
+        return await AsyncFileUtil.read_lines_str(path, charset=charset)
+
+    @staticmethod
+    async def load_utf8(path: Union[str, Path]) -> List[str]:
+        """以 UTF-8 编码加载文件内容为行列表。"""
+        return await AsyncFileUtil.read_utf8_lines(path)
+
+    @staticmethod
+    async def mk_parent_dirs(path: Union[str, Path]) -> Path:
+        """创建文件的父目录（如果不存在）。"""
+        AsyncFileUtil._check_aiofiles()
+        await aiofiles.os.makedirs(str(Path(path).parent), exist_ok=True)
+        return Path(path)
+
+    @staticmethod
+    async def mkdirs_safely(path: Union[str, Path]) -> Path:
+        """安全创建目录（与 mkdir 等价）。"""
+        return await AsyncFileUtil.mkdirs(path)
+
+    @staticmethod
+    async def new_file(path: Union[str, Path]) -> Path:
+        """创建新文件（包含父目录，与 touch 等价）。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, FileUtil.new_file, path)

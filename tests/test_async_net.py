@@ -99,3 +99,70 @@ class TestAsyncNetUtil:
 
         monkeypatch.setattr(socket, "socket", lambda *a, **k: _FakeSock())
         assert await AsyncNetUtil.get_local_ip() == "10.0.0.5"
+
+    # ---- 纯计算 / 地址解析（薄壳委托同步实现） ----
+
+    async def test_is_valid_port(self):
+        assert await AsyncNetUtil.is_valid_port(80) is True
+        assert await AsyncNetUtil.is_valid_port(70000) is False
+
+    async def test_ipv4_to_long(self):
+        assert await AsyncNetUtil.ipv4_to_long("1.2.3.4") == 16909060
+
+    async def test_long_to_ipv4(self):
+        assert await AsyncNetUtil.long_to_ipv4(16909060) == "1.2.3.4"
+
+    async def test_is_inner(self):
+        assert await AsyncNetUtil.is_inner("192.168.1.1") is True
+        assert await AsyncNetUtil.is_inner("8.8.8.8") is False
+
+    async def test_hide_ip_part(self):
+        assert await AsyncNetUtil.hide_ip_part("1.2.3.4") == "1.2.3.*"
+
+    async def test_to_ip_list_cidr(self):
+        # /30 网络含 2 个可用主机地址（去掉网络地址与广播地址）
+        assert await AsyncNetUtil.to_ip_list("192.168.1.0/30") == [
+            "192.168.1.1",
+            "192.168.1.2",
+        ]
+
+    async def test_get_localhost_str(self):
+        assert await AsyncNetUtil.get_localhost_str() == "localhost"
+
+    async def test_idn_to_ascii(self):
+        assert await AsyncNetUtil.idn_to_ascii("例子.com") == "xn--fsqu00a.com"
+
+    async def test_parse_cookies(self):
+        assert await AsyncNetUtil.parse_cookies("a=1; b=2") == {"a": "1", "b": "2"}
+
+    async def test_to_absolute_url(self):
+        # 基于 urllib.parse.urljoin 语义：base 的最后一段被相对路径替换
+        assert await AsyncNetUtil.to_absolute_url("http://x.com/a", "b/c") == "http://x.com/b/c"
+
+    async def test_get_local_host_name(self):
+        assert await AsyncNetUtil.get_local_host_name() == await AsyncNetUtil.get_localhost()
+
+    # ---- 网络 / 系统 I/O（run_in_executor 委托，避免阻塞事件循环） ----
+
+    async def test_get_usable_local_port(self):
+        port = await AsyncNetUtil.get_usable_local_port()
+        assert 1024 <= port <= 0xFFFF
+        assert await AsyncNetUtil.is_usable_local_port(port) is True
+
+    async def test_get_usable_local_ports(self):
+        ports = await AsyncNetUtil.get_usable_local_ports(3)
+        assert len(ports) == 3
+
+    async def test_get_localhost(self):
+        assert await AsyncNetUtil.get_localhost()
+
+    async def test_get_host_name(self):
+        assert await AsyncNetUtil.get_host_name()
+
+    async def test_get_mac_address(self):
+        mac = await AsyncNetUtil.get_mac_address()
+        assert len(mac.split(":")) == 6
+
+    async def test_local_ipv4s(self):
+        ips = await AsyncNetUtil.local_ipv4s()
+        assert isinstance(ips, list)

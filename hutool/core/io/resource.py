@@ -1,5 +1,6 @@
 """资源工具模块"""
 
+import asyncio
 import fnmatch
 import os
 from pathlib import Path
@@ -165,9 +166,6 @@ class AsyncResourceUtil:
         data = await AsyncResourceUtil.get_resource_bytes("config/app.json")
     """
 
-    # 默认资源搜索路径列表，可通过 add_resource_path 扩展
-    _resource_paths: List[str] = []
-
     @staticmethod
     def _check_aiofiles() -> None:
         """检查 aiofiles 是否已安装，未安装时抛出清晰的 ImportError。"""
@@ -222,3 +220,26 @@ class AsyncResourceUtil:
         AsyncResourceUtil._check_aiofiles()
         abs_path = ResourceUtil.get_resource(path)
         return aiofiles.open(abs_path, "rb")
+
+    # ===================== 路径解析 / 列表方法（全镜像补充） =====================
+
+    @staticmethod
+    async def add_resource_path(path: str) -> None:
+        """添加资源搜索路径。
+
+        委托同步实现，保证与 :class:`ResourceUtil` 共享同一份资源搜索路径，
+        从而 ``get_resource*`` 系列方法能找到通过本类注册的路径。
+        """
+        ResourceUtil.add_resource_path(path)
+
+    @staticmethod
+    async def get_resource(path: str) -> str:
+        """异步获取资源的绝对路径。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, ResourceUtil.get_resource, path)
+
+    @staticmethod
+    async def get_resources(pattern: str) -> List[str]:
+        """异步根据模式匹配获取资源列表。"""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, ResourceUtil.get_resources, pattern)

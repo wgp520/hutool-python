@@ -311,11 +311,13 @@ class HttpUtil:
         return {k: v for k, v in params.items() if v is not None}
 
 
-class AsyncHttpUtil(HttpUtil):
-    """异步 HTTP 工具类，提供常用的异步 HTTP 操作方法。
+class AsyncHttpUtil:
+    """异步 HTTP 工具类，提供与 :class:`HttpUtil` 完全对应的异步方法。
 
-    与 :class:`HttpUtil` 方法名一致，所有 I/O 方法均为协程，需用 ``await`` 调用。
-    纯工具方法（如 ``is_https`` / ``to_params`` / ``encode_url``）直接继承自同步版。
+    与 :class:`HttpUtil` 方法名一致，所有方法均为协程，需用 ``await`` 调用。
+    I/O 方法（get/post/download*）使用 ``httpx.AsyncClient`` 原生异步实现；
+    纯工具方法（is_https/to_params/encode_url/create_* 等）为薄壳，直接委托同步实现。
+    引入本类后通常可不再使用 :class:`HttpUtil`。
 
     示例::
 
@@ -449,3 +451,80 @@ class AsyncHttpUtil(HttpUtil):
         else:
             response = await AsyncHttpRequest.get(url).timeout(timeout).execute()
             return response.to_bytes()
+
+    # ===================== 纯计算 / URL 工具方法（薄壳委托同步实现） =====================
+
+    @staticmethod
+    async def is_https(url: str) -> bool:
+        """判断 URL 是否为 HTTPS。"""
+        return HttpUtil.is_https(url)
+
+    @staticmethod
+    async def is_http(url: str) -> bool:
+        """判断 URL 是否为 HTTP。"""
+        return HttpUtil.is_http(url)
+
+    @staticmethod
+    async def create_get(url: str) -> HttpRequest:
+        """创建 GET 请求对象（返回同步 ``HttpRequest``，可链式配置后用 ``AsyncHttpRequest`` 执行）。"""
+        return HttpRequest.get(url)
+
+    @staticmethod
+    async def create_post(url: str) -> HttpRequest:
+        """创建 POST 请求对象。"""
+        return HttpRequest.post(url)
+
+    @staticmethod
+    async def to_params(param_map: dict, charset: str = "utf-8") -> str:
+        """将参数 Map 转换为 URL 查询字符串。"""
+        return HttpUtil.to_params(param_map, charset)
+
+    @staticmethod
+    async def encode_params(params: dict, charset: str = "utf-8") -> str:
+        """编码参数为 URL 查询字符串（to_params 别名）。"""
+        return HttpUtil.encode_params(params, charset)
+
+    @staticmethod
+    async def decode_param_map(params_str: str) -> Dict[str, str]:
+        """将 URL 查询字符串解码为单值参数字典。"""
+        return HttpUtil.decode_param_map(params_str)
+
+    @staticmethod
+    async def decode_params(params_str: str) -> Dict[str, List[str]]:
+        """将 URL 查询字符串解码为多值参数字典。"""
+        return HttpUtil.decode_params(params_str)
+
+    @staticmethod
+    async def url_with_form(url: str, form: dict) -> str:
+        """将表单参数附加到 URL 上。"""
+        return HttpUtil.url_with_form(url, form)
+
+    @staticmethod
+    async def get_charset(content_type: str) -> str:
+        """从 Content-Type 中提取字符集。"""
+        return HttpUtil.get_charset(content_type)
+
+    @staticmethod
+    async def encode_url(url_str: str) -> str:
+        """URL 编码。"""
+        return HttpUtil.encode_url(url_str)
+
+    @staticmethod
+    async def decode_url(url_str: str) -> str:
+        """URL 解码。"""
+        return HttpUtil.decode_url(url_str)
+
+    @staticmethod
+    async def get_mime_type(content_type: str) -> str:
+        """从 Content-Type 获取 MIME 类型。"""
+        return HttpUtil.get_mime_type(content_type)
+
+    @staticmethod
+    async def build_basic_auth(username: str, password: str) -> str:
+        """构建 Basic 认证头。"""
+        return HttpUtil.build_basic_auth(username, password)
+
+    @staticmethod
+    async def normalize_params(params: dict) -> dict:
+        """规范化参数（过滤 None 值）。"""
+        return HttpUtil.normalize_params(params)

@@ -84,6 +84,12 @@ data = await AsyncFileUtil.read_bytes("/path/to/file.bin")
 text = await AsyncResourceUtil.get_resource_str("config/app.json")
 ```
 
+.. note::
+
+    ``AsyncFileUtil`` / ``AsyncResourceUtil`` 已与 ``FileUtil`` / ``ResourceUtil`` **完全镜像**：除文件读写 I/O
+    外，所有纯计算 / 路径工具方法（``contains_invalid`` / ``get_name`` / ``readable_file_size`` / ``check_slip`` 等）
+    也提供同名 ``async`` 薄壳。引入 ``AsyncFileUtil`` 后通常可不再使用 ``FileUtil``。
+
 ### 复制与移动
 
 ```python

@@ -356,3 +356,68 @@ class TestAsyncHttpUtil:
         total = await AsyncHttpUtil.download_file("http://example.com/f", str(dest))
         assert total == len(b"file-content")
         assert dest.read_bytes() == b"file-content"
+
+    # —— 纯计算 / URL 工具方法（薄壳，结果应与同步 HttpUtil 一致） ——
+
+    async def test_is_http(self):
+        assert await AsyncHttpUtil.is_http("http://example.com") is True
+        assert await AsyncHttpUtil.is_https("http://example.com") is False
+
+    async def test_is_https(self):
+        assert await AsyncHttpUtil.is_https("https://example.com") is True
+
+    async def test_create_get(self):
+        req = await AsyncHttpUtil.create_get("http://example.com")
+        assert req._method == "GET"
+
+    async def test_create_post(self):
+        req = await AsyncHttpUtil.create_post("http://example.com")
+        assert req._method == "POST"
+
+    async def test_to_params(self):
+        result = await AsyncHttpUtil.to_params({"key": "value", "a": "b"})
+        assert "key=value" in result
+        assert "a=b" in result
+
+    async def test_encode_params(self):
+        result = await AsyncHttpUtil.encode_params({"x": "1"})
+        assert result == HttpUtil.encode_params({"x": "1"})
+
+    async def test_decode_param_map(self):
+        result = await AsyncHttpUtil.decode_param_map("key=value&a=b")
+        assert result["key"] == "value"
+        assert result["a"] == "b"
+
+    async def test_decode_params(self):
+        result = await AsyncHttpUtil.decode_params("key=1&key=2")
+        assert result["key"] == ["1", "2"]
+
+    async def test_url_with_form(self):
+        result = await AsyncHttpUtil.url_with_form("http://e.com/p", {"q": "x"})
+        assert result.startswith("http://e.com/p?")
+        assert "q=x" in result
+
+    async def test_get_charset(self):
+        result = await AsyncHttpUtil.get_charset("text/html; charset=utf-8")
+        assert result in ("utf-8", "UTF-8")
+
+    async def test_encode_url(self):
+        result = await AsyncHttpUtil.encode_url("http://example.com/path?q=hello world")
+        assert "hello" in result
+        assert " " not in result
+
+    async def test_decode_url(self):
+        result = await AsyncHttpUtil.decode_url("http://example.com/path?q=hello%20world")
+        assert "hello world" in result
+
+    async def test_get_mime_type(self):
+        assert await AsyncHttpUtil.get_mime_type("text/html; charset=utf-8") == "text/html"
+
+    async def test_build_basic_auth(self):
+        token = await AsyncHttpUtil.build_basic_auth("user", "pass")
+        assert token.startswith("Basic ")
+        assert token == HttpUtil.build_basic_auth("user", "pass")
+
+    async def test_normalize_params(self):
+        result = await AsyncHttpUtil.normalize_params({"a": 1, "b": None})
+        assert result == {"a": 1}
