@@ -131,6 +131,32 @@ HtmlUtil.remove_html_tag("<p>Hello <b>World</b></p>")  # "Hello World"
 HtmlUtil.clean_html_tag("<p>content</p>")               # "content"
 ```
 
+## 异步用法（AsyncHttpUtil / AsyncHttpRequest）
+
+``HttpUtil`` / ``HttpRequest`` 的异步版本，基于 ``httpx.AsyncClient``，**无需额外依赖**。
+所有 I/O 方法均为协程，调用时需 ``await``：
+
+```python
+from hutool import AsyncHttpUtil, AsyncHttpRequest
+
+# 异步 GET
+html = await AsyncHttpUtil.get("https://httpbin.org/get")
+
+# 异步 POST
+result = await AsyncHttpUtil.post("https://httpbin.org/post", json_data={"city": "北京"})
+
+# 异步下载
+await AsyncHttpUtil.download_file("https://example.com/file.zip", "/path/to/save.zip")
+data = await AsyncHttpUtil.download_bytes("https://example.com/file.bin")
+
+# 链式异步请求
+response = await (AsyncHttpRequest.get("https://httpbin.org/get")
+    .header("Accept", "application/json")
+    .timeout(5000)
+    .execute())
+print(response.status)
+```
+
 ## 与 Java Hutool 的差异
 
 - 基于 `httpx` 而非 `HttpURLConnection`，支持 HTTP/2

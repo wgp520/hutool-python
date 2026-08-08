@@ -2,7 +2,28 @@ import os
 import tempfile
 from unittest.mock import MagicMock
 
-from hutool import HtmlUtil, HttpRequest, HttpResponse, HttpUtil
+import httpx
+
+from hutool import (
+    AsyncHttpRequest,
+    AsyncHttpUtil,
+    HtmlUtil,
+    HttpRequest,
+    HttpResponse,
+    HttpUtil,
+)
+
+
+def _make_fake_async_client(handler):
+    """构造一个基于 httpx.MockTransport 的假异步客户端类，用于离线测试。"""
+
+    class FakeAsyncClient(httpx.AsyncClient):
+        def __init__(self, *args, **kwargs):
+            kwargs.pop("transport", None)
+            kwargs["transport"] = httpx.MockTransport(handler)
+            super().__init__(*args, **kwargs)
+
+    return FakeAsyncClient
 
 
 class TestHttpRequest:
@@ -276,3 +297,62 @@ class TestHtmlUtil:
         html = '<p class="test" id="main">text</p>'
         result = HtmlUtil.remove_all_html_attr(html)
         assert "<p>" in result or "<p " not in result
+
+
+# ── 异步 HTTP 测试（使用 MockTransport，不发起真实网络请求） ──
+
+
+class TestAsyncHttpRequest:
+    async def test_execute(self, monkeypatch):
+        def handler(request):
+            return httpx.Response(200, text="async hello", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        resp = await AsyncHttpRequest.get("http://example.com").execute()
+        assert resp.status == 200
+        assert resp.to_str() == "async hello"
+
+
+class TestAsyncHttpUtil:
+    async def test_get(self, monkeypatch):
+        def handler(request):
+            return httpx.Response(200, text="async get", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        assert await AsyncHttpUtil.get("http://example.com") == "async get"
+
+    async def test_post_json(self, monkeypatch):
+        captured = {}
+
+        def handler(request):
+            captured["body"] = request.content
+            captured["headers"] = request.headers
+            return httpx.Response(200, text="async post", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        assert await AsyncHttpUtil.post("http://example.com", json_data={"a": 1}) == "async post"
+        assert captured["body"] == b'{"a":1}'
+
+    async def test_download_string(self, monkeypatch):
+        def handler(request):
+            return httpx.Response(200, text="downloaded", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        assert await AsyncHttpUtil.download_string("http://example.com") == "downloaded"
+
+    async def test_download_bytes(self, monkeypatch):
+        def handler(request):
+            return httpx.Response(200, content=b"bytes-data", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        assert await AsyncHttpUtil.download_bytes("http://example.com") == b"bytes-data"
+
+    async def test_download_file(self, monkeypatch, tmp_path):
+        def handler(request):
+            return httpx.Response(200, content=b"file-content", request=request)
+
+        monkeypatch.setattr(httpx, "AsyncClient", _make_fake_async_client(handler))
+        dest = tmp_path / "out.bin"
+        total = await AsyncHttpUtil.download_file("http://example.com/f", str(dest))
+        assert total == len(b"file-content")
+        assert dest.read_bytes() == b"file-content"

@@ -96,3 +96,28 @@ NetUtil.get_host_name()       # "DESKTOP-ABC123"
 # 获取本机 IP 地址（通过 UDP 探测）
 NetUtil.get_host_address()    # "192.168.1.100"
 ```
+
+## AsyncNetUtil（异步网络工具）
+
+``NetUtil`` 的异步版本，基于标准库 ``asyncio``（``asyncio.open_connection`` 做真正的非阻塞连接，
+``loop.run_in_executor`` 包裹阻塞式 DNS 解析），**无需任何第三方依赖**。
+方法名与同步版一致，所有网络 I/O 方法均为协程，调用时需 ``await``：
+
+```python
+from hutool import AsyncNetUtil
+
+# 检测端口是否可连接
+if await AsyncNetUtil.is_open("example.com", 80):
+    print("端口可达")
+
+# Ping 测试（TCP 80 端口）
+reachable = await AsyncNetUtil.ping("example.com")
+
+# 类似 nc/netcat 发送并接收
+resp = await AsyncNetUtil.net_cat("example.com", 80, "GET / HTTP/1.0\r\n\r\n")
+
+# 解析主机名 / DNS 信息 / 本机 IP
+ip = await AsyncNetUtil.get_ip_by_host("example.com")
+info = await AsyncNetUtil.get_dns_info("example.com")
+local = await AsyncNetUtil.get_local_ip()
+```

@@ -55,6 +55,35 @@ FileUtil.tail("/path/to/file.log", 10)      # 最后 10 行
 FileUtil.tail("/path/to/file.log")           # 最后 10 行（默认）
 ```
 
+### 异步读写（AsyncFileUtil / AsyncResourceUtil）
+
+``FileUtil`` / ``ResourceUtil`` 的异步版本，基于 ``aiofiles`` 做非阻塞文件读写。
+方法名与同步版一致，读写方法均为协程，调用时需 ``await``。
+
+.. note::
+
+    需要安装可选依赖 ``aiofiles``：
+
+    .. code-block:: bash
+
+        pip install 'hutool-python[async]'
+
+示例代码：
+
+```python
+from hutool import AsyncFileUtil, AsyncResourceUtil
+
+# 异步文件读写
+await AsyncFileUtil.write_string("/path/to/file.txt", "内容")
+content = await AsyncFileUtil.read_string("/path/to/file.txt")
+
+await AsyncFileUtil.write_bytes("/path/to/file.bin", b"data")
+data = await AsyncFileUtil.read_bytes("/path/to/file.bin")
+
+# 异步读取打包内资源
+text = await AsyncResourceUtil.get_resource_str("config/app.json")
+```
+
 ### 复制与移动
 
 ```python

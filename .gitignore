@@ -77,3 +77,14 @@ Thumbs.db
 # Sphinx documentation
 docs/_build/
 docs/apidocs/
+
+# AI Editor
+.agent/
+.claude/
+.codebuddy/
+.codex/
+.cursor/
+.opencode/
+.qoder/
+.trae/
+.workbuddy/

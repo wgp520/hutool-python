@@ -2,7 +2,7 @@ import re
 from typing import Dict, List, Optional, Union
 from urllib.parse import parse_qs, quote, unquote
 
-from .http_request import HttpRequest
+from .http_request import AsyncHttpRequest, HttpRequest
 
 
 class HttpUtil:
@@ -309,3 +309,143 @@ class HttpUtil:
         if not params:
             return {}
         return {k: v for k, v in params.items() if v is not None}
+
+
+class AsyncHttpUtil(HttpUtil):
+    """异步 HTTP 工具类，提供常用的异步 HTTP 操作方法。
+
+    与 :class:`HttpUtil` 方法名一致，所有 I/O 方法均为协程，需用 ``await`` 调用。
+    纯工具方法（如 ``is_https`` / ``to_params`` / ``encode_url``）直接继承自同步版。
+
+    示例::
+
+        from hutool import AsyncHttpUtil
+
+        html = await AsyncHttpUtil.get("https://example.com")
+        await AsyncHttpUtil.download_file("https://example.com/a.zip", "/tmp/a.zip")
+    """
+
+    @staticmethod
+    async def get(
+        url: str,
+        params: Optional[dict] = None,
+        timeout: int = 30000,
+        headers: Optional[dict] = None,
+    ) -> str:
+        """异步发送 GET 请求并返回响应体字符串。
+
+        :param url: 请求 URL
+        :param params: 查询参数
+        :param timeout: 超时时间（毫秒）
+        :param headers: 请求头
+        :return: 响应体字符串
+        """
+        request = AsyncHttpRequest.get(url).timeout(timeout)
+        if headers:
+            request.headers(headers)
+        if params:
+            request._params = params
+        response = await request.execute()
+        return response.to_str()
+
+    @staticmethod
+    async def post(
+        url: str,
+        data=None,
+        json_data=None,
+        timeout: int = 30000,
+        headers: Optional[dict] = None,
+    ) -> str:
+        """异步发送 POST 请求并返回响应体字符串。
+
+        :param url: 请求 URL
+        :param data: 表单数据
+        :param json_data: JSON 数据
+        :param timeout: 超时时间（毫秒）
+        :param headers: 请求头
+        :return: 响应体字符串
+        """
+        request = AsyncHttpRequest.post(url).timeout(timeout)
+        if headers:
+            request.headers(headers)
+        if data is not None:
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    request.form(k, str(v))
+            else:
+                request.body(str(data))
+        if json_data is not None:
+            request.json(json_data)
+        response = await request.execute()
+        return response.to_str()
+
+    @staticmethod
+    async def download_string(url: str, charset: str = "utf-8") -> str:
+        """异步下载 URL 内容为字符串。
+
+        :param url: 下载 URL
+        :param charset: 字符集，默认 utf-8
+        :return: 下载的字符串内容
+        """
+        response = await AsyncHttpRequest.get(url).charset(charset).execute()
+        return response.to_str()
+
+    @staticmethod
+    async def download_bytes(url: str) -> bytes:
+        """异步下载 URL 内容为字节数组。
+
+        :param url: 下载 URL
+        :return: 下载的字节数组
+        """
+        response = await AsyncHttpRequest.get(url).execute()
+        return response.to_bytes()
+
+    @staticmethod
+    async def download_file(url: str, dest: str) -> int:
+        """异步下载 URL 内容到文件。
+
+        :param url: 下载 URL
+        :param dest: 目标文件路径
+        :return: 下载的字节数
+        """
+        import httpx
+
+        total = 0
+        async with httpx.AsyncClient(follow_redirects=True, timeout=60) as client, client.stream(
+            "GET", url
+        ) as response:
+            response.raise_for_status()
+            with open(dest, "wb") as f:
+                async for chunk in response.aiter_bytes():
+                    f.write(chunk)
+                    total += len(chunk)
+        return total
+
+    @staticmethod
+    async def download(url: str, dest=None, timeout: int = 60000) -> Union[int, bytes]:
+        """异步统一下载接口。
+
+        如果 dest 为字符串路径，下载到文件并返回字节数；如果 dest 为 None，返回 bytes。
+
+        :param url: 下载 URL
+        :param dest: 目标文件路径或 None
+        :param timeout: 超时时间（毫秒）
+        :return: 字节数或 bytes
+        """
+        import httpx
+
+        timeout_seconds = timeout / 1000.0
+        if dest is not None:
+            total = 0
+            async with httpx.AsyncClient(follow_redirects=True, timeout=timeout_seconds) as client, client.stream(
+                "GET", url
+            ) as response:
+                response.raise_for_status()
+                with open(dest, "wb") as f:
+                    async for chunk in response.aiter_bytes():
+                        f.write(chunk)
+                        total += len(chunk)
+            return total
+        else:
+            response = await AsyncHttpRequest.get(url).timeout(timeout).execute()
+            return response.to_bytes()

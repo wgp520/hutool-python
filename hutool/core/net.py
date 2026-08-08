@@ -1,5 +1,6 @@
 """网络工具类，提供端口检测、IP地址处理、子网掩码转换等功能"""
 
+import asyncio
 import ipaddress
 import random
 import socket
@@ -7,7 +8,7 @@ import uuid
 from socket import AF_INET, AF_INET6, SO_REUSEADDR, SOCK_DGRAM, SOCK_STREAM, SOL_SOCKET
 from typing import Final, List, Optional
 
-__all__ = ("Ipv4Util", "MaskBit", "NetUtil")
+__all__ = ("AsyncNetUtil", "Ipv4Util", "MaskBit", "NetUtil")
 
 
 class MaskBit:
@@ -900,3 +901,124 @@ class NetUtil:
                 except socket.timeout:
                     break
             return b"".join(chunks).decode("utf-8", errors="replace")
+
+
+class AsyncNetUtil:
+    """异步网络工具类，提供端口检测、IP 解析等异步方法。
+
+    与 :class:`NetUtil` 方法名一致，所有网络 I/O 方法均为协程，需用 ``await`` 调用。
+    底层使用标准库 ``asyncio``（``asyncio.open_connection`` 做真正的非阻塞连接，
+    ``loop.run_in_executor`` 包裹阻塞式 DNS 解析），无需任何第三方依赖。
+
+    示例::
+
+        from hutool import AsyncNetUtil
+
+        if await AsyncNetUtil.is_open("example.com", 80):
+            print("端口可达")
+        ip = await AsyncNetUtil.get_ip_by_host("example.com")
+    """
+
+    # 本地 IPv4 地址
+    LOCAL_IP: Final[str] = Ipv4Util.LOCAL_IP
+    # 默认最小端口，1024
+    PORT_RANGE_MIN: Final[int] = 1024
+    # 默认最大端口，65535
+    PORT_RANGE_MAX: Final[int] = 0xFFFF
+
+    @staticmethod
+    async def is_open(host: str, port: int, timeout: int = 2000) -> bool:
+        """异步检测远程主机端口是否可连接。
+
+        :param host: 主机地址
+        :param port: 端口号
+        :param timeout: 超时时间，单位毫秒，默认 2000ms
+        :return: 端口是否可连接
+        """
+        if host is None or not NetUtil.is_valid_port(port):
+            return False
+        try:
+            await asyncio.wait_for(asyncio.open_connection(host, port), timeout=timeout / 1000.0)
+            return True
+        except (asyncio.TimeoutError, OSError):
+            return False
+
+    @staticmethod
+    async def ping(host: str, timeout: int = 3000) -> bool:
+        """异步 Ping 测试主机是否可达（尝试建立 TCP 连接到 80 端口）。
+
+        :param host: 主机地址
+        :param timeout: 超时时间，单位毫秒
+        :return: 是否可达
+        """
+        if host is None:
+            return False
+        try:
+            await asyncio.wait_for(asyncio.open_connection(host, 80), timeout=timeout / 1000.0)
+            return True
+        except (asyncio.TimeoutError, OSError):
+            return host in ("localhost", "127.0.0.1", "::1")
+
+    @staticmethod
+    async def net_cat(host: str, port: int, data: str, timeout: int = 5000) -> str:
+        """异步网络连接发送数据并接收响应（类似 nc/netcat）。
+
+        :param host: 主机地址
+        :param port: 端口号
+        :param data: 要发送的数据
+        :param timeout: 超时时间，单位毫秒
+        :return: 接收到的响应数据
+        :raises ConnectionRefusedError: 连接被拒绝
+        """
+        try:
+            reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=timeout / 1000.0)
+        except (asyncio.TimeoutError, OSError) as e:
+            raise ConnectionRefusedError(f"连接被拒绝: {host}:{port}") from e
+        try:
+            writer.write(data.encode("utf-8"))
+            await writer.drain()
+            chunks = []
+            try:
+                while True:
+                    chunk = await asyncio.wait_for(reader.read(4096), timeout=timeout / 1000.0)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+            except asyncio.TimeoutError:
+                pass
+            return b"".join(chunks).decode("utf-8", errors="replace")
+        finally:
+            try:
+                writer.close()
+                await writer.wait_closed()
+            except Exception:
+                pass
+
+    @staticmethod
+    async def get_ip_by_host(hostname: str) -> str:
+        """异步解析主机名获取 IP 地址。
+
+        :param hostname: 主机名
+        :return: IP 地址，解析失败返回空字符串
+        """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_ip_by_host, hostname)
+
+    @staticmethod
+    async def get_dns_info(hostname: str) -> dict:
+        """异步获取主机名的 DNS 信息。
+
+        :param hostname: 主机名
+        :return: DNS 信息字典，包含 ip、aliases、family 等
+        """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_dns_info, hostname)
+
+    @staticmethod
+    async def get_local_ip() -> str:
+        """异步获取本机 IP 地址。
+
+        :return: 本机 IP 地址，获取失败时返回 127.0.0.1
+        """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, NetUtil.get_local_ip)

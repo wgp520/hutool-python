@@ -36,7 +36,7 @@ class NumberUtil:
     _BASE62_REVERSE = {c: i for i, c in enumerate(_BASE62_ALPHABET)}
 
     @staticmethod
-    def add(*values: Union[int, float, str, None, Decimal]) -> Decimal:
+    def add(*values: Union[int, float, str, Decimal, None]) -> Decimal:
         """
         提供精确的加法运算
         如果传入多个值为None或者空，则返回0
@@ -51,7 +51,7 @@ class NumberUtil:
         return result
 
     @staticmethod
-    def sub(*values: Union[int, float, str, None, Decimal]) -> Decimal:
+    def sub(*values: Union[int, float, str, Decimal, None]) -> Decimal:
         """
         提供精确的减法运算
         如果传入多个值为None或者空，则返回0
@@ -66,7 +66,7 @@ class NumberUtil:
         return result
 
     @staticmethod
-    def mul(*values: Union[int, float, str, None, Decimal]) -> Decimal:
+    def mul(*values: Union[int, float, str, Decimal, None]) -> Decimal:
         """
         提供精确的乘法运算
 
@@ -84,7 +84,7 @@ class NumberUtil:
 
     @staticmethod
     def div(
-        v1: Union[int, float, str, None, Decimal],
+        v1: Union[int, float, str, Decimal, None],
         v2: Union[int, float, str, Decimal],
         scale: Union[int, Decimal] = DEFAULT_DIV_SCALE,
         rounding: str = decimal.ROUND_HALF_UP,
@@ -117,7 +117,7 @@ class NumberUtil:
 
     @staticmethod
     def round(
-        number: Union[int, float, str, None, Decimal],
+        number: Union[int, float, str, Decimal, None],
         scale: Union[int, Decimal],
         rounding: str = decimal.ROUND_HALF_UP,
     ) -> Decimal:
@@ -145,7 +145,7 @@ class NumberUtil:
 
     @staticmethod
     def round_str(
-        number: Union[int, float, str, None, Decimal],
+        number: Union[int, float, str, Decimal, None],
         scale: Union[int, Decimal],
         rounding: str = decimal.ROUND_HALF_UP,
     ) -> str:
@@ -160,7 +160,7 @@ class NumberUtil:
 
     @staticmethod
     def round_half_even(
-        number: Union[int, float, str, None, Decimal],
+        number: Union[int, float, str, Decimal, None],
         scale: Union[int, Decimal],
     ) -> Decimal:
         """
@@ -180,7 +180,7 @@ class NumberUtil:
 
     @staticmethod
     def round_down(
-        number: Union[int, float, str, None, Decimal],
+        number: Union[int, float, str, Decimal, None],
         scale: Union[int, Decimal],
     ) -> Decimal:
         """
@@ -192,7 +192,7 @@ class NumberUtil:
         return NumberUtil.round(number, scale, rounding=decimal.ROUND_DOWN)
 
     @staticmethod
-    def decimal_format(pattern: str, value: Union[int, float, str, None, Decimal]) -> str:
+    def decimal_format(pattern: str, value: Union[int, float, str, Decimal, None]) -> str:
         """格式化
 
         :param pattern: 格式，例如:
@@ -497,7 +497,7 @@ class NumberUtil:
         return str(number)
 
     @staticmethod
-    def to_decimal(number: Union[int, float, str, None, Decimal]) -> Decimal:
+    def to_decimal(number: Union[int, float, str, Decimal, None]) -> Decimal:
         """
         转成Decimal
         float有精度问题，转换为字符串后再转换

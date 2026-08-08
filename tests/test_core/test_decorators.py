@@ -4,7 +4,6 @@
 以及通过 Util 类的调用。
 """
 
-import asyncio
 import time
 
 from hutool import (
@@ -41,20 +40,20 @@ class TestTimeThis:
 
         assert add(1, 2) == 3
 
-    def test_async_no_parens(self):
+    async def test_async_no_parens(self):
         @TimeThis
         async def async_add(a, b):
             return a + b
 
-        result = asyncio.get_event_loop().run_until_complete(async_add(1, 2))
+        result = await async_add(1, 2)
         assert result == 3
 
-    def test_async_with_parens(self):
+    async def test_async_with_parens(self):
         @TimeThis()
         async def async_add(a, b):
             return a + b
 
-        result = asyncio.get_event_loop().run_until_complete(async_add(1, 2))
+        result = await async_add(1, 2)
         assert result == 3
 
     def test_preserves_name(self):
@@ -102,20 +101,20 @@ class TestProfileDeco:
 
         assert compute() == 4950
 
-    def test_async_no_parens(self):
+    async def test_async_no_parens(self):
         @ProfileDeco
         async def async_compute():
             return sum(range(100))
 
-        result = asyncio.get_event_loop().run_until_complete(async_compute())
+        result = await async_compute()
         assert result == 4950
 
-    def test_async_with_parens(self):
+    async def test_async_with_parens(self):
         @ProfileDeco(sort_by="tottime", limit=1)
         async def async_compute():
             return sum(range(100))
 
-        result = asyncio.get_event_loop().run_until_complete(async_compute())
+        result = await async_compute()
         assert result == 4950
 
     def test_backward_compat_prof_decorator(self):
@@ -168,7 +167,7 @@ class TestCacheFunction:
         assert double(5) == 10
         assert call_count == 1
 
-    def test_async_no_parens(self):
+    async def test_async_no_parens(self):
         call_count = 0
 
         @CacheFunction
@@ -177,12 +176,11 @@ class TestCacheFunction:
             call_count += 1
             return x * 2
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_double(5)) == 10
-        assert loop.run_until_complete(async_double(5)) == 10
+        assert await async_double(5) == 10
+        assert await async_double(5) == 10
         assert call_count == 1
 
-    def test_async_with_parens(self):
+    async def test_async_with_parens(self):
         call_count = 0
 
         @CacheFunction(ttl=60)
@@ -191,9 +189,8 @@ class TestCacheFunction:
             call_count += 1
             return x * 2
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_double(5)) == 10
-        assert loop.run_until_complete(async_double(5)) == 10
+        assert await async_double(5) == 10
+        assert await async_double(5) == 10
         assert call_count == 1
 
     def test_ttl_expiry(self):
@@ -320,7 +317,7 @@ class TestFuncOnce:
         assert init() == "done"
         assert call_count == 1
 
-    def test_async_no_parens(self):
+    async def test_async_no_parens(self):
         call_count = 0
 
         @FuncOnce
@@ -329,12 +326,11 @@ class TestFuncOnce:
             call_count += 1
             return 99
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_init()) == 99
-        assert loop.run_until_complete(async_init()) == 99
+        assert await async_init() == 99
+        assert await async_init() == 99
         assert call_count == 1
 
-    def test_async_with_parens(self):
+    async def test_async_with_parens(self):
         call_count = 0
 
         @FuncOnce()
@@ -343,9 +339,8 @@ class TestFuncOnce:
             call_count += 1
             return 99
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_init()) == 99
-        assert loop.run_until_complete(async_init()) == 99
+        assert await async_init() == 99
+        assert await async_init() == 99
         assert call_count == 1
 
     def test_backward_compat_func_once(self):
@@ -401,21 +396,19 @@ class TestTtlLruCache:
         assert double(5) == 10
         assert call_count == 1
 
-    def test_async_no_parens(self):
+    async def test_async_no_parens(self):
         @TtlLruCache
         async def async_double(x):
             return x * 2
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_double(5)) == 10
+        assert await async_double(5) == 10
 
-    def test_async_with_parens(self):
+    async def test_async_with_parens(self):
         @TtlLruCache(maxsize=64, ttl=120)
         async def async_double(x):
             return x * 2
 
-        loop = asyncio.get_event_loop()
-        assert loop.run_until_complete(async_double(5)) == 10
+        assert await async_double(5) == 10
 
     def test_ttl_expiry(self):
         call_count = 0
@@ -516,36 +509,36 @@ class TestNoneOnException:
 
         assert risky() is None
 
-    def test_async_no_parens_normal(self):
+    async def test_async_no_parens_normal(self):
         @NoneOnException
         async def safe():
             return 42
 
-        result = asyncio.get_event_loop().run_until_complete(safe())
+        result = await safe()
         assert result == 42
 
-    def test_async_no_parens_exception(self):
+    async def test_async_no_parens_exception(self):
         @NoneOnException
         async def risky():
             raise ValueError("oops")
 
-        result = asyncio.get_event_loop().run_until_complete(risky())
+        result = await risky()
         assert result is None
 
-    def test_async_with_parens_normal(self):
+    async def test_async_with_parens_normal(self):
         @NoneOnException()
         async def safe():
             return 42
 
-        result = asyncio.get_event_loop().run_until_complete(safe())
+        result = await safe()
         assert result == 42
 
-    def test_async_with_parens_exception(self):
+    async def test_async_with_parens_exception(self):
         @NoneOnException()
         async def risky():
             raise ValueError("oops")
 
-        result = asyncio.get_event_loop().run_until_complete(risky())
+        result = await risky()
         assert result is None
 
     def test_backward_compat_object_util(self):

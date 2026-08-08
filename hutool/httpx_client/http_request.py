@@ -157,24 +157,17 @@ class HttpRequest:
         self._follow_redirects = is_follow
         return self
 
-    def execute(self) -> "HttpResponse":  # noqa: F821
-        """执行HTTP请求
+    def _build_request_kwargs(self) -> Dict[str, Any]:
+        """构造 httpx 请求参数字典（同步 / 异步 ``execute`` 共用）。
 
-        :return: HttpResponse响应对象
-        :raises httpx.HTTPStatusError: 当响应状态码表示错误时
-        :raises httpx.RequestError: 当请求发生网络错误时
+        :return: 可直接解包给 ``httpx.Client.request`` / ``httpx.AsyncClient.request`` 的参数
         """
-        # 导入放在此处避免循环导入
-        from .http_response import HttpResponse
-
-        timeout_seconds = self._timeout / 1000.0
-
         kwargs: Dict[str, Any] = {
             "method": self._method,
             "url": self._url,
             "headers": self._headers,
             "cookies": self._cookies,
-            "timeout": timeout_seconds,
+            "timeout": self._timeout / 1000.0,
             "follow_redirects": self._follow_redirects,
         }
 
@@ -193,8 +186,20 @@ class HttpRequest:
         if self._files:
             kwargs["files"] = self._files
 
+        return kwargs
+
+    def execute(self) -> "HttpResponse":  # noqa: F821
+        """执行HTTP请求
+
+        :return: HttpResponse响应对象
+        :raises httpx.HTTPStatusError: 当响应状态码表示错误时
+        :raises httpx.RequestError: 当请求发生网络错误时
+        """
+        # 导入放在此处避免循环导入
+        from .http_response import HttpResponse
+
         with httpx.Client() as client:
-            response = client.request(**kwargs)
+            response = client.request(**self._build_request_kwargs())
 
         return HttpResponse(response, charset=self._charset)
 
@@ -375,3 +380,33 @@ class HttpRequest:
         """
         self._read_timeout = timeout_ms
         return self
+
+
+class AsyncHttpRequest(HttpRequest):
+    """异步 HTTP 请求对象，支持链式调用。
+
+    与 :class:`HttpRequest` 用法完全一致，仅 :meth:`execute` 为协程，
+    需要用 ``await`` 调用。底层使用 ``httpx.AsyncClient``。
+
+    示例::
+
+        response = await (AsyncHttpRequest.get("https://example.com")
+            .header("Accept", "application/json")
+            .timeout(5000)
+            .execute())
+    """
+
+    async def execute(self) -> "HttpResponse":  # noqa: F821
+        """异步执行 HTTP 请求。
+
+        :return: HttpResponse 响应对象
+        :raises httpx.HTTPStatusError: 当响应状态码表示错误时
+        :raises httpx.RequestError: 当请求发生网络错误时
+        """
+        # 导入放在此处避免循环导入
+        from .http_response import HttpResponse
+
+        async with httpx.AsyncClient() as client:
+            response = await client.request(**self._build_request_kwargs())
+
+        return HttpResponse(response, charset=self._charset)

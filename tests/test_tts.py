@@ -1,7 +1,5 @@
 """TtsUtil / AsyncTtsUtil 模块测试（不依赖网络，mock edge_tts 调用）。"""
 
-import asyncio
-
 import pytest
 
 from hutool.extra.tts import AsyncTtsUtil, TtsUtil, TtsVoice, _filter_voices, _resolve_voice
@@ -153,40 +151,44 @@ class TestTtsUtilNotInstalled:
 
 
 class TestAsyncTtsUtilNotInstalled:
-    def test_gen_voice_raises(self):
+    @pytest.mark.asyncio
+    async def test_gen_voice_raises(self):
         import hutool.extra.tts as mod
 
         old = mod._HAS_EDGE_TTS
         mod._HAS_EDGE_TTS = False
         try:
             with pytest.raises(ImportError, match="edge_tts"):
-                asyncio.run(AsyncTtsUtil.gen_voice("test"))
+                await AsyncTtsUtil.gen_voice("test")
         finally:
             mod._HAS_EDGE_TTS = old
 
-    def test_gen_voice_bytes_raises(self):
+    @pytest.mark.asyncio
+    async def test_gen_voice_bytes_raises(self):
         import hutool.extra.tts as mod
 
         old = mod._HAS_EDGE_TTS
         mod._HAS_EDGE_TTS = False
         try:
             with pytest.raises(ImportError):
-                asyncio.run(AsyncTtsUtil.gen_voice_bytes("test"))
+                await AsyncTtsUtil.gen_voice_bytes("test")
         finally:
             mod._HAS_EDGE_TTS = old
 
-    def test_gen_subtitle_raises(self):
+    @pytest.mark.asyncio
+    async def test_gen_subtitle_raises(self):
         import hutool.extra.tts as mod
 
         old = mod._HAS_EDGE_TTS
         mod._HAS_EDGE_TTS = False
         try:
             with pytest.raises(ImportError):
-                asyncio.run(AsyncTtsUtil.gen_subtitle("test"))
+                await AsyncTtsUtil.gen_subtitle("test")
         finally:
             mod._HAS_EDGE_TTS = old
 
-    def test_stream_voice_raises(self):
+    @pytest.mark.asyncio
+    async def test_stream_voice_raises(self):
         import hutool.extra.tts as mod
 
         old = mod._HAS_EDGE_TTS
@@ -198,6 +200,75 @@ class TestAsyncTtsUtilNotInstalled:
                     pass
 
             with pytest.raises(ImportError):
-                asyncio.run(_collect())
+                await _collect()
         finally:
             mod._HAS_EDGE_TTS = old
+
+
+# ── 用假 edge_tts 模块覆盖异步正向路径（离线） ──────────────
+
+
+class _FakeCommunicate:
+    def __init__(self, *args, **kwargs):
+        self._text = kwargs.get("text", "")
+
+    async def stream(self):
+        yield {"type": "audio", "data": b"MP3DATA"}
+        yield {"type": "WordBoundary", "offset": 0, "duration": 100}
+
+    async def save(self, *args, **kwargs):
+        path = args[0] if args else (kwargs.get("output") or "output.mp3")
+        with open(path, "wb") as f:
+            f.write(b"MP3DATA")
+
+
+class _FakeSubMaker:
+    def feed(self, *a, **k):
+        pass
+
+    def get_srt(self):
+        return "1\n00:00:00,000 --> 00:00:01,000\nhello\n"
+
+
+class _FakeEdgeTts:
+    Communicate = _FakeCommunicate
+    SubMaker = _FakeSubMaker
+
+    @staticmethod
+    async def list_voices():
+        return []
+
+
+@pytest.fixture
+def mock_edge_tts(monkeypatch):
+    import hutool.extra.tts as mod
+
+    monkeypatch.setattr(mod, "_HAS_EDGE_TTS", True, raising=False)
+    monkeypatch.setattr(mod, "_edge_tts", _FakeEdgeTts, raising=False)
+    yield
+
+
+class TestAsyncTtsUtilMocked:
+    @pytest.mark.asyncio
+    async def test_gen_voice_bytes(self, mock_edge_tts):
+        data = await AsyncTtsUtil.gen_voice_bytes("你好")
+        assert data == b"MP3DATA"
+
+    @pytest.mark.asyncio
+    async def test_gen_voice_file(self, mock_edge_tts, tmp_path):
+        out = tmp_path / "v.mp3"
+        result = await AsyncTtsUtil.gen_voice("你好", output=str(out))
+        assert result == out
+        assert out.read_bytes() == b"MP3DATA"
+
+    @pytest.mark.asyncio
+    async def test_stream_voice(self, mock_edge_tts):
+        chunks = []
+        async for c in AsyncTtsUtil.stream_voice("你好"):
+            chunks.append(c)
+        assert chunks == [b"MP3DATA"]
+
+    @pytest.mark.asyncio
+    async def test_gen_subtitle(self, mock_edge_tts):
+        srt = await AsyncTtsUtil.gen_subtitle("你好")
+        assert "hello" in srt

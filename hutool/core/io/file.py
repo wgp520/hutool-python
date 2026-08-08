@@ -14,6 +14,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
+# ── aiofiles 可选导入 ─────────────────────────────────────────
+
+try:
+    import aiofiles
+
+    _HAS_AIOFILES = True
+except Exception:
+    aiofiles = None
+    _HAS_AIOFILES = False
+
 
 class FileUtil:
     """文件工具类，对应 Java cn.hutool.core.io.FileUtil"""
@@ -1465,3 +1475,194 @@ class FileUtil:
             for line in result:
                 handler(line)
         return result
+
+
+class AsyncFileUtil:
+    """异步文件工具类，提供文件读写的异步方法。
+
+    与 :class:`FileUtil` 方法名一致，读写方法均为协程，需用 ``await`` 调用。
+    底层使用 ``aiofiles`` 做非阻塞文件读写。纯路径 / 判断类方法（如 ``exist`` /
+    ``is_file``）直接继承自同步版，无需异步。
+
+    .. note::
+
+        需要安装可选依赖 ``aiofiles``（``pip install 'hutool-python[async]'``）。
+        未安装时调用异步读写方法会抛出清晰的 ``ImportError``。
+
+    示例::
+
+        from hutool import AsyncFileUtil
+
+        await AsyncFileUtil.write_string("/tmp/a.txt", "hello")
+        text = await AsyncFileUtil.read_string("/tmp/a.txt")
+    """
+
+    FILE_SEPARATOR: str = os.sep
+
+    @staticmethod
+    def _check_aiofiles() -> None:
+        """检查 aiofiles 是否已安装，未安装时抛出清晰的 ImportError。"""
+        if not _HAS_AIOFILES:
+            raise ImportError(
+                "缺少可选依赖 aiofiles，无法使用异步文件读写。请先安装：pip install 'hutool-python[async]'"
+            )
+
+    @staticmethod
+    async def read_string(path: Union[str, Path], charset: str = "utf-8") -> str:
+        """异步读取文件内容为字符串。
+
+        :param path: 文件路径
+        :param charset: 字符编码
+        :return: 文件内容字符串
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, encoding=charset) as f:
+            return await f.read()
+
+    @staticmethod
+    async def read_bytes(path: Union[str, Path]) -> bytes:
+        """异步读取文件内容为字节数组。
+
+        :param path: 文件路径
+        :return: 字节数据
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, "rb") as f:
+            return await f.read()
+
+    @staticmethod
+    async def read_lines(path: Union[str, Path], charset: str = "utf-8") -> List[str]:
+        """异步读取文件内容为字符串列表（保留换行符）。
+
+        :param path: 文件路径
+        :param charset: 字符编码
+        :return: 行列表
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, encoding=charset) as f:
+            return await f.readlines()
+
+    @staticmethod
+    async def read_utf8_string(path: Union[str, Path]) -> str:
+        """以 UTF-8 编码异步读取文件内容为字符串。
+
+        :param path: 文件路径
+        :return: 文件内容字符串
+        """
+        return await AsyncFileUtil.read_string(path, charset="utf-8")
+
+    @staticmethod
+    async def read_utf8_lines(path: Union[str, Path]) -> List[str]:
+        """以 UTF-8 编码异步读取文件的每一行（去除行尾换行符）。
+
+        :param path: 文件路径
+        :return: 行列表
+        """
+        AsyncFileUtil._check_aiofiles()
+        async with aiofiles.open(path, encoding="utf-8") as f:
+            return (await f.read()).splitlines()
+
+    @staticmethod
+    async def write_string(
+        path: Union[str, Path],
+        content: str,
+        charset: str = "utf-8",
+        is_append: bool = False,
+    ) -> Path:
+        """异步写入字符串到文件。
+
+        :param path: 文件路径
+        :param content: 写入内容
+        :param charset: 字符编码
+        :param is_append: 是否追加模式
+        :return: 文件路径
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        mode = "a" if is_append else "w"
+        async with aiofiles.open(p, mode, encoding=charset) as f:
+            await f.write(content)
+        return p
+
+    @staticmethod
+    async def write_bytes(
+        path: Union[str, Path],
+        data: bytes,
+        is_append: bool = False,
+    ) -> Path:
+        """异步写字节数组到文件。
+
+        :param path: 文件路径
+        :param data: 字节数据
+        :param is_append: 是否追加模式
+        :return: 文件路径
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        mode = "ab" if is_append else "wb"
+        async with aiofiles.open(p, mode) as f:
+            await f.write(data)
+        return p
+
+    @staticmethod
+    async def write_lines(
+        path: Union[str, Path],
+        lines: list,
+        charset: str = "utf-8",
+        is_append: bool = False,
+    ) -> Path:
+        """异步写入行列表到文件（每个元素后自动追加换行符）。
+
+        :param path: 文件路径
+        :param lines: 行列表
+        :param charset: 字符编码
+        :param is_append: 是否追加模式
+        :return: 文件路径
+        :raises ImportError: 未安装 aiofiles 时抛出
+        """
+        AsyncFileUtil._check_aiofiles()
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        mode = "a" if is_append else "w"
+        async with aiofiles.open(p, mode, encoding=charset) as f:
+            for line in lines:
+                await f.write(str(line))
+                await f.write("\n")
+        return p
+
+    @staticmethod
+    async def append_string(
+        path: Union[str, Path],
+        content: str,
+        charset: str = "utf-8",
+    ) -> Path:
+        """异步追加字符串到文件末尾。
+
+        :param path: 文件路径
+        :param content: 追加内容
+        :param charset: 字符编码
+        :return: 文件路径
+        """
+        return await AsyncFileUtil.write_string(path, content, charset=charset, is_append=True)
+
+    @staticmethod
+    async def append_lines(
+        path: Union[str, Path],
+        lines: list,
+        charset: str = "utf-8",
+    ) -> Path:
+        """异步追加行列表到文件末尾。
+
+        :param path: 文件路径
+        :param lines: 行列表
+        :param charset: 字符编码
+        :return: 文件路径
+        """
+        return await AsyncFileUtil.write_lines(path, lines, charset=charset, is_append=True)

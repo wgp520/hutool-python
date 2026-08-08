@@ -14,7 +14,7 @@
 - setting: 配置工具（YAML、Properties）
 """
 
-__version__ = "1.1.3"
+__version__ = "1.2.0"
 
 # 核心工具类 - 顶层快捷导入
 # 其他模块
@@ -37,17 +37,17 @@ from .core.decorators import (
 from .core.exceptions import ValidateException
 from .core.exec import ExecUtil
 from .core.io.data_size import DataSizeUtil
-from .core.io.file import FileUtil
+from .core.io.file import AsyncFileUtil, FileUtil
 from .core.io.file_name import FileNameUtil
 from .core.io.path import PathUtil
-from .core.io.resource import ResourceUtil
+from .core.io.resource import AsyncResourceUtil, ResourceUtil
 from .core.io.streams import IoUtil
 from .core.iter import IterUtil
 from .core.map import BiMap, DictUtil, MapUtil
 from .core.math import BitStatusUtil, MathUtil
 from .core.memory_repo import MemoryRepo
 from .core.money import MoneyUtil
-from .core.net import Ipv4Util, MaskBit, NetUtil
+from .core.net import AsyncNetUtil, Ipv4Util, MaskBit, NetUtil
 from .core.prof import ProfUtil
 from .core.sql import ColumnType, F, Q, SqlUtil
 from .core.struct import Struct
@@ -110,7 +110,14 @@ from .extra import (
     TtsUtil,
     TtsVoice,
 )
-from .httpx_client import HtmlUtil, HttpRequest, HttpResponse, HttpUtil
+from .httpx_client import (
+    AsyncHttpRequest,
+    AsyncHttpUtil,
+    HtmlUtil,
+    HttpRequest,
+    HttpResponse,
+    HttpUtil,
+)
 from .json import JSONUtil
 from .jwt import JWTUtil
 from .setting import PropsUtil, SettingUtil, YamlUtil
@@ -118,6 +125,11 @@ from .setting import PropsUtil, SettingUtil, YamlUtil
 __all__ = [
     "ArithmeticCaptcha",
     "ArrayUtil",
+    "AsyncFileUtil",
+    "AsyncHttpRequest",
+    "AsyncHttpUtil",
+    "AsyncNetUtil",
+    "AsyncResourceUtil",
     "AsyncTtsUtil",
     "BankUtil",
     "Base32",

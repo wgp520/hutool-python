@@ -1,5 +1,15 @@
 # 更新日志
 
+## v1.2.0（2026-08-08）
+
+- 新增异步工具类（基于 `async/await`），针对阻塞式 I/O 提供协程版本，与同步 API 方法名保持一致、调用需 `await`：
+  - `AsyncHttpUtil` / `AsyncHttpRequest`：基于 `httpx.AsyncClient` 的异步 HTTP 客户端（`hutool/httpx_client`），**无需额外依赖**
+  - `AsyncNetUtil`：基于标准库 `asyncio` 的异步网络探测（`is_open` / `ping` / `net_cat` / `get_ip_by_host` / `get_dns_info` / `get_local_ip`），**无需额外依赖**
+  - `AsyncFileUtil` / `AsyncResourceUtil`：基于 `aiofiles` 的异步文件 / 资源读写（`hutool/core/io`），需安装可选依赖
+  - `AsyncTtsUtil`（已有）补充测试与文档
+- 新增可选依赖分组 `async`：`pip install 'hutool-python[async]'` 一键安装 `aiofiles`
+- 测试改用 `pytest-asyncio`（`asyncio_mode = "auto"`）；可选依赖未安装时相关用例自动跳过（`pytest.importorskip`）
+
 ## v1.1.3（2026-07-09）
 
 - SqlUtil修复插入 SQL 语句生成时对特殊字符的处理逻辑
