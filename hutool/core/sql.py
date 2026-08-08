@@ -146,7 +146,7 @@ class SqlUtil:
         else:
             raise TypeError("生成插入 SQL 语句失败，数据必须是字典或者列表")
 
-        values = re.sub("[\"|']\\${|}[\"|']", "", values)
+        values = re.sub(r"['\"]\$\{(.*?)\}['\"]", r"\1", values)
         keys = [q(key) for key in fields]
         keys = SqlUtil._list2str(keys).replace("'", "")
 
@@ -1224,7 +1224,7 @@ class InsertBuilder(SqlBuilder):
         else:
             raise TypeError("数据必须是字典或列表")
 
-        vals = re.sub("[\"|']\\${|}[\"|']", "", vals)
+        vals = re.sub(r"['\"]\$\{(.*?)\}['\"]", r"\1", vals)
         keys = [self._q(k) for k in fields]
         keys_str = SqlUtil._list2str(keys).replace("'", "")
 
