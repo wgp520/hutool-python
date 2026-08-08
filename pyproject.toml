@@ -50,7 +50,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.4.0"]
+dev = [
+    "pytest>=8.0", 
+    "ruff>=0.4.0"
+]
+docs = [
+    "sphinx>=7.0,<7.2",
+    "myst-parser>=2.0",
+    "sphinx-autodoc2>=0.5",
+    "furo>=2024.1",
+    "sphinx-copybutton>=0.5",
+    "sphinx-design>=0.5",
+]
 
 [project.urls]
 Homepage = "https://github.com/wgp520/hutool-python"
@@ -58,6 +69,10 @@ Documentation = "https://wgp520.github.io/hutool-python"
 Repository = "https://github.com/wgp520/hutool-python"
 Issues = "https://github.com/wgp520/hutool-python/issues"
 Changelog = "https://github.com/wgp520/hutool-python/blob/master/docs/changelog.md"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
 
 [tool.setuptools.packages.find]
 include = ["hutool*"]
